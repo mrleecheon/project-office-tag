@@ -1,0 +1,343 @@
+@import './tokens.css';
+@import './animations.css';
+@import './layout.css';
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  overflow: hidden;
+}
+button, input { font: inherit; }
+
+.nfc h2, .boot p {
+  color: #2a4c68;
+  font: 12px ui-monospace, Consolas, monospace;
+  letter-spacing: .12em;
+}
+.nfc button {
+  width: 160px;
+  aspect-ratio: 1;
+  border-radius: 22px;
+  border: 1px dashed #1e3a52;
+  background: #060e18;
+  cursor: pointer;
+}
+.nfc button.active {
+  box-shadow: 0 0 0 18px rgba(80,140,200,.05);
+  border-color: #508cc8;
+}
+.nfc button span {
+  display: block;
+  width: 40%;
+  height: 40%;
+  margin: 30%;
+  border-radius: 10px;
+  background: #101c28;
+}
+.nfc small, .ending small {
+  display: block;
+  color: #1e3248;
+  margin-top: 8px;
+}
+.nfc em {
+  display: block;
+  margin-top: 18px;
+  color: #142030;
+  font: 10px ui-monospace, Consolas, monospace;
+  letter-spacing: .08em;
+  font-style: normal;
+}
+
+.chatScene {
+  display: flex;
+  flex-direction: column;
+  background: #0e1822;
+}
+.chatScene main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px 16px;
+}
+.recvLine {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  margin-bottom: 7px;
+}
+.recvLine b {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--accent), transparent 88%);
+  border: 1.5px solid color-mix(in srgb, var(--accent), transparent 55%);
+  color: var(--accent);
+  flex: 0 0 auto;
+}
+.recvLine small {
+  display: block;
+  color: var(--muted);
+  font-size: 10.5px;
+  margin-bottom: 4px;
+}
+.recvLine p, .sentLine span {
+  display: block;
+  max-width: 270px;
+  margin: 0;
+  padding: 9px 13px;
+  border: 1px solid;
+  line-height: 1.65;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+.recvLine p { border-radius: 4px 16px 16px 16px; }
+.sentLine {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 7px;
+}
+.sentLine span {
+  background: #183550;
+  border-color: #254870;
+  color: #d8eeff;
+  border-radius: 16px 4px 16px 16px;
+}
+.sysLine, .typing {
+  margin: 9px auto;
+  width: fit-content;
+  max-width: 280px;
+  color: var(--muted);
+  background: #0f1926;
+  border: 1px solid #192d40;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+}
+footer {
+  padding: 10px 14px max(14px, env(safe-area-inset-bottom));
+  background: var(--panel-2);
+  border-top: 1px solid var(--line);
+}
+.choiceDock {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.choiceDock button, .uiButton {
+  padding: 11px 15px;
+  border-radius: 10px;
+  border: 1px solid #243f5e;
+  background: #0f1e30;
+  color: #8abee0;
+  text-align: left;
+  cursor: pointer;
+}
+.choiceDock button:disabled { color: #1e3a52; cursor: default; }
+.choiceDock span { color: #2e6aaa; margin-right: 8px; }
+.inputForm {
+  display: flex;
+  gap: 8px;
+}
+.uiTextInput {
+  flex: 1;
+  height: 44px;
+  border-radius: 8px;
+  border: 1px solid #1e3448;
+  background: #0c1824;
+  color: var(--text);
+  padding: 0 13px;
+}
+
+.vnScene {
+  display: flex;
+  flex-direction: column;
+  background: #070e18;
+  cursor: pointer;
+}
+.vnScene.important { animation: shake .45s ease-in-out; }
+.portraitStage {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #070e18, #0a1220);
+}
+.stageGrid {
+  position: absolute;
+  inset: 0;
+  opacity: .035;
+  background-image: linear-gradient(#5a9ac0 1px, transparent 1px), linear-gradient(90deg, #5a9ac0 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+.stageSilhouette {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  transform: translate(-50%, -60%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  color: var(--accent);
+  opacity: .58;
+}
+.stageSilhouette.muted { opacity: .08; }
+.stageSilhouette span {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  display: grid;
+  place-items: center;
+  font-size: 30px;
+  font-weight: 800;
+}
+.stageSilhouette small {
+  font: 10px ui-monospace, Consolas, monospace;
+  letter-spacing: .18em;
+}
+.vnBox {
+  flex: 0 0 auto;
+  background: linear-gradient(135deg, #0c1724, #091320);
+  border-top: 2px solid #1a3858;
+  padding: 14px 16px 16px;
+  box-shadow: 0 -4px 20px rgba(0,0,0,.55);
+}
+.vnBox.important {
+  background: linear-gradient(135deg, #120c06, #0f1820);
+  border-top-color: #7a3010;
+}
+.vnBox strong {
+  display: flex;
+  gap: 6px;
+  color: var(--accent);
+  margin-bottom: 9px;
+  font-size: 11.5px;
+}
+.vnBox strong small { opacity: .45; font-weight: 400; }
+.vnBox p {
+  margin: 0;
+  min-height: 28px;
+  color: #bcd8f2;
+  font-size: 15.5px;
+  line-height: 1.72;
+  word-break: keep-all;
+}
+.vnBox.important p { color: #f2c890; }
+.vnBox p b {
+  border-right: 2px solid #4a8ac0;
+  margin-left: 1px;
+  animation: blink .5s step-end infinite;
+}
+.vnBox em {
+  display: block;
+  text-align: right;
+  margin-top: 10px;
+  color: #2a5a7a;
+  font: 10px ui-monospace, Consolas, monospace;
+  font-style: normal;
+}
+
+.rpgScene {
+  display: flex;
+  flex-direction: column;
+  background: #070e18;
+}
+.mapViewport {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 8px;
+}
+.tileMap {
+  position: relative;
+  flex: 0 0 auto;
+  box-shadow: 0 0 0 1px #0f1e2c, 0 10px 34px rgba(0,0,0,.72);
+}
+.tile {
+  position: absolute;
+  border: 1px solid #111f2e;
+  display: grid;
+  place-items: center;
+}
+.tile.active {
+  filter: brightness(1.35);
+  box-shadow: 0 0 12px rgba(80,150,210,.16);
+}
+.tile span {
+  color: #416783;
+  font: 700 13px ui-monospace, Consolas, monospace;
+}
+.playerSprite {
+  position: absolute;
+  border-radius: 8px;
+  background: radial-gradient(circle at 50% 35%, #4b91c5, #1a4a72);
+  border: 1.5px solid #78c6f0;
+  box-shadow: 0 0 14px rgba(80,160,220,.48);
+  z-index: 10;
+  transition: left .09s ease, top .09s ease;
+}
+.playerSprite span {
+  display: block;
+  width: 10px;
+  height: 10px;
+  margin: 5px auto 0;
+  border-radius: 50%;
+  background: #9bd7ff;
+}
+.worldHint {
+  padding: 8px 14px;
+  background: #050b14;
+  border-top: 1px solid #0f1e2c;
+  color: #35536b;
+  font-size: 11.5px;
+}
+.dpad {
+  display: grid;
+  grid-template-columns: repeat(5, 44px);
+  gap: 5px;
+  justify-content: center;
+  padding: 10px 14px 14px;
+}
+.dpad button {
+  height: 42px;
+  border-radius: 8px;
+  border: 1px solid #182a3c;
+  background: #0e1a28;
+  color: #35536b;
+  cursor: pointer;
+}
+.dpad .action {
+  background: #1a3550;
+  border-color: #2a5a80;
+  color: #75bce8;
+}
+.ending button {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  text-align: center;
+}
+.ending .ghost {
+  border-color: #162030;
+  background: transparent;
+  color: #1e3a50;
+}
+.errorScreen {
+  min-height: 100vh;
+  background: #060e18;
+  color: #b0cce0;
+  padding: 20px;
+  font-family: system-ui, sans-serif;
+}
+.errorScreen pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: #020711;
+  padding: 14px;
+  border-radius: 10px;
+}

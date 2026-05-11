@@ -1,0 +1,24 @@
+{
+  "name": "cursor-project",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "npm --prefix my-game run dev --",
+    "build": "npm --prefix my-game run build --",
+    "lint": "npm --prefix my-game run lint --",
+    "test": "npm --prefix my-game run test --",
+    "preview": "npm --prefix my-game run preview --"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.57.0",
+    "vite": "^5.2.0"
+  }
+}

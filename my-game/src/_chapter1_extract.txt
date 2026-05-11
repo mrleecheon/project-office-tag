@@ -1,0 +1,370 @@
+        }}
+      >
+        {messages.map(msg => (
+          <Bubble key={msg.id} msg={msg} />
+        ))}
+        {/* 타이핑 인디케이터 (VN 열렸을 때는 숨김) */}
+        {isTyping && !isVnOpen && <Typing charKey="kim" />}
+        {/* VN 모드 여백 */}
+        {isVnOpen && <div style={{ height: 180 }} />}
+      </div>
+
+      {/* ── 선택지 영역 ── */}
+      {pendingChoices && !isVnOpen && (
+        <div style={{
+          flexShrink: 0, background: '#0b1520',
+          borderTop: '1px solid #172638',
+          padding: '10px 14px max(14px, env(safe-area-inset-bottom))',
+        }}>
+          <ChoiceButtons
+            choices={pendingChoices.choices}
+            onChoose={handleChoose}
+            disabled={choicesLocked}
+          />
+        </div>
+      )}
+
+      {/* ── 닉네임 입력 영역 ── */}
+      {awaitInput && !isVnOpen && (
+        <div style={{
+          flexShrink: 0, background: '#0b1520',
+          borderTop: '1px solid #172638',
+          padding: '10px 14px max(14px, env(safe-area-inset-bottom))',
+        }}>
+          <NicknameInput onSubmit={handleNickname} />
+        </div>
+      )}
+
+      {/* ── VN 오버레이 ── */}
+      {isVnOpen && (
+        <div style={{ position: 'absolute', inset: 0, zIndex: 28 }}>
+          {/* 반투명 배경 */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'rgba(4,9,16,0.82)',
+            pointerEvents: 'none',
+          }} />
+          {/* VN 박스 */}
+          <VNBox
+            key={`vn-${vnState?.idx ?? 0}`}
+            line={vnCurrentLine}
+            onNext={handleVnNext}
+            shakeActive={shaking}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────
+// SCREEN · NFC (카드 스캔 화면)
+// ─────────────────────────────────────────
+function NfcScanScreen({ onDone }) {
+  const [pulse, setPulse] = useState(false);
+
+  const handleTap = useCallback(() => {
+    if (pulse) return;
+    setPulse(true);
+    try { navigator.vibrate?.(28); } catch { /* 무시 */ }
+    setTimeout(onDone, 720);
+  }, [pulse, onDone]);
+
+  return (
+    <div style={{
+      position: 'absolute', inset: 0,
+      background: 'linear-gradient(180deg, #04090e 0%, #070f1a 100%)',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      padding: 24,
+    }}>
+      <div style={{ width: 'min(260px, 88vw)', textAlign: 'center' }}>
+        <div style={{
+          fontFamily: 'monospace', fontSize: 11,
+          letterSpacing: '0.22em', color: '#1e4060',
+          marginBottom: 22,
+        }}>
+          ACCESS · NFC UPLINK
+        </div>
+
+        <button
+          type="button"
+          onClick={handleTap}
+          style={{
+            width: '100%', aspectRatio: '1', maxWidth: 160,
+            margin: '0 auto', display: 'flex',
+            alignItems: 'center', justifyContent: 'center',
+            borderRadius: '22px',
+            border: pulse ? '1px solid rgba(80,140,200,0.5)' : '1px dashed #1e3a52',
+            background: pulse
+              ? 'radial-gradient(circle at 50% 40%, rgba(80,140,200,0.14), transparent 55%)'
+              : '#060e18',
+            boxShadow: pulse ? '0 0 0 18px rgba(80,140,200,0.05)' : 'none',
+            cursor: pulse ? 'default' : 'pointer',
+            transition: 'all 0.35s ease',
+          }}
+        >
+          <div style={{
+            width: '40%', height: '40%', borderRadius: 10,
+            background: pulse ? '#224870' : '#101c28',
+            opacity: pulse ? 0.95 : 0.8,
+            transition: 'all 0.35s ease',
+          }} />
+        </button>
+
+        <p style={{
+          marginTop: 28, fontSize: 13.5, color: '#3a5878',
+          lineHeight: 1.7,
+          fontFamily: "'Noto Sans KR', system-ui, sans-serif",
+        }}>
+          사원 카드를 리더에 태그하세요.<br />
+          <span style={{ fontSize: 11.5, color: '#1e3248' }}>
+            (브라우저 데모: 영역을 탭하면 스캔됩니다)
+          </span>
+        </p>
+
+        <div style={{
+          marginTop: 18, fontFamily: 'monospace',
+          fontSize: 10, letterSpacing: '0.08em', color: '#142030',
+        }}>
+          {SESSION_EMP_ID} · 카드 레인지 활성화됨
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────
+// SCREEN · Boot (부팅 시퀀스 화면)
+// ─────────────────────────────────────────
+const BOOT_LINES = [
+  { t: '',     s: `${COMPANY.legal} · ${COMPANY.product} v2.1` },
+  { t: '',     s: '' },
+  { t: 'ok',   s: '[  OK  ] Network UP · TLS 1.3' },
+  { t: 'ok',   s: '[  OK  ] Auth service … OK' },
+  { t: 'warn', s: `[ WARN ] Session restore · ${SESSION_EMP_ID}` },
+  { t: 'warn', s: '[ WARN ] TEMP_CARD_BINDING / PRED_ID → ACTIVE SESSION' },
+  { t: 'ok',   s: '[  OK  ] Access granted · INTERN CONTRACT' },
+  { t: '',     s: '' },
+  { t: '',     s: 'Launching TalkLine INTERNAL…' },
+];
+
+function BootScreen({ onDone }) {
+  const [visibleLines, setVisibleLines] = useState([]);
+  const [progress, setProgress]         = useState(0);
+  const timersRef = useRef([]);
+  const idxRef    = useRef(0);
+
+  useEffect(() => {
+    const tick = () => {
+      if (idxRef.current >= BOOT_LINES.length) {
+        setProgress(100);
+        timersRef.current.push(setTimeout(onDone, 600));
+        return;
+      }
+      const line = BOOT_LINES[idxRef.current];
+      setVisibleLines(prev => [...prev, line]);
+      setProgress(Math.round((idxRef.current / BOOT_LINES.length) * 100));
+      idxRef.current++;
+      const delay = line.t === 'warn' ? 240 : line.s === '' ? 70 : 110;
+      timersRef.current.push(setTimeout(tick, delay));
+    };
+    timersRef.current.push(setTimeout(tick, 400));
+    return () => timersRef.current.forEach(clearTimeout);
+  }, [onDone]);
+
+  const lineColor = t =>
+    t === 'ok' ? '#2e7a4a' : t === 'warn' ? '#7a5818' : '#2a4c68';
+
+  return (
+    <div style={{
+      position: 'absolute', inset: 0,
+      background: '#070e18',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <div style={{ width: '100%', maxWidth: 320, padding: '28px 24px' }}>
+        {visibleLines.map((l, i) => (
+          <div key={i} style={{
+            fontFamily: 'monospace', fontSize: 11.5,
+            letterSpacing: '0.06em', color: lineColor(l.t),
+            marginBottom: 4, minHeight: 18,
+          }}>
+            {l.s || '\u00a0'}
+          </div>
+        ))}
+        <div style={{ marginTop: 20, height: 2, background: '#0c1a28', borderRadius: 1 }}>
+          <div style={{
+            height: '100%', width: `${progress}%`,
+            background: '#1e5278', borderRadius: 1,
+            transition: 'width 0.12s linear',
+          }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────
+// Error Boundary (에러 경계)
+// ─────────────────────────────────────────
+class GameErrorBoundary extends Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+
+  static getDerivedStateFromError(error) { return { error }; }
+
+  componentDidCatch(error, info) {
+    console.error('[GameErrorBoundary]', error, info?.componentStack);
+  }
+
+  render() {
+    if (this.state.error) return (
+      <div role="alert" style={{
+        minHeight: '100vh', background: '#060e18',
+        color: '#b0cce0', padding: 20,
+        fontFamily: "'Noto Sans KR', system-ui, sans-serif",
+      }}>
+        <h1 style={{ fontSize: 17, fontWeight: 700, marginBottom: 12 }}>
+          화면을 불러오지 못했습니다
+        </h1>
+        <p style={{ fontSize: 13.5, lineHeight: 1.65, marginBottom: 16, color: '#5a7898' }}>
+          처리 중 문제가 발생했습니다. 새로고침으로 다시 시도하세요.
+        </p>
+        <pre style={{
+          fontSize: 11, background: '#030a14',
+          padding: 14, borderRadius: 8,
+          border: '1px solid #182a3c', color: '#4a6878',
+          whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+        }}>
+          {String(this.state.error?.message ?? this.state.error)}
+        </pre>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          style={{
+            marginTop: 20, padding: '13px 20px', borderRadius: 8,
+            border: '1px solid #224870', background: '#122a44',
+            color: '#d0e8ff', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+          }}
+        >
+          새로고침
+        </button>
+      </div>
+    );
+    return this.props.children;
+  }
+}
+
+// ─────────────────────────────────────────
+// ROOT · NexusApp (화면 전환 관리)
+// ─────────────────────────────────────────
+function NexusApp() {
+  // screen: 'nfc' → 'boot' → 'chat' → 'ending'
+  const [screen, setScreen]     = useState('nfc');
+  const [endNickname, setEndNickname] = useState(null);
+
+  const handleEnd = useCallback((nick) => {
+    setEndNickname(nick);
+    setScreen('ending');
+  }, []);
+
+  const handleRestart = useCallback(() => {
+    // 완전 리셋: 키를 변경해 MessengerScreen을 새로 마운트
+    setEndNickname(null);
+    setScreen('nfc');
+  }, []);
+
+  return (
+    <div style={{
+      width: '100%', minHeight: '100vh',
+      background: '#040810',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      {/* 모바일 느낌의 컨테이너 (최대 420px) */}
+      <div style={{
+        width: '100%', maxWidth: 420, minHeight: '100vh',
+        position: 'relative', overflow: 'hidden', margin: '0 auto',
+      }}>
+        {screen === 'nfc' && (
+          <NfcScanScreen key="nfc" onDone={() => setScreen('boot')} />
+        )}
+        {screen === 'boot' && (
+          <BootScreen key="boot" onDone={() => setScreen('chat')} />
+        )}
+        {screen === 'chat' && (
+          // key를 고정해 리스타트 시 강제 리마운트
+          <MessengerScreen key="chat" onEnd={handleEnd} />
+        )}
+        {screen === 'ending' && (
+          <EndingScreen
+            key="ending"
+            nickname={endNickname}
+            onRestart={handleRestart}
+          />
+        )}
+      </div>
+
+      {/* 전역 스타일 */}
+      <style>{`
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #040810; overflow: hidden; }
+
+        /* 페이드 업 */
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        /* 오른쪽에서 페이드 */
+        @keyframes fadeUpRight {
+          from { opacity: 0; transform: translateX(10px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+        /* 타이핑 점 */
+        @keyframes typingDot {
+          0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+          30%            { transform: translateY(-5px); opacity: 1; }
+        }
+        /* VN 박스 슬라이드 업 */
+        @keyframes vnUp {
+          from { opacity: 0; transform: translateY(18px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        /* 커서 깜박임 */
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50%       { opacity: 0; }
+        }
+        /* 화면 쉐이크 (중요 VN 대사) */
+        @keyframes shake {
+          0%  { transform: translateX(0); }
+          15% { transform: translateX(-5px) rotate(-0.4deg); }
+          30% { transform: translateX(5px) rotate(0.4deg); }
+          45% { transform: translateX(-4px) rotate(-0.3deg); }
+          60% { transform: translateX(4px) rotate(0.3deg); }
+          75% { transform: translateX(-2px); }
+          90% { transform: translateX(2px); }
+          100%{ transform: translateX(0); }
+        }
+        /* 붉은 틴트 페이드아웃 */
+        @keyframes tintFade {
+          0%   { opacity: 1; }
+          100% { opacity: 0; }
+        }
+
+        /* 스크롤바 */
+        ::-webkit-scrollbar { width: 3px; }
+        ::-webkit-scrollbar-thumb { background: #172838; border-radius: 2px; }
+      `}</style>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────
+// export default
+// ─────────────────────────────────────────
+export default function App() {
+  return (
+    <GameErrorBoundary>
+      <NexusApp />
+    </GameErrorBoundary>
+  );
+}

@@ -1,0 +1,48 @@
+.appRoot {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(60,120,200,.16), transparent 32%),
+    var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans KR', system-ui, sans-serif;
+}
+
+.phoneFrame {
+  width: min(100%, 420px);
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: var(--panel);
+  box-shadow: 0 0 70px rgba(0,0,0,.55);
+}
+
+.screen, .chatScene, .vnScene, .rpgScene {
+  position: absolute;
+  inset: 0;
+}
+
+.screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: linear-gradient(180deg, #04090e, #070f1a);
+  padding: 24px;
+}
+
+.modeBar, .chapterHud {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  background: #050b14;
+  border-bottom: 1px solid #10202e;
+  color: #244055;
+  font: 10.5px ui-monospace, Consolas, monospace;
+  letter-spacing: .14em;
+}
+
+.chapterHud {
+  display: flex;
+  justify-content: space-between;
+}
