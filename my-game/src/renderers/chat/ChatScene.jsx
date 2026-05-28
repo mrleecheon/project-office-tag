@@ -7,7 +7,7 @@ import { createMessengerPacingController } from '../../features/messenger/runtim
 import { resolveChoiceAvailability } from '../../game/transitions/transitionPolicy'
 import { resolveLineText, resolveUiText } from '../../content/manifests/text'
 import { resolveChatCueProfile } from '../../content/manifests/audio'
-import { resolveImageUrl } from '../../game/runtime/preload/assetPreloader'
+import { resolveImageUrl } from '../../game/runtime/preload/assetPreloader.js'
 import ChatBubble from './ChatBubble'
 import ChoiceDock from './ChoiceDock'
 import {
@@ -43,7 +43,8 @@ export default function ChatScene({ scene, context, onChoice, onInput, onAutoNex
   const lockedRef = useRef(false)
   const onChoiceRef = useRef(onChoice)
   const onAutoNextRef = useRef(onAutoNext)
-  const wallpaperUrl = resolveImageUrl(scene.chatTheme?.wallpaperAssetId)
+  const isPersonalChannel = !scene.systemMessage
+  const chatWallpaper = resolveImageUrl(scene?.chatTheme?.wallpaperAssetId)
 
   useEffect(() => {
     onChoiceRef.current = onChoice
@@ -199,33 +200,41 @@ export default function ChatScene({ scene, context, onChoice, onInput, onAutoNex
 
   return (
     <div
-      className={`chatScene ${scene.emotion === 'warning' ? 'warning' : ''} ${scene.investigationHub ? 'investigationHub' : ''}`}
-      style={wallpaperUrl ? { '--chatWallpaper': `url(${wallpaperUrl})` } : undefined}
+      className={`chatScene ${scene.emotion === 'warning' ? 'warning' : ''} ${scene.investigationHub ? 'investigationHub' : ''} ${isPersonalChannel ? 'personalChannel' : ''}`}
     >
-      <div className="chatSceneNotice">
-        <span>{resolveUiText(scene.modeLabelKey, resolveUiText('modeBarChatDefault', 'CHAT MODE · TalkLine Internal'))}</span>
-        {scene.emotion === 'warning' && <strong>LOG UNSTABLE</strong>}
-      </div>
-      <section className="chatDialogPanel">
-        <main ref={scrollRef}>
-          <div className="chatThread">
-            {messages.map((message) => <ChatBubble key={message.id} message={message} />)}
-            {narrationLog.map((message) => <ChatBubble key={message.id} message={message} />)}
-            {typing && typingLabel && (
-              <TypingIndicator charName={typingLabel} unstable={typing.unstable} />
-            )}
+      <div className="chatSceneLayout">
+        <div className="chatBackgroundWrapper" aria-hidden="true">
+          {chatWallpaper && <img className="chatBackgroundImage" src={chatWallpaper} alt="" />}
+        </div>
+
+        {!isPersonalChannel && (
+          <div className="chatSceneNotice">
+            <span>{resolveUiText(scene.modeLabelKey, resolveUiText('modeBarChatDefault', 'CHAT MODE · TalkLine Internal'))}</span>
+            {scene.emotion === 'warning' && <strong>LOG UNSTABLE</strong>}
           </div>
-        </main>
-        {choices && <ChoiceDock choices={choices} disabled={locked} onChoose={choose} />}
-        {scene.input && (
-          <footer>
-            <form className="inputForm" onSubmit={submitName}>
-              <TextInput value={nameDraft} maxLength="14" placeholder={resolveUiText('chatNamePlaceholder', '표시 이름')} autoFocus onChange={(event) => setNameDraft(event.target.value)} />
-              <Button type="submit">{resolveUiText('chatSend', '전송')}</Button>
-            </form>
-          </footer>
         )}
-      </section>
+
+        <section className="chatPanelContainer">
+          <main className="chatPanelScroll" ref={scrollRef}>
+            <div className="chatThread">
+              {messages.map((message) => <ChatBubble key={message.id} message={message} />)}
+              {narrationLog.map((message) => <ChatBubble key={message.id} message={message} />)}
+              {typing && typingLabel && (
+                <TypingIndicator charName={typingLabel} unstable={typing.unstable} />
+              )}
+            </div>
+          </main>
+          {choices && <ChoiceDock choices={choices} disabled={locked} onChoose={choose} />}
+          {scene.input && (
+            <footer className="chatPanelFooter">
+              <form className="inputForm" onSubmit={submitName}>
+                <TextInput value={nameDraft} maxLength="14" placeholder={resolveUiText('chatNamePlaceholder', '표시 이름')} autoFocus onChange={(event) => setNameDraft(event.target.value)} />
+                <Button type="submit">{resolveUiText('chatSend', '전송')}</Button>
+              </form>
+            </footer>
+          )}
+        </section>
+      </div>
     </div>
   )
 }

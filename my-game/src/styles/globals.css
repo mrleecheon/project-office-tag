@@ -294,37 +294,87 @@ button, input { font: inherit; }
 }
 
 .chatScene {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  background:
-    linear-gradient(rgba(9, 18, 28, .62), rgba(9, 18, 28, .78)),
-    var(--chatWallpaper, linear-gradient(180deg, #0e1822, #0a131d));
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: transparent;
 }
 
-.chatDialogPanel {
+.chatScene.personalChannel.warning {
+  background: transparent;
+}
+
+.chatSceneLayout {
   position: absolute;
-  bottom: max(8px, env(safe-area-inset-bottom));
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.chatBackgroundWrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
   left: 0;
   width: 100%;
-  margin: 0;
-  z-index: 6;
-  box-sizing: border-box;
-  background: linear-gradient(135deg, rgba(12, 23, 36, .78), rgba(9, 19, 32, .86));
-  border-top: 2px solid #1a3858;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, .55);
-  backdrop-filter: blur(2px);
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+  background: linear-gradient(180deg, #0e1822, #0a131d);
 }
 
-.chatDialogPanel main {
+.chatBackgroundImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.chatBackgroundWrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background-image:
+    linear-gradient(rgba(9, 18, 28, .46), rgba(9, 18, 28, .58));
+}
+
+.chatPanelContainer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  z-index: 4;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, .32);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04);
+  backdrop-filter: blur(8px);
+}
+
+.chatScene.personalChannel .chatPanelContainer {
+  background: rgba(0, 0, 0, .24);
+  backdrop-filter: blur(10px);
+}
+
+.chatPanelScroll {
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  max-height: 34vh;
-  padding: 12px 14px 10px;
+  padding: 46px 14px 10px;
 }
 
-.chatDialogPanel .choiceDock,
-.chatDialogPanel > footer {
+.chatPanelContainer .choiceDock,
+.chatPanelContainer > .chatPanelFooter {
   margin: 0;
 }
 
@@ -335,6 +385,11 @@ button, input { font: inherit; }
 }
 
 .chatSceneNotice {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
   display: flex;
   justify-content: space-between;
   gap: 8px;
@@ -473,10 +528,10 @@ button, input { font: inherit; }
   justify-content: center;
   color: #38556d;
 }
-footer {
+.chatPanelFooter {
   padding: 10px 14px max(14px, env(safe-area-inset-bottom));
-  background: var(--panel-2);
-  border-top: 1px solid var(--line);
+  background: rgba(8, 18, 29, .92);
+  border-top: 1px solid #1d3852;
 }
 .choiceDock {
   display: flex;

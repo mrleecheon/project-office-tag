@@ -55,17 +55,14 @@ export default function ProjectOfficeIntro({ onComplete, exiting = false }) {
     setShaking(false)
     setTagging(false)
     setTimeout(() => {
-      setSceneIndex((index) => {
-        const next = index + 1
-        if (next >= SCENES.length) {
-          onComplete?.()
-          return index
-        }
-        setFadeState('in')
-        return next
-      })
+      if (sceneIndex >= SCENES.length - 1) {
+        onComplete?.()
+        return
+      }
+      setSceneIndex(sceneIndex + 1)
+      setFadeState('in')
     }, 500)
-  }, [onComplete])
+  }, [onComplete, sceneIndex])
 
   useEffect(() => {
     if (currentScene.overlay) {

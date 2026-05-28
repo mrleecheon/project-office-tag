@@ -1,5 +1,5 @@
 # Claude review bundle — my-game
-# Generated: 2026-05-28T12:16:28.551Z
+# Generated: 2026-05-28T13:27:03.079Z
 # Files: 159
 # Auto-updated: npm run dev | npm run bundle:claude:watch
 
@@ -500,7 +500,9 @@ export default function MessengerAppShell({
   onRestart,
 }) {
   const [tabState, setTabState] = useState({ sceneId: null, tab: 'chat' })
+  const isChatScene = scene?.mode === SceneModes.CHAT
   const isImmersive = scene?.mode === SceneModes.VN || scene?.mode === SceneModes.RPG
+  const isPersonalChannel = scene?.mode === SceneModes.CHAT && !scene?.systemMessage
   const activeTab = tabState.sceneId === scene?.id ? tabState.tab : 'chat'
   const storyStatus = useMemo(() => selectStoryStatus(state), [state])
   const selectTab = (tab) => setTabState({ sceneId: scene?.id ?? null, tab })
@@ -520,7 +522,7 @@ export default function MessengerAppShell({
 
       <main className="messengerShellBody">
         <div
-          className={`messengerViewport ${isImmersive || activeTab === 'chat' ? 'active' : ''}`}
+          className={`messengerViewport ${isImmersive || activeTab === 'chat' ? 'active' : ''} ${isPersonalChannel ? 'personalChannel' : ''}`}
           aria-hidden={!isImmersive && activeTab !== 'chat'}
         >
           <SceneViewport
@@ -8037,7 +8039,7 @@ import { createMessengerPacingController } from '../../features/messenger/runtim
 import { resolveChoiceAvailability } from '../../game/transitions/transitionPolicy'
 import { resolveLineText, resolveUiText } from '../../content/manifests/text'
 import { resolveChatCueProfile } from '../../content/manifests/audio'
-import { resolveImageUrl } from '../../game/runtime/preload/assetPreloader'
+import { resolveImageUrl } from '../../game/runtime/preload/assetPreloader.js'
 import ChatBubble from './ChatBubble'
 import ChoiceDock from './ChoiceDock'
 import {
@@ -8073,7 +8075,8 @@ export default function ChatScene({ scene, context, onChoice, onInput, onAutoNex
   const lockedRef = useRef(false)
   const onChoiceRef = useRef(onChoice)
   const onAutoNextRef = useRef(onAutoNext)
-  const wallpaperUrl = resolveImageUrl(scene.chatTheme?.wallpaperAssetId)
+  const isPersonalChannel = !scene.systemMessage
+  const chatWallpaper = resolveImageUrl(scene?.chatTheme?.wallpaperAssetId)
 
   useEffect(() => {
     onChoiceRef.current = onChoice
@@ -8229,33 +8232,41 @@ export default function ChatScene({ scene, context, onChoice, onInput, onAutoNex
 
   return (
     <div
-      className={`chatScene ${scene.emotion === 'warning' ? 'warning' : ''} ${scene.investigationHub ? 'investigationHub' : ''}`}
-      style={wallpaperUrl ? { '--chatWallpaper': `url(${wallpaperUrl})` } : undefined}
+      className={`chatScene ${scene.emotion === 'warning' ? 'warning' : ''} ${scene.investigationHub ? 'investigationHub' : ''} ${isPersonalChannel ? 'personalChannel' : ''}`}
     >
-      <div className="chatSceneNotice">
-        <span>{resolveUiText(scene.modeLabelKey, resolveUiText('modeBarChatDefault', 'CHAT MODE · TalkLine Internal'))}</span>
-        {scene.emotion === 'warning' && <strong>LOG UNSTABLE</strong>}
-      </div>
-      <section className="chatDialogPanel">
-        <main ref={scrollRef}>
-          <div className="chatThread">
-            {messages.map((message) => <ChatBubble key={message.id} message={message} />)}
-            {narrationLog.map((message) => <ChatBubble key={message.id} message={message} />)}
-            {typing && typingLabel && (
-              <TypingIndicator charName={typingLabel} unstable={typing.unstable} />
-            )}
+      <div className="chatSceneLayout">
+        <div className="chatBackgroundWrapper" aria-hidden="true">
+          {chatWallpaper && <img className="chatBackgroundImage" src={chatWallpaper} alt="" />}
+        </div>
+
+        {!isPersonalChannel && (
+          <div className="chatSceneNotice">
+            <span>{resolveUiText(scene.modeLabelKey, resolveUiText('modeBarChatDefault', 'CHAT MODE · TalkLine Internal'))}</span>
+            {scene.emotion === 'warning' && <strong>LOG UNSTABLE</strong>}
           </div>
-        </main>
-        {choices && <ChoiceDock choices={choices} disabled={locked} onChoose={choose} />}
-        {scene.input && (
-          <footer>
-            <form className="inputForm" onSubmit={submitName}>
-              <TextInput value={nameDraft} maxLength="14" placeholder={resolveUiText('chatNamePlaceholder', '표시 이름')} autoFocus onChange={(event) => setNameDraft(event.target.value)} />
-              <Button type="submit">{resolveUiText('chatSend', '전송')}</Button>
-            </form>
-          </footer>
         )}
-      </section>
+
+        <section className="chatPanelContainer">
+          <main className="chatPanelScroll" ref={scrollRef}>
+            <div className="chatThread">
+              {messages.map((message) => <ChatBubble key={message.id} message={message} />)}
+              {narrationLog.map((message) => <ChatBubble key={message.id} message={message} />)}
+              {typing && typingLabel && (
+                <TypingIndicator charName={typingLabel} unstable={typing.unstable} />
+              )}
+            </div>
+          </main>
+          {choices && <ChoiceDock choices={choices} disabled={locked} onChoose={choose} />}
+          {scene.input && (
+            <footer className="chatPanelFooter">
+              <form className="inputForm" onSubmit={submitName}>
+                <TextInput value={nameDraft} maxLength="14" placeholder={resolveUiText('chatNamePlaceholder', '표시 이름')} autoFocus onChange={(event) => setNameDraft(event.target.value)} />
+                <Button type="submit">{resolveUiText('chatSend', '전송')}</Button>
+              </form>
+            </footer>
+          )}
+        </section>
+      </div>
     </div>
   )
 }
@@ -8266,7 +8277,7 @@ export default function ChatScene({ scene, context, onChoice, onInput, onAutoNex
 export default function ChoiceDock({ choices, disabled, onChoose }) {
   if (!choices?.length) return null
   return (
-    <footer className="choiceDock">
+    <div className="choiceDock">
       <small>응답 선택</small>
       {choices.map((choice, index) => (
         <button key={`${choice.text}-${choice.next}`} type="button" disabled={disabled} onClick={() => onChoose(choice)}>
@@ -8274,7 +8285,7 @@ export default function ChoiceDock({ choices, disabled, onChoose }) {
           {choice.text}
         </button>
       ))}
-    </footer>
+    </div>
   )
 }
 
@@ -8861,17 +8872,14 @@ export default function ProjectOfficeIntro({ onComplete, exiting = false }) {
     setShaking(false)
     setTagging(false)
     setTimeout(() => {
-      setSceneIndex((index) => {
-        const next = index + 1
-        if (next >= SCENES.length) {
-          onComplete?.()
-          return index
-        }
-        setFadeState('in')
-        return next
-      })
+      if (sceneIndex >= SCENES.length - 1) {
+        onComplete?.()
+        return
+      }
+      setSceneIndex(sceneIndex + 1)
+      setFadeState('in')
     }, 500)
-  }, [onComplete])
+  }, [onComplete, sceneIndex])
 
   useEffect(() => {
     if (currentScene.overlay) {
@@ -9684,37 +9692,87 @@ button, input { font: inherit; }
 }
 
 .chatScene {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  background:
-    linear-gradient(rgba(9, 18, 28, .62), rgba(9, 18, 28, .78)),
-    var(--chatWallpaper, linear-gradient(180deg, #0e1822, #0a131d));
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: transparent;
 }
 
-.chatDialogPanel {
+.chatScene.personalChannel.warning {
+  background: transparent;
+}
+
+.chatSceneLayout {
   position: absolute;
-  bottom: max(8px, env(safe-area-inset-bottom));
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.chatBackgroundWrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
   left: 0;
   width: 100%;
-  margin: 0;
-  z-index: 6;
-  box-sizing: border-box;
-  background: linear-gradient(135deg, rgba(12, 23, 36, .78), rgba(9, 19, 32, .86));
-  border-top: 2px solid #1a3858;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, .55);
-  backdrop-filter: blur(2px);
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+  background: linear-gradient(180deg, #0e1822, #0a131d);
 }
 
-.chatDialogPanel main {
+.chatBackgroundImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.chatBackgroundWrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background-image:
+    linear-gradient(rgba(9, 18, 28, .46), rgba(9, 18, 28, .58));
+}
+
+.chatPanelContainer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  z-index: 4;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, .32);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04);
+  backdrop-filter: blur(8px);
+}
+
+.chatScene.personalChannel .chatPanelContainer {
+  background: rgba(0, 0, 0, .24);
+  backdrop-filter: blur(10px);
+}
+
+.chatPanelScroll {
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  max-height: 34vh;
-  padding: 12px 14px 10px;
+  padding: 46px 14px 10px;
 }
 
-.chatDialogPanel .choiceDock,
-.chatDialogPanel > footer {
+.chatPanelContainer .choiceDock,
+.chatPanelContainer > .chatPanelFooter {
   margin: 0;
 }
 
@@ -9725,6 +9783,11 @@ button, input { font: inherit; }
 }
 
 .chatSceneNotice {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
   display: flex;
   justify-content: space-between;
   gap: 8px;
@@ -9863,10 +9926,10 @@ button, input { font: inherit; }
   justify-content: center;
   color: #38556d;
 }
-footer {
+.chatPanelFooter {
   padding: 10px 14px max(14px, env(safe-area-inset-bottom));
-  background: var(--panel-2);
-  border-top: 1px solid var(--line);
+  background: rgba(8, 18, 29, .92);
+  border-top: 1px solid #1d3852;
 }
 .choiceDock {
   display: flex;
@@ -11003,6 +11066,7 @@ footer {
 .messengerViewport {
   position: absolute;
   inset: 0;
+  z-index: 1;
   display: none;
 }
 

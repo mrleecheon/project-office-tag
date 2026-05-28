@@ -1,7 +1,7 @@
 export default function ChoiceDock({ choices, disabled, onChoose }) {
   if (!choices?.length) return null
   return (
-    <footer className="choiceDock">
+    <div className="choiceDock">
       <small>응답 선택</small>
       {choices.map((choice, index) => (
         <button key={`${choice.text}-${choice.next}`} type="button" disabled={disabled} onClick={() => onChoose(choice)}>
@@ -9,6 +9,6 @@ export default function ChoiceDock({ choices, disabled, onChoose }) {
           {choice.text}
         </button>
       ))}
-    </footer>
+    </div>
   )
 }

@@ -32,7 +32,9 @@ export default function MessengerAppShell({
   onRestart,
 }) {
   const [tabState, setTabState] = useState({ sceneId: null, tab: 'chat' })
+  const isChatScene = scene?.mode === SceneModes.CHAT
   const isImmersive = scene?.mode === SceneModes.VN || scene?.mode === SceneModes.RPG
+  const isPersonalChannel = scene?.mode === SceneModes.CHAT && !scene?.systemMessage
   const activeTab = tabState.sceneId === scene?.id ? tabState.tab : 'chat'
   const storyStatus = useMemo(() => selectStoryStatus(state), [state])
   const selectTab = (tab) => setTabState({ sceneId: scene?.id ?? null, tab })
@@ -52,7 +54,7 @@ export default function MessengerAppShell({
 
       <main className="messengerShellBody">
         <div
-          className={`messengerViewport ${isImmersive || activeTab === 'chat' ? 'active' : ''}`}
+          className={`messengerViewport ${isImmersive || activeTab === 'chat' ? 'active' : ''} ${isPersonalChannel ? 'personalChannel' : ''}`}
           aria-hidden={!isImmersive && activeTab !== 'chat'}
         >
           <SceneViewport
