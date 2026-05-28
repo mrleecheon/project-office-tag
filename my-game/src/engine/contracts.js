@@ -14,6 +14,7 @@ export const EffectTypes = Object.freeze({
   SET_CHAPTER: 'setChapter',
   SET_MAP_POSITION: 'setMapPosition',
   ADD_SCORE: 'addScore',
+  SET_CHAPTER_ENDED: 'setChapterEnded',
 })
 
 export const SaveVersion = 1

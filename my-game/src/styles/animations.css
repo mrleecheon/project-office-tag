@@ -15,3 +15,38 @@
   0%, 60%, 100% { transform: translateY(0); opacity: .4; }
   30% { transform: translateY(-5px); opacity: 1; }
 }
+
+@keyframes introTagFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes introTagCardPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(.94); opacity: .82; }
+}
+
+@keyframes introTagRing {
+  0% { transform: scale(.92); opacity: .7; }
+  70%, 100% { transform: scale(1.18); opacity: 0; }
+}
+
+@keyframes introCardShake {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  12% { transform: translate(-6px, 2px) rotate(-1.2deg); }
+  28% { transform: translate(7px, -2px) rotate(1.4deg); }
+  44% { transform: translate(-5px, 1px) rotate(-.8deg); }
+  60% { transform: translate(5px, -1px) rotate(.9deg); }
+  76% { transform: translate(-2px, 0) rotate(-.3deg); }
+}
+
+@keyframes introTagSceneBreath {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.018); }
+}
+
+@keyframes vnSfxPop {
+  0% { opacity: 0; transform: scale(.92); }
+  18% { opacity: 1; transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
+}

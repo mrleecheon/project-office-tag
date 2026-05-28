@@ -8,6 +8,11 @@
     "build": "vite build",
     "lint": "eslint .",
     "test": "node src/tests/runValidation.js",
+    "validate:content": "node src/tools/content-build/buildValidationReport.js",
+    "export:unity": "node scripts/export-unity-content.mjs",
+    "assets:placeholders": "node src/tools/content-build/generatePlaceholderAssets.js",
+    "bundle:claude": "node scripts/bundle-claude-review.mjs",
+    "bundle:claude:watch": "node scripts/bundle-claude-review.mjs --watch",
     "preview": "vite preview"
   },
   "dependencies": {

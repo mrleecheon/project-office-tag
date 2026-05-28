@@ -8,9 +8,9 @@ import { EffectTypes } from '../engine/contracts.js'
 const prologue = chapterRegistry.getChapter('prologue')
 assert.equal(prologue.startSceneId, 'start')
 
-let state = gameReducer(initialGameState, setScene('clarify_no'))
-assert.equal(state.activeSceneId, 'clarify_no')
-assert.ok(state.visitedScenes.includes('prologue.clarify_no'))
+let state = gameReducer(initialGameState, setScene('start'))
+assert.equal(state.activeSceneId, 'start')
+assert.ok(state.visitedScenes.includes('prologue.start'))
 
 state = gameReducer(state, applyEffects([
   { type: EffectTypes.ADD_FLAG, flag: 'deniedIdentity' },
@@ -20,8 +20,8 @@ state = gameReducer(state, applyEffects([
 assert.deepEqual(state.flags, ['deniedIdentity'])
 assert.deepEqual(state.inventory, ['tempBinding'])
 
-state = gameReducer(state, setChapter('chapter-01', 'rpg_floor7'))
+state = gameReducer(state, setChapter('chapter-01', 'morning_briefing'))
 assert.equal(state.activeChapterId, 'chapter-01')
-assert.equal(state.activeSceneId, 'rpg_floor7')
+assert.equal(state.activeSceneId, 'morning_briefing')
 
 console.log('progression.test.js passed')

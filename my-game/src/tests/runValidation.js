@@ -1,5 +1,18 @@
 import './sceneGraph.test.js'
 import './progression.test.js'
 import './saveSchema.test.js'
+import './saveSlots.test.js'
+import './contentSchema.test.js'
+import './runtimeIntegrity.test.js'
+import './transitionPolicy.test.js'
+import './chapter02Endings.test.js'
+import './formatChatText.test.js'
+import './vnPrologueFlow.test.js'
+import './phase0Flow.test.js'
+import './chapter04Branching.test.js'
+import './chapterFlow.test.js'
+import './chapter05Branching.test.js'
+import './endingResolution.test.js'
+import './fullPlaythrough.test.js'
 
 console.log('All validation tests passed')

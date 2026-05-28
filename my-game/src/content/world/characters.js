@@ -1,4 +1,28 @@
+// content/world/characters.js
+// 변경: 박서이(seoi), CARETAKER 추가. emotions에 glitch/cold 추가.
+// 기존 8캐릭터(groomy/iseol/kim/choi/yoon/unknown/system/player)는 그대로 보존.
+
 export const characters = {
+  groomy: {
+    id: 'groomy',
+    name: 'GROOMY',
+    dept: 'AI Secretary',
+    initial: 'G',
+    accent: '#72e0c2',
+    bubble: '#102f2a',
+    border: '#245f52',
+    text: '#c9fff2',
+  },
+  iseol: {
+    id: 'iseol',
+    name: '강이솔 선임',
+    dept: '운영지원팀',
+    initial: '강',
+    accent: '#e0a55a',
+    bubble: '#322414',
+    border: '#654728',
+    text: '#ffe4c2',
+  },
   kim: {
     id: 'kim',
     name: '김수진 대리',
@@ -39,10 +63,32 @@ export const characters = {
     border: '#4a2020',
     text: '#e0a0a0',
   },
+  // 신규: 전임자 박서이. 시체로 발견되나 일기/녹음으로 사후 등장.
+  seoi: {
+    id: 'seoi',
+    name: '박서이 선임',
+    dept: '운영지원팀 · 결번',
+    initial: '서',
+    accent: '#c08070',
+    bubble: '#2a1818',
+    border: '#4a2818',
+    text: '#e8c8b0',
+  },
+  // 신규: CARETAKER 시스템. 모든 직원이 죽은 뒤에도 회사를 운영하는 AI.
+  caretaker: {
+    id: 'caretaker',
+    name: 'CARETAKER',
+    dept: 'CORE SYSTEM',
+    initial: 'C',
+    accent: '#8a8a40',
+    bubble: '#1a1a08',
+    border: '#3a3a18',
+    text: '#d8d8a0',
+  },
   system: {
     id: 'system',
     name: 'SYSTEM',
-    dept: 'NEXUS CORE',
+    dept: 'CARETAKER SYSTEMS',
     initial: 'S',
     accent: '#4a7fb0',
     bubble: '#10243a',
@@ -67,4 +113,8 @@ export const emotions = {
   nervous: { ring: '#c8a030', glow: 'rgba(200,160,48,0.30)', hair: '#605020', face: '#a08838' },
   warning: { ring: '#c05030', glow: 'rgba(192,80,48,0.40)', hair: '#501818', face: '#904030' },
   unknown: { ring: '#404868', glow: 'rgba(64,72,104,0.20)', hair: '#303040', face: '#505868' },
+  // 신규: 보정 레이어가 깨져 격리된 기억이 새어 나오는 순간
+  glitch: { ring: '#a040a0', glow: 'rgba(160,64,160,0.45)', hair: '#401040', face: '#603060' },
+  // 신규: 그루미의 진짜 정체가 드러나는 차가운 표정
+  cold: { ring: '#506880', glow: 'rgba(80,104,128,0.20)', hair: '#1a2030', face: '#384050' },
 }

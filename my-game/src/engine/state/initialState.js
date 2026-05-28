@@ -12,8 +12,13 @@ export const initialGameState = {
     trust: 0,
     suspicion: 0,
     risk: 0,
+    groomyAffinity: 0,
+    mysteryEvidence: 0,
+    batteryDesperation: 0,
+    corporateSuspicion: 0,
   },
   visitedScenes: [],
   mapPositions: {},
   routeHistory: [],
+  chapterEnded: false,
 }

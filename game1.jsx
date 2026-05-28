@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 // ─────────────────────────────────────────
 // WORLD (story constants)
 // ─────────────────────────────────────────
-const COMPANY = { legal: 'NEXUS CORE', product: 'TalkLine', intranet: 'TalkLine INTERNAL' };
+const COMPANY = { legal: 'GROOMY OFFICE', product: 'GroomyTalk', intranet: 'GroomyTalk INTERNAL' };
 const PREDECESSOR_NAME = '박준혁 선임';
 const SESSION_EMP_ID = 'EMP-2024-0041';
 
@@ -17,10 +17,19 @@ function resolveScriptText(item, ctx) {
 // DATA · Characters
 // ─────────────────────────────────────────
 const CHARS = {
-  kim: {
-    name: '김수진 대리',
-    dept: '인사팀',
-    initial: '김',
+  groomy: {
+    name: '그루미',
+    dept: 'AI 비서',
+    initial: 'G',
+    accentColor: '#7a5fcf',
+    bubbleColor: '#1a1535',
+    bubbleBorder: '#2e2060',
+    textColor: '#c8b8f0',
+  },
+  lee: {
+    name: '강이솔 선임',
+    dept: '기획팀',
+    initial: '이',
     accentColor: '#5b9bd5',
     bubbleColor: '#1a2f45',
     bubbleBorder: '#2a4560',
@@ -50,34 +59,98 @@ const SCRIPT = [
   { type: 'sys', delay: 400,
     text: 'TEMP_CARD_BINDING · PRED_ID → 활성 사용자 (재사용)' },
   { type: 'sys', delay: 600,
-    text: '김수진 대리님이 초대하였습니다.', },
-  { type: 'recv', char: 'kim', emotion: 'friendly', delay: 900,
-    text: () =>
-      `${PREDECESSOR_NAME}님이 맞으시죠? 방금 카드 접속 로그가 올라와서요. 오늘이 첫 출근이실 텐데, TalkLine만 먼저 확인 부탁드려요.` },
+    text: '그루미가 채널에 입장했습니다.' },
+
+  { type: 'vn', char: 'groomy', emotion: 'nervous',
+    text: '…삑-', delay: 800 },
+  { type: 'vn', char: 'groomy', emotion: 'nervous',
+    text: '저기 당신 혹시.', delay: 0 },
+  { type: 'vn', char: 'groomy', emotion: 'neutral',
+    text: '처음 오셨군요.', delay: 0 },
+
+  { type: 'recv', char: 'groomy', emotion: 'neutral', delay: 900,
+    text: (item, ctx) =>
+      `${PREDECESSOR_NAME}님 카드로 접속이 됐는데… 처음 보는 분이네요.` },
+
+  { type: 'choice', delay: 400, options: [
+    { label: '네, 처음입니다.',        score: 1,  next: 'choice1_a' },
+    { label: '전임자 아세요?',         score: 0,  next: 'choice1_b' },
+    { label: '여기가 어디죠?',         score: -1, next: 'choice1_c' },
+  ]},
+
+  { type: 'branch', id: 'choice1_a',
+    items: [
+      { type: 'sent', text: '네, 처음입니다.' },
+      { type: 'recv', char: 'groomy', emotion: 'friendly', delay: 800,
+        text: '…그렇군요. 뭐, 반갑습니다.' },
+    ]},
+  { type: 'branch', id: 'choice1_b',
+    items: [
+      { type: 'sent', text: '전임자 아세요?' },
+      { type: 'recv', char: 'groomy', emotion: 'warning', delay: 1000,
+        text: '…그 질문은 지금 안 받아요.' },
+    ]},
+  { type: 'branch', id: 'choice1_c',
+    items: [
+      { type: 'sent', text: '여기가 어디죠?' },
+      { type: 'recv', char: 'groomy', emotion: 'neutral', delay: 900,
+        text: '(작게 웃음) 회사요. 로비예요. 아직 카드 태그 전이라 머리가 좀 멍할 수 있어요.' },
+    ]},
+
   { type: 'gate_nickname', delay: 400 },
-  { type: 'recv', char: 'kim', emotion: 'nervous', delay: 1200,
-    text: (_, ctx) =>
-      `…${ctx.nickname}님. 제가 헷갈렸네요.\n아직 귀하의 카드가 정식 발급 전이라서요. 업무 시작은 빨리해야 해서…… 전임자분 카드 라인을 잠시 매핑해 뒀거든요. 시스템 로그 검색 결과가 이름·사번 때문에 섞여 보일 수 있어요.\n일단 업무 진행부터 부탁드릴게요.` },
-  { type: 'recv', char: 'kim', emotion: 'friendly', delay: 1600,
-    text: (_, ctx) =>
-      `${ctx.nickname}님이라고 불러 드려도 될까요? 자리는 7층 창가쪽이에요. 실물 카드는 나중에 HR에서 교체해 줄 거예요.` },
-  { type: 'recv', char: 'kim', emotion: 'friendly', delay: 2000,
-    text: () => '(전임자 기록 접두어가 포함된 결과는 무시하셔도 됩니다. 정리 중이에요.)' },
-  { type: 'recv', char: 'kim', emotion: 'neutral', delay: 1800,
-    text: '오후 2시에 팀 미팅 있습니다. 회의실은 시스템 캘린더에 반영해 두었어요.', },
-  // ── VN moment ──
-  { type: 'vn',   char: 'kim', emotion: 'nervous',
-    text: '…그리고 한 가지만 부탁드려도 될까요?',                    delay: 2600 },
-  { type: 'vn',   char: 'kim', emotion: 'nervous',
-    text: '3층에는 가지 마세요.',                          important: true, delay: 2200 },
-  { type: 'vn',   char: 'kim', emotion: 'warning',
-    text: '이유는 묻지 마세요. 그냥… 오늘은요.',                     delay: 2400 },
-  // ── back to chat ──
-  { type: 'recv', char: 'kim', emotion: 'neutral',
-    text: '3층은 지금 보안 감사 중이라서요! ^^',                      delay: 1600 },
-  { type: 'sys',  text: '메시지 1건이 정책에 의해 숨김 처리되었습니다.', delay: 3200 },
-  { type: 'recv', char: 'kim', emotion: 'warning',
-    text: '혹시… 이 사번 쓰시던 분 아세요?',                         delay: 3800 },
+
+  { type: 'recv', char: 'groomy', emotion: 'neutral', delay: 1200,
+    text: (item, ctx) =>
+      `${ctx.nickname}씨. 사원증은 아직 발급 전이라서요. 일단 전임자 분 카드로 매핑해 뒀어요. 시스템 로그에 이름이 섞여 보일 수 있는데 신경 쓰지 마세요.` },
+
+  { type: 'recv', char: 'groomy', emotion: 'friendly', delay: 1800,
+    text: (item, ctx) =>
+      `카드키 찾아야 진짜 사무실 들어갈 수 있어요. 아마 책상 아래나 어딘가 떨어져 있을 텐데—` },
+
+  { type: 'choice', delay: 400, options: [
+    { label: '알겠어요.',                  score: 0,  next: 'choice2_a' },
+    { label: '왜 그렇게 퉁명스럽게 말해요?', score: 2,  next: 'choice2_b' },
+    { label: '전임자 얘기 좀 해줘요.',       score: -1, next: 'choice2_c' },
+  ]},
+
+  { type: 'branch', id: 'choice2_a',
+    items: [
+      { type: 'sent', text: '알겠어요.' },
+      { type: 'recv', char: 'groomy', emotion: 'neutral', delay: 700,
+        text: '찾고 나서 다시 말 걸어줄래요.' },
+    ]},
+  { type: 'branch', id: 'choice2_b',
+    items: [
+      { type: 'sent', text: '왜 그렇게 퉁명스럽게 말해요?' },
+      { type: 'recv', char: 'groomy', emotion: 'nervous', delay: 1100,
+        text: '…퉁명? 이게 제 기본값인데요.' },
+      { type: 'recv', char: 'groomy', emotion: 'friendly', delay: 1400,
+        text: '(잠깐 멈춤) …뭐, 빨리 찾아요. 제가 옆에 있을게요.' },
+    ]},
+  { type: 'branch', id: 'choice2_c',
+    items: [
+      { type: 'sent', text: '전임자 얘기 좀 해줘요.' },
+      { type: 'recv', char: 'groomy', emotion: 'warning', delay: 1200,
+        text: '카드키 먼저요.' },
+      { type: 'sys', text: '[단서 획득: 그루미가 전임자 언급을 회피함]', delay: 800 },
+    ]},
+
+  { type: 'sys', delay: 2000, text: '강이솔 선임님이 채널에 입장했습니다.' },
+  { type: 'recv', char: 'lee', emotion: 'friendly', delay: 1200,
+    text: (item, ctx) => `${ctx.nickname}씨 맞죠? 저 강이솔이에요. 오늘 사수 맡았어요. 카드키는 찾았어요?` },
+
+  { type: 'vn', char: 'lee', emotion: 'nervous',
+    text: '참, 한 가지만 부탁드려도 될까요?', delay: 2600 },
+  { type: 'vn', char: 'lee', emotion: 'warning',
+    text: '3층에는 가지 마세요.', important: true, delay: 2200 },
+  { type: 'vn', char: 'lee', emotion: 'nervous',
+    text: '이유는 묻지 마세요. 그냥… 오늘은요.', delay: 2400 },
+
+  { type: 'recv', char: 'lee', emotion: 'neutral', delay: 1600,
+    text: '3층은 지금 보안 감사 중이라서요! ^^' },
+  { type: 'sys', text: '메시지 1건이 정책에 의해 숨김 처리되었습니다.', delay: 3200 },
+  { type: 'recv', char: 'lee', emotion: 'warning', delay: 3800,
+    text: '혹시… 이 사번 쓰시던 분 아세요?' },
 ];
 
 // ─────────────────────────────────────────
@@ -101,7 +174,6 @@ function Portrait({ emotion, size = 72 }) {
         borderRadius: '50%',
         boxShadow: `0 0 ${glowing ? 24 : 10}px ${em.glow}`,
         border: `1.5px solid ${em.ring}`,
-        borderRadius: '50%',
         transition: 'box-shadow 0.5s ease, border-color 0.5s ease',
         pointerEvents: 'none',
       }} />
@@ -428,19 +500,22 @@ function MessengerScreen() {
   const [messages, setMessages]     = useState([]);
   const [scriptIdx, setScriptIdx]   = useState(0);
   const [resumeTick, setResumeTick] = useState(0);
+  const [relationScore, setRelationScore] = useState(0);
+  const [pendingChoice, setPendingChoice] = useState(null);
   const [nickname, setNickname]       = useState(null);
   const [awaitingNickname, setAwaitingNickname] = useState(false);
   const [nicknameDraft, setNicknameDraft] = useState('');
   const [isTyping, setIsTyping]     = useState(false);
   const [typingChar, setTypingChar] = useState(null);
   const [emotion, setEmotion]       = useState('neutral');
-  const [activeChar, setActiveChar] = useState('kim');
+  const [activeChar, setActiveChar] = useState('groomy');
   const [vnQueue, setVnQueue]       = useState([]);
   const [vnIdx, setVnIdx]           = useState(0);
   const [vnOpen, setVnOpen]         = useState(false);
   const [freshId, setFreshId]       = useState(null);
   const scrollRef = useRef(null);
   const timerRef  = useRef(null);
+  const branchTimerRef = useRef(null);
   const paused    = useRef(false);
   const inputRef  = useRef(null);
 
@@ -467,7 +542,6 @@ function MessengerScreen() {
 
   const submitNickname = () => {
     let nick = nicknameDraft.trim().replace(/\s+/g, ' ').slice(0, 14);
-    if (nick === '') nick = '신입';
     if (nick.length < 2) return;
     const finalNick = nick;
     const ctxNick = { ...buildCtx(), nickname: finalNick };
@@ -477,6 +551,77 @@ function MessengerScreen() {
     addMsg({ type: 'sent', text: `${finalNick}(이)라고 불러 주세요.` }, ctxNick);
     setScriptIdx(i => i + 1);
     setResumeTick(t => t + 1);
+  };
+
+  const skipPastBranches = (fromIdx) => {
+    let nextIdx = fromIdx + 1;
+    while (nextIdx < SCRIPT.length && SCRIPT[nextIdx].type === 'branch') {
+      nextIdx++;
+    }
+    return nextIdx;
+  };
+
+  const runBranchItem = (bi, ctxNow, idx, items, onComplete) => {
+    if (bi.emotion) setEmotion(bi.emotion);
+    if (bi.char) setActiveChar(bi.char);
+
+    if (bi.type === 'sent') {
+      addMsg(bi, ctxNow);
+      branchTimerRef.current = setTimeout(() => {
+        if (idx + 1 < items.length) {
+          runBranchItem(items[idx + 1], ctxNow, idx + 1, items, onComplete);
+        } else {
+          onComplete();
+        }
+      }, 280);
+      return;
+    }
+
+    if (bi.type === 'sys') {
+      branchTimerRef.current = setTimeout(() => {
+        addMsg(bi, ctxNow);
+        if (idx + 1 < items.length) {
+          runBranchItem(items[idx + 1], ctxNow, idx + 1, items, onComplete);
+        } else {
+          onComplete();
+        }
+      }, bi.delay ?? 400);
+      return;
+    }
+
+    if (bi.type === 'recv') {
+      const textLen = resolveScriptText(bi, ctxNow).length;
+      setIsTyping(true);
+      setTypingChar(bi.char || null);
+      scrollDown();
+      branchTimerRef.current = setTimeout(() => {
+        setIsTyping(false);
+        addMsg(bi, ctxNow);
+        if (idx + 1 < items.length) {
+          runBranchItem(items[idx + 1], ctxNow, idx + 1, items, onComplete);
+        } else {
+          onComplete();
+        }
+      }, (bi.delay ?? 800) + textLen * 22);
+    }
+  };
+
+  const handleChoice = (option) => {
+    setRelationScore(s => s + (option.score ?? 0));
+    setPendingChoice(null);
+    const branch = SCRIPT.find(s => s.type === 'branch' && s.id === option.next);
+    const nextIdx = skipPastBranches(scriptIdx);
+    const resume = () => {
+      paused.current = false;
+      setScriptIdx(nextIdx);
+      setResumeTick(t => t + 1);
+    };
+    if (!branch?.items?.length) {
+      resume();
+      return;
+    }
+    paused.current = true;
+    runBranchItem(branch.items[0], buildCtx(), 0, branch.items, resume);
   };
 
   useEffect(() => {
@@ -489,6 +634,20 @@ function MessengerScreen() {
   useEffect(() => {
     if (paused.current || scriptIdx >= SCRIPT.length) return;
     const item = SCRIPT[scriptIdx];
+
+    if (item.type === 'branch') {
+      timerRef.current = setTimeout(() => setScriptIdx(p => p + 1), 0);
+      return () => clearTimeout(timerRef.current);
+    }
+
+    if (item.type === 'choice') {
+      timerRef.current = setTimeout(() => {
+        paused.current = true;
+        setPendingChoice(item.options);
+        scrollDown();
+      }, item.delay ?? 400);
+      return () => clearTimeout(timerRef.current);
+    }
 
     if (item.type === 'gate_nickname') {
       timerRef.current = setTimeout(() => {
@@ -546,7 +705,10 @@ function MessengerScreen() {
     };
 
     timerRef.current = setTimeout(run, item.delay ?? 800);
-    return () => clearTimeout(timerRef.current);
+    return () => {
+      clearTimeout(timerRef.current);
+      clearTimeout(branchTimerRef.current);
+    };
   }, [scriptIdx, resumeTick]);
 
   const handleVnNext = () => {
@@ -611,8 +773,8 @@ function MessengerScreen() {
         ref={scrollRef}
         style={{
           flex: 1, overflowY: 'auto',
-          padding: awaitingNickname
-            ? '14px max(14px, env(safe-area-inset-right)) calc(132px + env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left))'
+          padding: (pendingChoice || awaitingNickname)
+            ? `14px max(14px, env(safe-area-inset-right)) calc(${pendingChoice ? 200 : 132}px + env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left))`
             : '14px max(14px, env(safe-area-inset-right)) calc(28px + env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left))',
           background: '#0e1822',
           scrollbarWidth: 'thin', scrollbarColor: '#182840 transparent',
@@ -632,8 +794,8 @@ function MessengerScreen() {
         <VNBox line={currentVnLine} onNext={handleVnNext} />
       )}
 
-      {/* 닉네임 입력 다이제틱 바 */}
-      {awaitingNickname && (
+      {/* 선택지 · 닉네임 입력 하단 오버레이 */}
+      {(pendingChoice || awaitingNickname) && (
         <div
           style={{
             position: 'absolute', left: 0, right: 0,
@@ -644,8 +806,47 @@ function MessengerScreen() {
             zIndex: 20,
           }}
           role="dialog"
-          aria-labelledby="nickname-hint"
+          aria-labelledby={pendingChoice ? 'choice-hint' : 'nickname-hint'}
         >
+          {pendingChoice && (
+            <div style={{ marginBottom: awaitingNickname ? 14 : 0 }}>
+              <div id="choice-hint" style={{
+                fontSize: 11, color: '#4a6880',
+                marginBottom: 10,
+                fontFamily: 'system-ui, sans-serif',
+                letterSpacing: '0.03em',
+              }}>
+                답변을 선택하세요
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {pendingChoice.map(opt => (
+                  <button
+                    key={opt.next}
+                    type="button"
+                    onClick={() => handleChoice(opt)}
+                    style={{
+                      width: '100%',
+                      minHeight: 44,
+                      borderRadius: 8,
+                      border: '1px solid #2e2060',
+                      background: '#1a1535',
+                      color: '#c8b8f0',
+                      fontSize: 14,
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      padding: '10px 14px',
+                      fontFamily: "'Noto Sans KR', system-ui, sans-serif",
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {awaitingNickname && (
+          <>
           <div id="nickname-hint" style={{
             fontSize: 11, color: '#4a6880',
             marginBottom: 8,
@@ -696,6 +897,8 @@ function MessengerScreen() {
               전송
             </button>
           </div>
+          </>
+          )}
         </div>
       )}
 

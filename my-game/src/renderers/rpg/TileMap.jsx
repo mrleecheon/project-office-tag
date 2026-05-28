@@ -1,48 +1,75 @@
+import { useState } from 'react'
 import PlayerSprite from './PlayerSprite'
+import NpcSprite from './NpcSprite'
 
-const tileColors = {
-  0: '#0d1a26',
-  1: '#0a1020',
-  2: '#1a3a5a',
-  3: '#1a3020',
-  4: '#2b2411',
+const tileClassByValue = {
+  0: 'floor',
+  1: 'wall',
+  2: 'door',
+  3: 'panel',
+  4: 'locker',
 }
 
-function tileIcon(tile, label) {
-  if (tile === 2) return 'D'
-  if (label === '혈흔') return '!'
-  if (label === '꺼진 CCTV') return 'C'
-  if (tile === 3 || tile === 4) return '*'
-  return ''
+function tileKind(tile, label) {
+  if (label === '혈흔') return 'blood'
+  if (label === '꺼진 CCTV') return 'camera'
+  return tileClassByValue[tile] ?? 'floor'
 }
 
-export default function TileMap({ map, playerPosition, activeTarget }) {
+export default function TileMap({ map, playerPosition, activeTarget, moveTick }) {
+  const [backgroundFailed, setBackgroundFailed] = useState(false)
   const tileSize = map.tileSize ?? 40
+  const frameWidth = map.spriteFrame?.width ?? 32
+  const frameHeight = map.spriteFrame?.height ?? 32
+  const hasBackground = Boolean(map.backgroundImage && !backgroundFailed)
 
   return (
     <div className="mapViewport">
       <div className="tileMap" style={{ width: map.cols * tileSize, height: map.rows * tileSize }}>
+        {hasBackground ? (
+          <img className="tileMapBackground" src={map.backgroundImage} alt="" onError={() => setBackgroundFailed(true)} />
+        ) : (
+          <div className="tileMapBackdrop" aria-hidden />
+        )}
         {map.grid.map((row, rowIndex) => row.map((tile, colIndex) => {
           const key = `${rowIndex}-${colIndex}`
           const active = activeTarget?.key === key
           const label = map.labels?.[key]
+          const kind = tileKind(tile, label)
+          const isInteractable = Boolean(label && tile !== 1)
           return (
             <div
               key={key}
-              className={active ? 'tile active' : 'tile'}
+              className={[
+                'tile',
+                `tile-${kind}`,
+                active ? 'active' : '',
+                isInteractable ? 'interactable' : '',
+              ].filter(Boolean).join(' ')}
               style={{
                 left: colIndex * tileSize,
                 top: rowIndex * tileSize,
                 width: tileSize,
                 height: tileSize,
-                background: tileColors[tile],
               }}
             >
-              <span>{tileIcon(tile, label)}</span>
+              {isInteractable && (
+                <span className="tileLabel">{label}</span>
+              )}
             </div>
           )
         }))}
-        <PlayerSprite position={playerPosition} tileSize={tileSize} />
+        {(map.npcs ?? []).map((npc) => (
+          <NpcSprite key={npc.id} npc={npc} tileSize={tileSize} frameWidth={frameWidth} frameHeight={frameHeight} />
+        ))}
+        <PlayerSprite
+          position={playerPosition}
+          tileSize={tileSize}
+          sprite={map.playerSprite}
+          frameWidth={frameWidth}
+          frameHeight={frameHeight}
+          moveTick={moveTick}
+        />
       </div>
     </div>
   )

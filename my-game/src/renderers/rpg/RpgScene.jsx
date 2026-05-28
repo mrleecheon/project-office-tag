@@ -1,62 +1,79 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { emitAudioCue } from '../../engine/audio/audioBus'
 import { interactionKeys, movementKeys } from '../../engine/events/inputBindings'
+import { canTriggerInteraction, isBlockedTile, resolveInteractableTarget } from '../../game/runtime/exploration/explorationRuntime'
 import DPad from '../../ui/controls/DPad'
-import Hud from '../../ui/layout/Hud'
 import InteractionHint from './InteractionHint'
 import TileMap from './TileMap'
 
-function isBlocked(map, row, col) {
-  return row < 0 || row >= map.rows || col < 0 || col >= map.cols || map.grid[row]?.[col] === 1
+function resolveMapPixelSize(map) {
+  const tileSize = map.tileSize ?? 40
+  return {
+    tileSize,
+    width: map.cols * tileSize,
+    height: map.rows * tileSize,
+  }
 }
 
 export default function RpgScene({ chapter, map, state, onTrigger, onMove }) {
   const saved = state.mapPositions[map.id]
   const start = saved ?? map.playerStart
   const [position, setPosition] = useState({ row: start.row, col: start.col, facing: start.facing ?? { dr: 0, dc: 1 } })
+  const [moveTick, setMoveTick] = useState(0)
+  const [mapScale, setMapScale] = useState(1)
   const positionRef = useRef(position)
+  const lastTriggerAtRef = useRef(0)
+  const mapAreaRef = useRef(null)
+  const mapPixels = useMemo(() => resolveMapPixelSize(map), [map])
 
   useEffect(() => {
     positionRef.current = position
   }, [position])
 
-  const findInteractable = useCallback((pos = positionRef.current) => {
-    const facing = pos.facing ?? { dr: 0, dc: 1 }
-    const candidates = [
-      [pos.row + facing.dr, pos.col + facing.dc],
-      [pos.row, pos.col],
-      [pos.row - 1, pos.col],
-      [pos.row + 1, pos.col],
-      [pos.row, pos.col - 1],
-      [pos.row, pos.col + 1],
-    ]
+  useEffect(() => {
+    const node = mapAreaRef.current
+    if (!node) return undefined
 
-    for (const [row, col] of candidates) {
-      const key = `${row}-${col}`
-      const tile = map.grid[row]?.[col]
-      if ((tile === 2 || tile === 3 || tile === 4) && map.labels?.[key]) {
-        return { key, label: map.labels[key], trigger: map.triggers?.[key] }
-      }
+    const updateScale = () => {
+      const bounds = node.getBoundingClientRect()
+      const padding = 20
+      const nextScale = Math.min(
+        1,
+        (bounds.width - padding) / mapPixels.width,
+        (bounds.height - padding) / mapPixels.height,
+      )
+      setMapScale(Number.isFinite(nextScale) && nextScale > 0 ? nextScale : 1)
     }
-    return null
-  }, [map])
 
-  const activeTarget = useMemo(() => findInteractable(position), [findInteractable, position])
+    updateScale()
+    const observer = new ResizeObserver(updateScale)
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [mapPixels.height, mapPixels.width])
+
+  const findInteractable = useCallback((pos) => resolveInteractableTarget(map, pos ?? positionRef.current), [map])
+
+  const activeTarget = useMemo(() => resolveInteractableTarget(map, position), [map, position])
+  const ambientEnabled = (map.ambientFlags ?? []).some((flag) => flag.enabled)
 
   const move = useCallback((dr, dc) => {
     setPosition((previous) => {
       const next = { row: previous.row + dr, col: previous.col + dc, facing: { dr, dc } }
-      if (isBlocked(map, next.row, next.col)) {
+      if (isBlockedTile(map, next.row, next.col)) {
         emitAudioCue('rpg:bump')
         return { ...previous, facing: { dr, dc } }
       }
       emitAudioCue('rpg:step')
       onMove(map.id, next)
+      setMoveTick((value) => value + 1)
       return next
     })
   }, [map, onMove])
 
   const interact = useCallback(() => {
+    const nowMs = Date.now()
+    if (!canTriggerInteraction(lastTriggerAtRef.current, nowMs)) return
+    lastTriggerAtRef.current = nowMs
     const target = findInteractable()
     if (!target?.trigger) {
       emitAudioCue('rpg:bump')
@@ -83,12 +100,41 @@ export default function RpgScene({ chapter, map, state, onTrigger, onMove }) {
   }, [interact, move])
 
   return (
-    <div className="rpgScene">
-      <Hud chapter={chapter} nickname={state.nickname} />
-      <div className="modeBar">RPG MODE · {map.label}</div>
-      <TileMap map={map} playerPosition={position} activeTarget={activeTarget} />
-      <InteractionHint>{activeTarget ? `[Space/Enter] ${activeTarget.label}` : map.hint}</InteractionHint>
-      <DPad onMove={move} onInteract={interact} />
+    <div className={`rpgScene ${ambientEnabled ? 'ambientOn' : ''}`}>
+      <header className="rpgHeader">
+        <div className="rpgHeaderMain">
+          <span className="rpgFloorBadge">{map.floorId ?? 'UNK'}</span>
+          <strong>{map.label}</strong>
+          <small>{chapter?.label ?? 'SESSION'}</small>
+        </div>
+        <p className="rpgAmbient">{map.ambient}</p>
+      </header>
+
+      <div ref={mapAreaRef} className="rpgMapArea">
+        <div
+          className="rpgMapScaler"
+          style={{
+            width: mapPixels.width,
+            height: mapPixels.height,
+            transform: `scale(${mapScale})`,
+          }}
+        >
+          <TileMap
+            map={map}
+            playerPosition={position}
+            activeTarget={activeTarget}
+            moveTick={moveTick}
+          />
+        </div>
+        {activeTarget && (
+          <div className="rpgTargetBadge">{activeTarget.label}</div>
+        )}
+      </div>
+
+      <footer className="rpgControls">
+        <InteractionHint>{activeTarget ? `[●] ${activeTarget.label}` : map.hint}</InteractionHint>
+        <DPad onMove={move} onInteract={interact} />
+      </footer>
     </div>
   )
 }

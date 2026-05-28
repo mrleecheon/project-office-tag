@@ -26,11 +26,14 @@ function applyEffect(state, effect) {
     case EffectTypes.SET_SCENE:
       return { ...state, activeSceneId: effect.sceneId }
     case EffectTypes.SET_CHAPTER:
+      if (state.chapterEnded) return state
       return {
         ...state,
         activeChapterId: effect.chapterId,
         activeSceneId: effect.sceneId ?? state.activeSceneId,
       }
+    case EffectTypes.SET_CHAPTER_ENDED:
+      return { ...state, chapterEnded: Boolean(effect.ended) }
     case EffectTypes.SET_MAP_POSITION:
       return {
         ...state,
@@ -56,6 +59,7 @@ export function gameReducer(state, action) {
         routeHistory: [...state.routeHistory, { chapterId: state.activeChapterId, sceneId: action.sceneId }],
       }
     case GameActionTypes.SET_CHAPTER:
+      if (state.chapterEnded) return state
       return {
         ...state,
         activeChapterId: action.chapterId,
