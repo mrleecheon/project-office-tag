@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import { useCallback, useMemo, useReducer, useState } from 'react'
 import { SceneModes } from '../../engine/contracts.js'
 import { chapterRegistry } from '../../engine/progression/chapterRegistry.js'
 import { loadSave, resetGame, setScreen } from '../../engine/state/actions.js'
@@ -41,11 +41,6 @@ export function useGameRuntimeController({ afterOfficeIntro = false } = {}) {
   useChapterPreload({ chapterRegistry, activeChapterId: state.activeChapterId })
   useAssetPreload(state.activeChapterId)
 
-  const stateRef = useRef(state)
-  useEffect(() => {
-    stateRef.current = state
-  }, [state])
-
   const chapter = selectActiveChapter(state, chapterRegistry)
   const scene = selectActiveScene(state, chapterRegistry)
   const map = selectActiveMap(state, chapterRegistry)
@@ -53,11 +48,11 @@ export function useGameRuntimeController({ afterOfficeIntro = false } = {}) {
 
   const orchestrator = useMemo(() => createSceneOrchestrator({
     dispatch,
-    getState: () => stateRef.current,
+    getState: () => state,
     setClearCopy,
     setNextChapterId,
     setRuntimeError,
-  }), [dispatch])
+  }), [dispatch, state])
 
   const restart = useCallback(() => {
     saveService.clear()
@@ -70,7 +65,7 @@ export function useGameRuntimeController({ afterOfficeIntro = false } = {}) {
   const { handleSceneDone, handleMapMove } = useSceneTransitionRuntime({ dispatch, orchestrator, chapter, scene })
 
   const handleClearContinue = useCallback(() => {
-    if (stateRef.current.chapterEnded) {
+    if (state.chapterEnded) {
       restart()
       return
     }
@@ -102,7 +97,7 @@ export function useGameRuntimeController({ afterOfficeIntro = false } = {}) {
     })
     setNextChapterId(null)
     dispatch(setScreen('chapterClear'))
-  }, [clearCopy, dispatch, nextChapterId, orchestrator, restart, state.activeChapterId, state.nickname])
+  }, [clearCopy, dispatch, nextChapterId, orchestrator, restart, state.activeChapterId, state.chapterEnded, state.nickname])
 
   const {
     slots,

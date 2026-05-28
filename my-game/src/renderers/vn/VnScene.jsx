@@ -111,7 +111,7 @@ export default function VnScene({ scene, context, onChoice, onDone }) {
       setIndex(next)
     }
     else if (!availableChoices.length) onDone(scene.next ?? scene.returnTo)
-  }, [availableChoices.length, done, important, index, isSfx, line?.char, onDone, scene.id, scene.lines, scene.next, scene.returnTo, text])
+  }, [availableChoices.length, done, important, index, isSfx, line, onDone, scene.id, scene.lines, scene.next, scene.returnTo, text])
 
   useEffect(() => {
     if (!done || !autoMode) return () => {}

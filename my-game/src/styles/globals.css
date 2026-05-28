@@ -294,11 +294,38 @@ button, input { font: inherit; }
 }
 
 .chatScene {
-  display: flex;
-  flex-direction: column;
+  position: relative;
+  width: 100%;
+  height: 100%;
   background:
-    linear-gradient(rgba(9, 18, 28, .86), rgba(9, 18, 28, .95)),
+    linear-gradient(rgba(9, 18, 28, .62), rgba(9, 18, 28, .78)),
     var(--chatWallpaper, linear-gradient(180deg, #0e1822, #0a131d));
+}
+
+.chatDialogPanel {
+  position: absolute;
+  bottom: max(8px, env(safe-area-inset-bottom));
+  left: 0;
+  width: 100%;
+  margin: 0;
+  z-index: 6;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, rgba(12, 23, 36, .78), rgba(9, 19, 32, .86));
+  border-top: 2px solid #1a3858;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, .55);
+  backdrop-filter: blur(2px);
+}
+
+.chatDialogPanel main {
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 34vh;
+  padding: 12px 14px 10px;
+}
+
+.chatDialogPanel .choiceDock,
+.chatDialogPanel > footer {
+  margin: 0;
 }
 
 .chatScene.warning {
@@ -324,16 +351,6 @@ button, input { font: inherit; }
   font-weight: 600;
 }
 
-.chatScene main {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 12px 14px 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  min-height: 0;
-}
 .chatThread {
   width: 100%;
 }
@@ -691,6 +708,8 @@ footer {
 
 .vnScene {
   position: relative;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   background: #070e18;
@@ -824,12 +843,14 @@ footer {
 
 /* VN 대사 말풍선 — 하단 가로형 스트립 */
 .vnScene > .vnBox:not(.sfx):not(.textOnly):not(.welcomeCaption) {
-  margin-top: auto;
-  margin-left: 0;
-  margin-right: 0;
-  margin-bottom: 0;
+  position: absolute;
+  left: 0;
+  bottom: calc(56px + env(safe-area-inset-bottom));
+  width: 100%;
+  margin: 0;
   border-top: 1px solid #1a3858;
   border-radius: 0;
+  z-index: 6;
 }
 .vnStageBackground {
   position: absolute;

@@ -45,8 +45,10 @@ export default function ChatScene({ scene, context, onChoice, onInput, onAutoNex
   const onAutoNextRef = useRef(onAutoNext)
   const wallpaperUrl = resolveImageUrl(scene.chatTheme?.wallpaperAssetId)
 
-  onChoiceRef.current = onChoice
-  onAutoNextRef.current = onAutoNext
+  useEffect(() => {
+    onChoiceRef.current = onChoice
+    onAutoNextRef.current = onAutoNext
+  }, [onAutoNext, onChoice])
 
   const clearProgressionWatchdog = () => {
     if (!progressionWatchdogRef.current) return
@@ -148,13 +150,7 @@ export default function ChatScene({ scene, context, onChoice, onInput, onAutoNex
       timers.clear()
       clearProgressionWatchdog()
     }
-  }, [
-    context.flags,
-    context.inventory,
-    context.nickname,
-    context.scores,
-    scene,
-  ])
+  }, [context, scene])
 
   useEffect(() => () => {
     if (choiceTimerRef.current) clearTimeout(choiceTimerRef.current)
@@ -210,24 +206,26 @@ export default function ChatScene({ scene, context, onChoice, onInput, onAutoNex
         <span>{resolveUiText(scene.modeLabelKey, resolveUiText('modeBarChatDefault', 'CHAT MODE · TalkLine Internal'))}</span>
         {scene.emotion === 'warning' && <strong>LOG UNSTABLE</strong>}
       </div>
-      <main ref={scrollRef}>
-        <div className="chatThread">
-          {messages.map((message) => <ChatBubble key={message.id} message={message} />)}
-          {narrationLog.map((message) => <ChatBubble key={message.id} message={message} />)}
-          {typing && typingLabel && (
-            <TypingIndicator charName={typingLabel} unstable={typing.unstable} />
-          )}
-        </div>
-      </main>
-      {choices && <ChoiceDock choices={choices} disabled={locked} onChoose={choose} />}
-      {scene.input && (
-        <footer>
-          <form className="inputForm" onSubmit={submitName}>
-            <TextInput value={nameDraft} maxLength="14" placeholder={resolveUiText('chatNamePlaceholder', '표시 이름')} autoFocus onChange={(event) => setNameDraft(event.target.value)} />
-            <Button type="submit">{resolveUiText('chatSend', '전송')}</Button>
-          </form>
-        </footer>
-      )}
+      <section className="chatDialogPanel">
+        <main ref={scrollRef}>
+          <div className="chatThread">
+            {messages.map((message) => <ChatBubble key={message.id} message={message} />)}
+            {narrationLog.map((message) => <ChatBubble key={message.id} message={message} />)}
+            {typing && typingLabel && (
+              <TypingIndicator charName={typingLabel} unstable={typing.unstable} />
+            )}
+          </div>
+        </main>
+        {choices && <ChoiceDock choices={choices} disabled={locked} onChoose={choose} />}
+        {scene.input && (
+          <footer>
+            <form className="inputForm" onSubmit={submitName}>
+              <TextInput value={nameDraft} maxLength="14" placeholder={resolveUiText('chatNamePlaceholder', '표시 이름')} autoFocus onChange={(event) => setNameDraft(event.target.value)} />
+              <Button type="submit">{resolveUiText('chatSend', '전송')}</Button>
+            </form>
+          </footer>
+        )}
+      </section>
     </div>
   )
 }

@@ -68,11 +68,6 @@ export default function ProjectOfficeIntro({ onComplete, exiting = false }) {
   }, [onComplete])
 
   useEffect(() => {
-    setFadeState('in')
-    setTextVisible(false)
-    setShaking(false)
-    setTagging(false)
-
     if (currentScene.overlay) {
       const textTimer = setTimeout(() => setTextVisible(true), currentScene.textOnly ? 120 : 600)
       return () => clearTimeout(textTimer)

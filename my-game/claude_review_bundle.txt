@@ -1,5 +1,5 @@
 # Claude review bundle — my-game
-# Generated: 2026-05-26T14:03:20.544Z
+# Generated: 2026-05-28T12:16:28.551Z
 # Files: 159
 # Auto-updated: npm run dev | npm run bundle:claude:watch
 
@@ -14,7 +14,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', '_phase1_extract']),
   {
     files: ['**/*.{js,jsx}'],
     extends: [
@@ -205,7 +205,7 @@ exportUnityContent().catch((error) => {
 
 ================ FILE: src/app/App.jsx ================
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import GameRouter from './GameRouter'
 import AppProviders from './AppProviders'
 import ErrorBoundary from './ErrorBoundary'
@@ -220,7 +220,7 @@ const devChapterBootstrap = parseDevBootstrapFromUrl(
 )
 
 export default function App() {
-  const bootstrapAfterOfficeIntro = useRef(!devChapterBootstrap)
+  const bootstrapAfterOfficeIntro = !devChapterBootstrap
   const [introExiting, setIntroExiting] = useState(false)
   const [introDone, setIntroDone] = useState(Boolean(devChapterBootstrap))
 
@@ -234,7 +234,7 @@ export default function App() {
       <AppProviders>
         <div className="appRoot">
           <PhoneFrame>
-            <GameRouter afterOfficeIntro={bootstrapAfterOfficeIntro.current} />
+            <GameRouter afterOfficeIntro={bootstrapAfterOfficeIntro} />
             {!introDone ? (
               <ProjectOfficeIntro exiting={introExiting} onComplete={handleIntroComplete} />
             ) : null}
@@ -779,7 +779,7 @@ export default function SystemScreenRouter({
 
 ================ FILE: src/app/routing/useGameRuntimeController.js ================
 
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import { useCallback, useMemo, useReducer, useState } from 'react'
 import { SceneModes } from '../../engine/contracts.js'
 import { chapterRegistry } from '../../engine/progression/chapterRegistry.js'
 import { loadSave, resetGame, setScreen } from '../../engine/state/actions.js'
@@ -822,11 +822,6 @@ export function useGameRuntimeController({ afterOfficeIntro = false } = {}) {
   useChapterPreload({ chapterRegistry, activeChapterId: state.activeChapterId })
   useAssetPreload(state.activeChapterId)
 
-  const stateRef = useRef(state)
-  useEffect(() => {
-    stateRef.current = state
-  }, [state])
-
   const chapter = selectActiveChapter(state, chapterRegistry)
   const scene = selectActiveScene(state, chapterRegistry)
   const map = selectActiveMap(state, chapterRegistry)
@@ -834,11 +829,11 @@ export function useGameRuntimeController({ afterOfficeIntro = false } = {}) {
 
   const orchestrator = useMemo(() => createSceneOrchestrator({
     dispatch,
-    getState: () => stateRef.current,
+    getState: () => state,
     setClearCopy,
     setNextChapterId,
     setRuntimeError,
-  }), [dispatch])
+  }), [dispatch, state])
 
   const restart = useCallback(() => {
     saveService.clear()
@@ -851,7 +846,7 @@ export function useGameRuntimeController({ afterOfficeIntro = false } = {}) {
   const { handleSceneDone, handleMapMove } = useSceneTransitionRuntime({ dispatch, orchestrator, chapter, scene })
 
   const handleClearContinue = useCallback(() => {
-    if (stateRef.current.chapterEnded) {
+    if (state.chapterEnded) {
       restart()
       return
     }
@@ -883,7 +878,7 @@ export function useGameRuntimeController({ afterOfficeIntro = false } = {}) {
     })
     setNextChapterId(null)
     dispatch(setScreen('chapterClear'))
-  }, [clearCopy, dispatch, nextChapterId, orchestrator, restart, state.activeChapterId, state.nickname])
+  }, [clearCopy, dispatch, nextChapterId, orchestrator, restart, state.activeChapterId, state.chapterEnded, state.nickname])
 
   const {
     slots,
@@ -8080,8 +8075,10 @@ export default function ChatScene({ scene, context, onChoice, onInput, onAutoNex
   const onAutoNextRef = useRef(onAutoNext)
   const wallpaperUrl = resolveImageUrl(scene.chatTheme?.wallpaperAssetId)
 
-  onChoiceRef.current = onChoice
-  onAutoNextRef.current = onAutoNext
+  useEffect(() => {
+    onChoiceRef.current = onChoice
+    onAutoNextRef.current = onAutoNext
+  }, [onAutoNext, onChoice])
 
   const clearProgressionWatchdog = () => {
     if (!progressionWatchdogRef.current) return
@@ -8183,13 +8180,7 @@ export default function ChatScene({ scene, context, onChoice, onInput, onAutoNex
       timers.clear()
       clearProgressionWatchdog()
     }
-  }, [
-    context.flags,
-    context.inventory,
-    context.nickname,
-    context.scores,
-    scene,
-  ])
+  }, [context, scene])
 
   useEffect(() => () => {
     if (choiceTimerRef.current) clearTimeout(choiceTimerRef.current)
@@ -8245,24 +8236,26 @@ export default function ChatScene({ scene, context, onChoice, onInput, onAutoNex
         <span>{resolveUiText(scene.modeLabelKey, resolveUiText('modeBarChatDefault', 'CHAT MODE · TalkLine Internal'))}</span>
         {scene.emotion === 'warning' && <strong>LOG UNSTABLE</strong>}
       </div>
-      <main ref={scrollRef}>
-        <div className="chatThread">
-          {messages.map((message) => <ChatBubble key={message.id} message={message} />)}
-          {narrationLog.map((message) => <ChatBubble key={message.id} message={message} />)}
-          {typing && typingLabel && (
-            <TypingIndicator charName={typingLabel} unstable={typing.unstable} />
-          )}
-        </div>
-      </main>
-      {choices && <ChoiceDock choices={choices} disabled={locked} onChoose={choose} />}
-      {scene.input && (
-        <footer>
-          <form className="inputForm" onSubmit={submitName}>
-            <TextInput value={nameDraft} maxLength="14" placeholder={resolveUiText('chatNamePlaceholder', '표시 이름')} autoFocus onChange={(event) => setNameDraft(event.target.value)} />
-            <Button type="submit">{resolveUiText('chatSend', '전송')}</Button>
-          </form>
-        </footer>
-      )}
+      <section className="chatDialogPanel">
+        <main ref={scrollRef}>
+          <div className="chatThread">
+            {messages.map((message) => <ChatBubble key={message.id} message={message} />)}
+            {narrationLog.map((message) => <ChatBubble key={message.id} message={message} />)}
+            {typing && typingLabel && (
+              <TypingIndicator charName={typingLabel} unstable={typing.unstable} />
+            )}
+          </div>
+        </main>
+        {choices && <ChoiceDock choices={choices} disabled={locked} onChoose={choose} />}
+        {scene.input && (
+          <footer>
+            <form className="inputForm" onSubmit={submitName}>
+              <TextInput value={nameDraft} maxLength="14" placeholder={resolveUiText('chatNamePlaceholder', '표시 이름')} autoFocus onChange={(event) => setNameDraft(event.target.value)} />
+              <Button type="submit">{resolveUiText('chatSend', '전송')}</Button>
+            </form>
+          </footer>
+        )}
+      </section>
     </div>
   )
 }
@@ -8881,11 +8874,6 @@ export default function ProjectOfficeIntro({ onComplete, exiting = false }) {
   }, [onComplete])
 
   useEffect(() => {
-    setFadeState('in')
-    setTextVisible(false)
-    setShaking(false)
-    setTagging(false)
-
     if (currentScene.overlay) {
       const textTimer = setTimeout(() => setTextVisible(true), currentScene.textOnly ? 120 : 600)
       return () => clearTimeout(textTimer)
@@ -9249,7 +9237,7 @@ export default function VnScene({ scene, context, onChoice, onDone }) {
       setIndex(next)
     }
     else if (!availableChoices.length) onDone(scene.next ?? scene.returnTo)
-  }, [availableChoices.length, done, important, index, isSfx, line?.char, onDone, scene.id, scene.lines, scene.next, scene.returnTo, text])
+  }, [availableChoices.length, done, important, index, isSfx, line, onDone, scene.id, scene.lines, scene.next, scene.returnTo, text])
 
   useEffect(() => {
     if (!done || !autoMode) return () => {}
@@ -9696,11 +9684,38 @@ button, input { font: inherit; }
 }
 
 .chatScene {
-  display: flex;
-  flex-direction: column;
+  position: relative;
+  width: 100%;
+  height: 100%;
   background:
-    linear-gradient(rgba(9, 18, 28, .86), rgba(9, 18, 28, .95)),
+    linear-gradient(rgba(9, 18, 28, .62), rgba(9, 18, 28, .78)),
     var(--chatWallpaper, linear-gradient(180deg, #0e1822, #0a131d));
+}
+
+.chatDialogPanel {
+  position: absolute;
+  bottom: max(8px, env(safe-area-inset-bottom));
+  left: 0;
+  width: 100%;
+  margin: 0;
+  z-index: 6;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, rgba(12, 23, 36, .78), rgba(9, 19, 32, .86));
+  border-top: 2px solid #1a3858;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, .55);
+  backdrop-filter: blur(2px);
+}
+
+.chatDialogPanel main {
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 34vh;
+  padding: 12px 14px 10px;
+}
+
+.chatDialogPanel .choiceDock,
+.chatDialogPanel > footer {
+  margin: 0;
 }
 
 .chatScene.warning {
@@ -9726,16 +9741,6 @@ button, input { font: inherit; }
   font-weight: 600;
 }
 
-.chatScene main {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 12px 14px 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  min-height: 0;
-}
 .chatThread {
   width: 100%;
 }
@@ -10093,6 +10098,8 @@ footer {
 
 .vnScene {
   position: relative;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   background: #070e18;
@@ -10226,12 +10233,14 @@ footer {
 
 /* VN 대사 말풍선 — 하단 가로형 스트립 */
 .vnScene > .vnBox:not(.sfx):not(.textOnly):not(.welcomeCaption) {
-  margin-top: auto;
-  margin-left: 0;
-  margin-right: 0;
-  margin-bottom: 0;
+  position: absolute;
+  left: 0;
+  bottom: calc(56px + env(safe-area-inset-bottom));
+  width: 100%;
+  margin: 0;
   border-top: 1px solid #1a3858;
   border-radius: 0;
+  z-index: 6;
 }
 .vnStageBackground {
   position: absolute;
@@ -12150,7 +12159,6 @@ import assert from 'node:assert/strict'
 import { chapterRegistry } from '../engine/progression/chapterRegistry.js'
 import { gameReducer } from '../engine/state/gameReducer.js'
 import { initialGameState } from '../engine/state/initialState.js'
-import { GameActionTypes, setScreen } from '../engine/state/actions.js'
 import { createSceneOrchestrator } from '../game/runtime/orchestration/sceneOrchestrator.js'
 import { safeResolveSceneTransition } from '../tools/validators/runtimeIntegrity.js'
 

@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import GameRouter from './GameRouter'
 import AppProviders from './AppProviders'
 import ErrorBoundary from './ErrorBoundary'
@@ -13,7 +13,7 @@ const devChapterBootstrap = parseDevBootstrapFromUrl(
 )
 
 export default function App() {
-  const bootstrapAfterOfficeIntro = useRef(!devChapterBootstrap)
+  const bootstrapAfterOfficeIntro = !devChapterBootstrap
   const [introExiting, setIntroExiting] = useState(false)
   const [introDone, setIntroDone] = useState(Boolean(devChapterBootstrap))
 
@@ -27,7 +27,7 @@ export default function App() {
       <AppProviders>
         <div className="appRoot">
           <PhoneFrame>
-            <GameRouter afterOfficeIntro={bootstrapAfterOfficeIntro.current} />
+            <GameRouter afterOfficeIntro={bootstrapAfterOfficeIntro} />
             {!introDone ? (
               <ProjectOfficeIntro exiting={introExiting} onComplete={handleIntroComplete} />
             ) : null}

@@ -2,7 +2,6 @@ import assert from 'node:assert/strict'
 import { chapterRegistry } from '../engine/progression/chapterRegistry.js'
 import { gameReducer } from '../engine/state/gameReducer.js'
 import { initialGameState } from '../engine/state/initialState.js'
-import { GameActionTypes, setScreen } from '../engine/state/actions.js'
 import { createSceneOrchestrator } from '../game/runtime/orchestration/sceneOrchestrator.js'
 import { safeResolveSceneTransition } from '../tools/validators/runtimeIntegrity.js'
 
