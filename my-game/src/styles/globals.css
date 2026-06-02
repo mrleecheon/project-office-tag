@@ -1392,6 +1392,19 @@ button, input { font: inherit; }
   margin-top: 12px;
   text-align: center;
 }
+
+.demo-end .demoTumblrLink {
+  display: inline-block;
+  margin: 16px 0 8px;
+  color: var(--groomy-mint);
+  font: 12px ui-monospace, Consolas, monospace;
+  letter-spacing: .06em;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.demo-end .demoTumblrLink:hover {
+  color: #d7eef4;
+}
 .ending .ghost {
   border-color: #162030;
   background: transparent;

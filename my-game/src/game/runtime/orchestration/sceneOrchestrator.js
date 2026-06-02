@@ -1,3 +1,4 @@
+import { DEMO_MODE, isDemoBlockedChapter, shouldShowDemoEnd } from '../../../config/demo.js'
 import { EffectTypes } from '../../../engine/contracts.js'
 import { chapterRegistry } from '../../../engine/progression/chapterRegistry.js'
 import { resolveChapterClearCopy } from '../../../engine/progression/endings.js'
@@ -17,9 +18,17 @@ export function createSceneOrchestrator({ dispatch, getState, setClearCopy, setN
     dispatch(applyEffects(effects))
   }
 
+  function triggerDemoEnd() {
+    dispatch(setScreen('demoEnd'))
+    return false
+  }
+
   function goToScene(sceneId) {
     const state = getState()
     if (!sceneId) return false
+    if (DEMO_MODE && shouldShowDemoEnd(state.activeChapterId, sceneId)) {
+      return triggerDemoEnd()
+    }
     const transition = safeResolveSceneTransition({
       chapterRegistry,
       chapterId: state.activeChapterId,
@@ -47,6 +56,7 @@ export function createSceneOrchestrator({ dispatch, getState, setClearCopy, setN
 
   function enterChapter(chapterId) {
     if (getState().chapterEnded) return false
+    if (DEMO_MODE && isDemoBlockedChapter(chapterId)) return triggerDemoEnd()
     const nextChapter = chapterRegistry.getChapter(chapterId)
     if (!nextChapter) return false
     dispatch(setChapter(nextChapter.id, nextChapter.startSceneId))
@@ -63,6 +73,9 @@ export function createSceneOrchestrator({ dispatch, getState, setClearCopy, setN
       return null
     }
     const nextChapterId = resolveNextChapterId(completedChapter.id, explicitNextChapterId)
+    if (DEMO_MODE && isDemoBlockedChapter(nextChapterId)) {
+      return triggerDemoEnd()
+    }
     setClearCopy(resolveChapterClearCopy(completedChapter.id, state))
     setNextChapterId(nextChapterId)
     dispatch(setScreen('chapterClear'))

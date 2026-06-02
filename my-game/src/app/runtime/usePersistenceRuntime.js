@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { DEMO_MODE, isDemoPlayablePosition } from '../../config/demo.js'
 
 export function usePersistenceRuntime({ saveService, state, dispatch, loadSave, setRuntimeError }) {
   const [slots, setSlots] = useState(() => saveService.listSlots())
@@ -15,7 +16,10 @@ export function usePersistenceRuntime({ saveService, state, dispatch, loadSave, 
   const handleLoadSlot = useCallback((slotId) => {
     const loaded = saveService.loadSlot(slotId)
     if (!loaded) return
-    dispatch(loadSave(loaded))
+    const saveState = DEMO_MODE && !isDemoPlayablePosition(loaded.activeChapterId, loaded.activeSceneId)
+      ? { ...loaded, screen: 'demoEnd' }
+      : loaded
+    dispatch(loadSave(saveState))
     setRuntimeError(null)
     refreshSlots()
   }, [dispatch, loadSave, refreshSlots, saveService, setRuntimeError])

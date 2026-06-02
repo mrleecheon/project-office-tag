@@ -7,6 +7,9 @@ import { prologueChapter } from './prologue/index.js'
 
 export const chapters = [prologueChapter, chapter01, chapter02, chapter03, chapter04, chapter05]
 
+/** Playable chapters in the public demo (prologue + chapter 1 only). */
+export const demoPlayableChapters = [prologueChapter, chapter01]
+
 const chapterCache = {
   prologue: prologueChapter,
   'chapter-01': chapter01,

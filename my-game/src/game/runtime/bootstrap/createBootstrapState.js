@@ -1,9 +1,13 @@
+import { DEMO_MODE, isDemoPlayablePosition } from '../../../config/demo.js'
 import { chapterRegistry } from '../../../engine/progression/chapterRegistry.js'
 import { saveService } from '../../../engine/save/saveService.js'
 import { initialGameState } from '../../../engine/state/initialState.js'
 import { validateRuntimeSceneIntegrity } from '../../../tools/validators/runtimeIntegrity.js'
 
 function buildDevChapterState({ chapterId, sceneId }) {
+  if (DEMO_MODE && !isDemoPlayablePosition(chapterId, sceneId ?? '')) {
+    return { ...initialGameState, screen: 'demoEnd' }
+  }
   const chapter = chapterRegistry.getChapter(chapterId)
   if (!chapter) return initialGameState
 
@@ -52,6 +56,9 @@ export function createBootstrapState({ afterOfficeIntro = false, devBootstrap = 
     const chapter = chapterRegistry.getChapter(loadedState.activeChapterId)
     if (!chapter) return initialGameState
     return { ...initialGameState, ...loadedState, activeSceneId: chapter.startSceneId }
+  }
+  if (DEMO_MODE && !isDemoPlayablePosition(loadedState.activeChapterId, loadedState.activeSceneId)) {
+    return { ...initialGameState, ...loadedState, screen: 'demoEnd' }
   }
   return { ...initialGameState, ...loadedState }
 }

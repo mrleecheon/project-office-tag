@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useReducer, useState } from 'react'
+import { DEMO_MODE, isDemoBlockedChapter } from '../../config/demo.js'
 import { SceneModes } from '../../engine/contracts.js'
 import { chapterRegistry } from '../../engine/progression/chapterRegistry.js'
 import { loadSave, resetGame, setScreen } from '../../engine/state/actions.js'
@@ -73,6 +74,7 @@ export function useGameRuntimeController({ afterOfficeIntro = false } = {}) {
     const nextChapter = chapterRegistry.getChapter(nextChapterId)
       ?? chapterRegistry.getNextChapter(state.activeChapterId)
     const hasPlayableNext = Boolean(nextChapter?.scenes?.[nextChapter.startSceneId])
+      && !(DEMO_MODE && isDemoBlockedChapter(nextChapter?.id))
 
     if (hasPlayableNext) {
       setClearCopy(null)
@@ -125,7 +127,11 @@ export function useGameRuntimeController({ afterOfficeIntro = false } = {}) {
   }, [])
 
   const screenMode = state.screen === 'playing' ? scene?.mode : state.screen
-  const isSystemScreen = !scene || state.screen !== 'playing' || scene.mode === SceneModes.END || Boolean(runtimeError)
+  const isSystemScreen = !scene
+    || state.screen !== 'playing'
+    || state.screen === 'demoEnd'
+    || scene.mode === SceneModes.END
+    || Boolean(runtimeError)
 
   return {
     state,
