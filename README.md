@@ -123,24 +123,25 @@ npm run preview  # 빌드 결과 미리보기
 
 ### GitHub Pages (권장)
 
-`main` 브랜치에 push하면 [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml)이 자동으로 빌드·배포합니다.
+`main` 브랜치에 push하면 [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml)이 빌드 후 **`gh-pages` 브랜치**에 게임 파일을 올립니다.
 
-**최초 1회 설정**
+**최초 1회 설정 (404가 뜨면 이 순서대로)**
 
-1. GitHub 저장소 → **Settings** → **Pages**
-2. **Build and deployment** → Source: **GitHub Actions** (Deploy from a branch가 아님)
-3. **Settings** → **Actions** → **General** → Workflow permissions: **Read and write permissions** 선택
-4. `main`에 push (또는 Actions 탭에서 **Deploy to GitHub Pages** → **Run workflow**)
+1. **Settings → Actions → General → Workflow permissions**  
+   → **Read and write permissions** 선택 후 Save
 
-**배포가 실패할 때**
+2. **Actions** 탭 → **Deploy to GitHub Pages** → **Run workflow** (또는 `main`에 push)  
+   → 초록색 ✅ 가 될 때까지 대기 (2~3분)
 
-| 증상 | 해결 |
-|------|------|
-| deploy job만 실패 | Pages Source가 **GitHub Actions**인지 확인 후 워크플로 **Re-run** |
-| Environment 승인 대기 | Actions → 해당 run → **Review deployments** → Approve |
-| build job 실패 | Actions 로그에서 `npm test` / `npm run build` 단계 확인 |
+3. **Settings → Pages → Build and deployment**  
+   - Source: **Deploy from a branch**  
+   - Branch: **`gh-pages`** / **`/ (root)`**  
+   - Save
 
-배포 URL: **https://mrleecheon.github.io/project-office-tag/**
+4. 1~5분 후 접속: **https://mrleecheon.github.io/project-office-tag/**
+
+> Actions가 실패하면 로그를 확인하세요. `npm test` 또는 `npm run build` 단계에서 빨간 줄이 있는지 봅니다.  
+> `gh-pages` 브랜치가 생겼는데도 404면, Pages 설정에서 브랜치가 `gh-pages` / `root`인지 다시 확인하세요.
 
 ### Netlify (대안)
 

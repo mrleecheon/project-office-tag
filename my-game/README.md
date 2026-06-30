@@ -73,11 +73,16 @@ node src/tools/content-build/estimatePlaytime.mjs      # 플레이타임 추정
 
 ### GitHub Pages
 
-`main` push 시 자동 배포. 설정: 저장소 **Settings → Pages → Source: GitHub Actions**.
+`main` push 시 빌드 후 **`gh-pages` 브랜치**에 배포됩니다.
+
+**설정 순서**
+
+1. **Settings → Actions → General** → Workflow permissions: **Read and write**
+2. Actions에서 **Deploy to GitHub Pages** 실행 → 성공 확인
+3. **Settings → Pages** → Source: **Deploy from a branch** → **`gh-pages`** / **root**
 
 - 워크플로: [`.github/workflows/deploy-pages.yml`](../.github/workflows/deploy-pages.yml)
 - URL: https://mrleecheon.github.io/project-office-tag/
-- GitHub Pages는 `/저장소이름/` 서브경로이므로 빌드 시 `VITE_BASE_PATH`가 자동 설정됩니다.
 
 ### Netlify (대안)
 
