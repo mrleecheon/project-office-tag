@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -44,6 +44,16 @@ jobs:
 
       - name: Add SPA fallback for GitHub Pages
         run: cp dist/index.html dist/404.html
+
+      - name: Verify build output
+        run: |
+          test -f dist/index.html
+          test -f dist/404.html
+          ls -la dist
+          ls -la dist/assets | head
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

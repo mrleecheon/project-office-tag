@@ -128,12 +128,19 @@ npm run preview  # 빌드 결과 미리보기
 **최초 1회 설정**
 
 1. GitHub 저장소 → **Settings** → **Pages**
-2. **Build and deployment** → Source: **GitHub Actions**
-3. `main`에 변경 사항 push (또는 Actions 탭에서 **Deploy to GitHub Pages** 수동 실행)
+2. **Build and deployment** → Source: **GitHub Actions** (Deploy from a branch가 아님)
+3. **Settings** → **Actions** → **General** → Workflow permissions: **Read and write permissions** 선택
+4. `main`에 push (또는 Actions 탭에서 **Deploy to GitHub Pages** → **Run workflow**)
+
+**배포가 실패할 때**
+
+| 증상 | 해결 |
+|------|------|
+| deploy job만 실패 | Pages Source가 **GitHub Actions**인지 확인 후 워크플로 **Re-run** |
+| Environment 승인 대기 | Actions → 해당 run → **Review deployments** → Approve |
+| build job 실패 | Actions 로그에서 `npm test` / `npm run build` 단계 확인 |
 
 배포 URL: **https://mrleecheon.github.io/project-office-tag/**
-
-> `demo` 브랜치만 사용 중이라면 `main`으로 merge하거나, 워크플로의 `branches`에 `demo`를 추가하세요.
 
 ### Netlify (대안)
 
