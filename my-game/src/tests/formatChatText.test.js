@@ -38,4 +38,12 @@ assert.equal(deliveries[0].text, '하나.')
 assert.equal(deliveries[1].text, '둘.')
 assert.equal(deliveries[2].text, '셋.')
 
+const playerDeliveries = buildChatDeliveries(
+  [{ char: 'player', text: '왜요?' }, { char: 'system', text: '조용해진다.', isNarration: true }],
+  (line) => line.text,
+)
+assert.equal(playerDeliveries[0].isPlayer, true)
+assert.equal(playerDeliveries[0].isNarration, false)
+assert.equal(playerDeliveries[1].isNarration, true)
+
 console.log('formatChatText.test.js passed')

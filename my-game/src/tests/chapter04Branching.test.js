@@ -27,7 +27,18 @@ assert.deepEqual(
 )
 
 assert.deepEqual(
+  gateChoicesForAffinity(1).map((choice) => choice.next),
+  ['groomy_hint'],
+  'affinity 1 must reach hint (not abandon) so CH5 badB is reachable',
+)
+
+assert.deepEqual(
   gateChoicesForAffinity(0).map((choice) => choice.next),
+  ['groomy_abandon'],
+)
+
+assert.deepEqual(
+  gateChoicesForAffinity(-1).map((choice) => choice.next),
   ['groomy_abandon'],
 )
 
@@ -40,11 +51,11 @@ assert.equal(realizationChoices[0]?.next, 'groomy_realization_high')
 
 const ch3ToCh4 = chapterRegistry.getNextChapter('chapter-03')
 assert.equal(ch3ToCh4?.id, 'chapter-04')
-assert.equal(chapterRegistry.getChapter('chapter-04').startSceneId, 'ch4_accusation')
+assert.equal(chapterRegistry.getChapter('chapter-04').startSceneId, 'archive_room_infiltration')
 
 const mainline = [
-  'ch4_accusation', 'groomy_gate', 'groomy_shield', 'diary_full', 'caretaker_core_descent',
-  'truth_revelation', 'battery_revelation', 'groomy_realization_gate', 'groomy_realization_high', 'ch4_end',
+  'archive_room_infiltration', 'archive_room_caught', 'ch4_accusation', 'groomy_gate', 'groomy_shield', 'diary_full', 'caretaker_core_descent', 'guardian_ara_interlude',
+  'truth_revelation', 'truth_revelation_after', 'battery_revelation', 'groomy_realization_gate', 'groomy_realization_high', 'ch4_closing', 'ch4_end',
 ]
 for (const sceneId of mainline) {
   const integrity = safeResolveSceneTransition({

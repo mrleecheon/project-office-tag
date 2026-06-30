@@ -20,14 +20,18 @@ import TypingIndicator from './TypingIndicator'
 import TextInput from '../../ui/controls/TextInput'
 import Button from '../../ui/controls/Button'
 
-function resolveEmotionalPressure(scene) {
+function resolveEmotionalPressure(scene, lineEmotion) {
   const byEmotion = {
     friendly: 0.1,
     neutral: 0.2,
     nervous: 0.6,
     warning: 1.05,
+    glitch: 1.15,
+    cold: 0.85,
   }
-  return scene.important ? 1.2 : (byEmotion[scene.emotion] ?? 0.35)
+  const emotion = lineEmotion ?? scene.emotion
+  const base = byEmotion[emotion] ?? 0.35
+  return scene.important && !lineEmotion ? 1.2 : base
 }
 
 export default function ChatScene({ scene, context, onChoice, onInput, onAutoNext }) {
@@ -74,7 +78,11 @@ export default function ChatScene({ scene, context, onChoice, onInput, onAutoNex
     setLocked(false)
 
     for (const delivery of deliveries) {
+      if (delivery.delayMs) delay += delivery.delayMs
+
+      const linePressure = resolveEmotionalPressure(scene, delivery.lineEmotion)
       const incomingMeta = metadata.resolveIncomingMeta(delivery.lineIndex)
+      if (delivery.forceUnstable) incomingMeta.unstable = true
       const showTyping = shouldShowTypingIndicator(delivery.char)
       const sameSpeakerAsPrevious = previousChar === delivery.char
       const showName = previousChar !== delivery.char
@@ -87,18 +95,21 @@ export default function ChatScene({ scene, context, onChoice, onInput, onAutoNex
       }, delay)
 
       delay += showTyping
-        ? pacing.getTypingDuration({ text: delivery.text, index: delivery.sequence, emotionalPressure })
-        : Math.min(280, pacing.getTypingDuration({ text: delivery.text, index: delivery.sequence, emotionalPressure }) * 0.18)
+        ? pacing.getTypingDuration({ text: delivery.text, index: delivery.sequence, emotionalPressure: linePressure })
+        : Math.min(420, pacing.getTypingDuration({ text: delivery.text, index: delivery.sequence, emotionalPressure: linePressure }) * 0.24)
 
       timers.later(() => {
         setTyping(null)
+        const messageType = delivery.isNarration ? 'narration' : delivery.isPlayer ? 'sent' : 'recv'
         const message = {
           id: `${scene.id}-${delivery.lineIndex}-${delivery.chunkIndex}`,
-          type: delivery.isNarration ? 'narration' : 'recv',
+          type: messageType,
           char: delivery.char,
           text: delivery.text,
-          showName: delivery.isNarration ? false : showName,
-          meta: incomingMeta,
+          showName: delivery.isNarration || delivery.isPlayer ? false : showName,
+          meta: delivery.isPlayer
+            ? metadata.resolveOutgoingMeta(delivery.sequence)
+            : incomingMeta,
         }
         if (delivery.isNarration) {
           setNarrationLog((previous) => [...previous, message])
@@ -110,7 +121,7 @@ export default function ChatScene({ scene, context, onChoice, onInput, onAutoNex
       previousChar = delivery.char
 
       const gap = pacing.getDeliveryGap({ index: delivery.sequence, unstable: incomingMeta.unstable })
-      delay += sameSpeakerAsPrevious ? Math.min(70, gap) : gap
+      delay += sameSpeakerAsPrevious ? Math.min(120, gap) : gap
     }
 
     timers.later(() => {
@@ -131,9 +142,9 @@ export default function ChatScene({ scene, context, onChoice, onInput, onAutoNex
       if (scene.input) return
       if (availableChoices.length) setChoices(availableChoices)
       else onAutoNextRef.current(scene.next ?? scene.returnTo)
-    }, delay + 220)
+    }, delay + 420)
 
-    const watchdogDelay = Math.max(delay + 2400, 3200)
+    const watchdogDelay = Math.max(delay + 3200, 4200)
     progressionWatchdogRef.current = timers.later(() => {
       if (lockedRef.current) return
       setTyping(null)

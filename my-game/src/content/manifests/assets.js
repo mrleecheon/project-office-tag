@@ -1,3 +1,5 @@
+import { resolvePublicPath } from '../../engine/assets/publicPath.js'
+
 const imageAssets = {
   bg_default_office: { id: 'bg_default_office', type: 'image', src: '/assets/placeholders/bg-default-office.png', width: 576, height: 1024 },
   bg_meeting_room: { id: 'bg_meeting_room', type: 'image', src: '/assets/placeholders/bg-meeting-room.png', width: 576, height: 1024 },
@@ -35,12 +37,16 @@ export const assetManifest = {
 
 export function resolveImageAsset(assetId) {
   if (!assetId) return null
-  return assetManifest.images[assetId] ?? null
+  const asset = assetManifest.images[assetId]
+  if (!asset) return null
+  return { ...asset, src: resolvePublicPath(asset.src) }
 }
 
 export function resolveAudioAsset(assetId) {
   if (!assetId) return null
-  return assetManifest.audio[assetId] ?? null
+  const asset = assetManifest.audio[assetId]
+  if (!asset) return null
+  return { ...asset, src: resolvePublicPath(asset.src) }
 }
 
 export function collectAssetUrlsFromRefs(assetRefs = []) {

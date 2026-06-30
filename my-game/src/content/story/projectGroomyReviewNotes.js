@@ -45,7 +45,7 @@ export const projectGroomyNarrativeReviewNotes = [
     id: 'flavor-kim-seat-label',
     status: 'completed',
     severity: 'info',
-    note: '✅ 회의실 허브 라벨 "강이솔 자리"로 통일 (flavor_kim_seat / char iseol).',
+    note: '✅ 회의실 허브 라벨 "강이솔 자리"로 통일 (flavor_iseol_seat / char iseol).',
   },
   {
     id: 'guardian-indirect-scenes',
@@ -70,6 +70,54 @@ export const projectGroomyNarrativeReviewNotes = [
 
   // ── ❌ 미결 (유지) ──
   {
+    id: 'ch4-full-script-patch',
+    status: 'completed',
+    severity: 'info',
+    note: '✅ ch4_full_script: §1+부록5 잠입, §2~12 지문, 부록0~4, CH5 부분 확장(부록2 충돌 구간 제외). groomyInternalLog.js TRUE 보너스.',
+  },
+  {
+    id: 'ch5-full-script-patch',
+    status: 'completed',
+    severity: 'info',
+    note: '✅ ch5_full_script: §0~10 내레이션, ch5_closing, ending_true 분기 씬, 부록 A(추리 성공/실패 결말문), 부록 B(badA/badB 분리).',
+  },
+  {
+    id: 'ending-badab-collision-fixed',
+    status: 'completed',
+    severity: 'info',
+    note: '✅ dismantledWithFullKnowledge 플래그로 badA(가까운 사이+해체) vs badB(먼 거리+해체) 엔딩 요약 불일치 수정.',
+  },
+  {
+    id: 'badb-unreachable-fixed',
+    status: 'completed',
+    severity: 'info',
+    note: '✅ GROOMY_AFFINITY_CH4_ABANDON_MAX(0) 도입 — CH4 abandon(≤0) vs CH5 badB(≤1) 분리. hint는 1~4.',
+  },
+  {
+    id: 'badb-organic-path-verified',
+    status: 'completed',
+    severity: 'info',
+    note: '✅ badB 유기 경로(2026-06-22): R04/R08 CH4 직전 aff=1 복구 — CH2 expose 시 briefing「일단 둘러보고」(호감 무증가). verifyPlaythroughRoutes badB-organic·multiRoute 10/10·groomyAffinityAudit 통과. **설계 확인 대기:** 2단계 BAD(≤0 abandon vs aff=1 badB) 및 ch4_end_bad/badA 동일 타이틀 의도.',
+  },
+  {
+    id: 'multi-route-simulator-refresh',
+    status: 'completed',
+    severity: 'info',
+    note: '✅ multiRoutePlaythroughReport·groomyAffinityAudit 새 CH1(deduction→chapter_end)·CH2(briefing_chat 경유) 반영. 10루트 10/10, docs/multi-route-playthrough-report.md 재생성.',
+  },
+  {
+    id: 'ch1-rewrite-seoi-canon',
+    status: 'completed',
+    severity: 'info',
+    note: '✅ CH1 전면 재작성: 박서이/CARETAKER 캐논, Seoi 플래그, corporateHeat 제거, flavor_iseol_seat, deduction→chapter_end 직행, 조사 허브 유지.',
+  },
+  {
+    id: 'ch1-ch3-deduction-duplicate',
+    status: 'pending_decision',
+    severity: 'info',
+    note: '⏳ CH1 deduction_chat(ch1Concluded*)와 CH3 ch3_deduction_chat(ch3Concluded*) 이중 존재. isMysterySolvedFully는 CH3 플래그+증거≥8만 사용 — CH1 플래그는 UI 라벨만.',
+  },
+  {
     id: 'chapter-count-brief',
     status: 'open',
     severity: 'gap',
@@ -82,6 +130,12 @@ export const projectGroomyNarrativeReviewNotes = [
     note: '❌ 아라(보호자 안드로이드) 전용 초상·풀 CG·집 내부 씬 미구현. 배터리 동기는 대사·플래그·CH5 통화로만 전달.',
   },
   {
+    id: 'ch3-gap-fill',
+    status: 'completed',
+    severity: 'info',
+    note: '✅ CH3 갭 보강: storage_clue_diary(ch3_recoveredSeoiDiary·seoiDiaryPartial), groomy_blood_reaction_leak(복선 #3), iseol_letter_reaction(강이솔 중반 등장·ch3_sharedLetterWithIseol).',
+  },
+  {
     id: 'groomy-predecessor-bond',
     status: 'open',
     severity: 'gap',
@@ -89,9 +143,21 @@ export const projectGroomyNarrativeReviewNotes = [
   },
   {
     id: 'chapter-02-placeholder-assets',
-    status: 'open',
+    status: 'completed',
     severity: 'inconsistency',
-    note: '❌ CH2 VN 초상이 kim/unknown 에셋 ID에 묶여 있음. 대사는 그루미·강이솔 기준 — 전용 portrait 에셋 교체 필요.',
+    note: '✅ CH2 VN charId 버그 수정(iseol/groomy). baseId 이미지(kim/unknown 에셋)는 여전히 placeholder — ch2-portrait-art-still-placeholder 참고.',
+  },
+  {
+    id: 'ch2-portrait-art-still-placeholder',
+    status: 'open',
+    severity: 'gap',
+    note: '❌ CH2 VN portrait baseId가 kim/unknown 에셋 ID에 묶여 있음. charId는 iseol/groomy로 수정 완료. 전용 아트 교체 필요.',
+  },
+  {
+    id: 'ch2-rewrite-seoi-canon',
+    status: 'completed',
+    severity: 'info',
+    note: '✅ CH2 전면 재작성: briefing_chat·aftermath_chat·vault_box, suspicion 제거, 박서이 캐논, guard/analyst/locker/server 분기.',
   },
   {
     id: 'iseol-antagonist-level',

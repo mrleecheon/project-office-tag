@@ -27,3 +27,13 @@ Thumbs.db
 **/.vite/
 .cache/
 **/.cache/
+
+# my-game — local backups, bundles, and deploy binaries
+my-game/_phase1_extract/
+my-game/claude_review_bundle.txt
+my-game/*.zip
+my-game/tools/butler/
+
+# my-game — generated debug output (keep authored .md docs)
+my-game/docs/full-playthrough-transcript.txt
+my-game/docs/route-audit.txt

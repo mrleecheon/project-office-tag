@@ -16,7 +16,7 @@ function tileKind(tile, label) {
   return tileClassByValue[tile] ?? 'floor'
 }
 
-export default function TileMap({ map, playerPosition, activeTarget, moveTick }) {
+export default function TileMap({ map, playerPosition, activeTarget, moveTick, visitedTileKeys }) {
   const [backgroundFailed, setBackgroundFailed] = useState(false)
   const tileSize = map.tileSize ?? 40
   const frameWidth = map.spriteFrame?.width ?? 32
@@ -37,6 +37,7 @@ export default function TileMap({ map, playerPosition, activeTarget, moveTick })
           const label = map.labels?.[key]
           const kind = tileKind(tile, label)
           const isInteractable = Boolean(label && tile !== 1)
+          const visited = visitedTileKeys?.has(key)
           return (
             <div
               key={key}
@@ -45,6 +46,7 @@ export default function TileMap({ map, playerPosition, activeTarget, moveTick })
                 `tile-${kind}`,
                 active ? 'active' : '',
                 isInteractable ? 'interactable' : '',
+                visited ? 'visited' : '',
               ].filter(Boolean).join(' ')}
               style={{
                 left: colIndex * tileSize,
@@ -54,7 +56,9 @@ export default function TileMap({ map, playerPosition, activeTarget, moveTick })
               }}
             >
               {isInteractable && (
-                <span className="tileLabel">{label}</span>
+                <span className="tileLabel">
+                  {visited ? `${label} · 완료` : label}
+                </span>
               )}
             </div>
           )

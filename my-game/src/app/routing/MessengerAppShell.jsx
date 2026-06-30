@@ -32,7 +32,6 @@ export default function MessengerAppShell({
   onRestart,
 }) {
   const [tabState, setTabState] = useState({ sceneId: null, tab: 'chat' })
-  const isChatScene = scene?.mode === SceneModes.CHAT
   const isImmersive = scene?.mode === SceneModes.VN || scene?.mode === SceneModes.RPG
   const isPersonalChannel = scene?.mode === SceneModes.CHAT && !scene?.systemMessage
   const activeTab = tabState.sceneId === scene?.id ? tabState.tab : 'chat'

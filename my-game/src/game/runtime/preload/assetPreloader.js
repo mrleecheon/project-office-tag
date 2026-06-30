@@ -1,4 +1,5 @@
 import { collectAssetUrlsFromRefs, resolveImageAsset } from '../../../content/manifests/assets.js'
+import { resolvePublicPath } from '../../../engine/assets/publicPath.js'
 
 const imageCache = new Map()
 
@@ -9,7 +10,7 @@ function preloadImage(url) {
     img.onload = () => resolve()
     img.onerror = reject
   })
-  img.src = url
+  img.src = resolvePublicPath(url)
   imageCache.set(url, promise)
   return promise
 }

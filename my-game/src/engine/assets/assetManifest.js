@@ -1,4 +1,5 @@
 import { chapters } from '../../content/chapters/index.js'
+import { resolvePublicPath } from './publicPath.js'
 
 const IMAGE_PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='256' height='144'><rect width='100%' height='100%' fill='%2314202d'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%235e89ab' font-size='14'>missing image</text></svg>"
 const AUDIO_PLACEHOLDER = 'data:audio/mp3;base64,'
@@ -55,7 +56,7 @@ function loadImage(path) {
       console.warn(`[assetManifest] failed image: ${path}`)
       resolve({ ok: false, path, resolvedPath: IMAGE_PLACEHOLDER, kind: 'image' })
     }
-    img.src = path
+    img.src = resolvePublicPath(path)
   })
 }
 
@@ -72,7 +73,7 @@ function loadAudio(path) {
       console.warn(`[assetManifest] failed audio: ${path}`)
       finish(false)
     }
-    audio.src = path
+    audio.src = resolvePublicPath(path)
     audio.load()
   })
 }

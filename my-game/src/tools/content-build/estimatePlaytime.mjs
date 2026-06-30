@@ -136,16 +136,21 @@ const minRoute = {
     'search_pocket', 'entrance_tag', 'iseol_intro', 'prologue_complete',
   ],
   'chapter-01': [
-    'morning_briefing', 'meeting_room_hub', 'meeting_chat', 'floor3_vn', 'floor3_hub',
+    'morning_briefing', 'meeting_room_rpg', 'meeting_chat', 'floor3_vn', 'floor3_rpg',
     'exit_floor3', 'deduction_chat', 'chapter_end',
   ],
   'chapter-02': [
-    'arrival_vn', 'briefing_chat', 'server_panel_chat', 'analyst_chat', 'locker_chat',
-    'escalation_vn', 'mirror_clue_vn', 'aftermath_chat', 'groomy_debrief', 'floor3_door_approach', 'chapter_end',
+    'arrival_vn', 'signal_vn', 'records_vn', 'floor5_rpg', 'server_panel_chat', 'vault_terminal_chat',
+    'guard_chat', 'analyst_chat', 'locker_chat',
+    'mirror_clue_vn', 'escalation_vn', 'groomy_debrief', 'ch2_chapter_closing', 'chapter_end',
   ],
   'chapter-03': [
-    'ch3_morning_after', 'desk_drawer', 'ch3_storage_entry', 'recorder_found', 'caretaker_warning',
-    'guardian_recall', 'bathroom_glitch', 'ch3_end',
+    'ch3_morning_after', 'desk_assignment_vn', 'desk_drawer_rpg', 'resignation_letter_clue',
+    'family_photo_clue', 'recorder_found_clue', 'guardian_recall_vn', 'groomy_absence_chat',
+    'bathroom_glitch_vn', 'floor3_decision_chat', 'floor3_decision_continue', 'storage_entry_vn',
+    'storage_rpg', 'storage_clue_recorder_full', 'body_discovery_vn', 'groomy_comforted_at_body',
+    'recorder_playback_vn', 'caretaker_first_contact_chat', 'caretaker_pressed', 'ch3_deduction_chat',
+    'ch3_deduction_after_homicide', 'ch3_chapter_closing', 'chapter_end',
   ],
   'chapter-04': [
     'ch4_accusation', 'groomy_gate', 'diary_full', 'caretaker_core_descent', 'truth_revelation',

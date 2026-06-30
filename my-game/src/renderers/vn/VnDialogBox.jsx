@@ -15,6 +15,7 @@ export default function VnDialogBox({ line, shown, done }) {
       className={[
         'vnBox',
         line?.important ? 'important' : '',
+        line?.emotion ? `emotion-${line.emotion}` : '',
         isNarration ? 'isNarration' : '',
         isSfx ? 'sfx' : '',
         isTextOnly ? 'textOnly' : '',

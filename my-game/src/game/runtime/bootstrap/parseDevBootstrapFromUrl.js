@@ -16,8 +16,6 @@ const CHAPTER_ALIASES = {
   'chapter-05': 'chapter-05',
 }
 
-import { DEMO_MODE, isDemoPlayablePosition } from '../../../config/demo.js'
-
 /**
  * Dev-only: ?chapter=2 or ?chapter=chapter-02&scene=floor5_rpg
  */
@@ -30,7 +28,6 @@ export function parseDevBootstrapFromUrl(search = '') {
 
   const chapterId = CHAPTER_ALIASES[chapterParam.trim()]
   if (!chapterId) return null
-  if (DEMO_MODE && !isDemoPlayablePosition(chapterId, params.get('scene')?.trim() ?? '')) return null
 
   const sceneId = params.get('scene')?.trim() || null
   return { chapterId, sceneId }

@@ -70,15 +70,17 @@ assert.equal(ch1End.end?.nextChapterId, 'chapter-02')
 
 const meetingEntry = chapterRegistry.getScene('chapter-01', 'meeting_entry')
 assert.equal(meetingEntry.chatTheme?.wallpaperAssetId, 'bg_meeting_room', 'meeting_entry uses meeting room wallpaper')
-const meetingHub = chapterRegistry.getScene('chapter-01', 'meeting_room_hub')
-assert.equal(meetingHub.chatTheme?.wallpaperAssetId, 'bg_meeting_room', 'meeting_room_hub uses meeting room wallpaper')
+const meetingRpg = chapterRegistry.getScene('chapter-01', 'meeting_room_rpg')
+assert.equal(meetingRpg.mode, SceneModes.RPG, 'meeting_room_rpg is RPG investigation map')
+assert.equal(meetingRpg.mapId, 'meetingRoom')
 const officeTour = chapterRegistry.getScene('chapter-01', 'office_tour')
 assert.equal(officeTour.chatTheme?.wallpaperAssetId, 'bg_default_office', 'non-meeting CH1 chat keeps default office wallpaper')
 
 // CH2 END scene + clear copy
 const ch2End = chapterRegistry.getScene('chapter-02', 'chapter_end')
 assert.equal(ch2End.mode, SceneModes.END)
-assert.equal(ch2End.nextChapterId, undefined)
+assert.equal(ch2End.nextChapterId, 'chapter-03')
+assert.equal(ch2End.end?.nextChapterId, 'chapter-03')
 
 state = {
   ...state,
@@ -86,10 +88,20 @@ state = {
   activeSceneId: 'floor5_rpg',
   nickname: '테스터',
   scores: { ...state.scores, mysteryEvidence: 5, batteryDesperation: 2, corporateSuspicion: 1 },
+  flags: [
+    'foundBatteryCompatCheckLog',
+    'foundDuplicateAccessRecord',
+    'ch2_guardInterviewed',
+    'learnedGroomySeenInTwoPlaces',
+    'foundBatterySpecWithGroomyNote',
+    'ch2_mirrorDecisionMade',
+  ],
 }
-const groomyDebrief = chapterRegistry.getScene('chapter-02', 'groomy_debrief')
-assert.equal(groomyDebrief.next, 'floor3_door_approach')
-go('floor3_door_approach')
+go('mirror_clue_vn')
+go('mirror_after_withhold')
+go('escalation_vn')
+go('groomy_debrief')
+go('ch2_chapter_closing')
 go('chapter_end')
 assert.equal(state.activeSceneId, 'chapter_end')
 
@@ -101,10 +113,14 @@ assert.ok(clearCopy.body.length > 0)
 assert.equal(chapterRegistry.getNextChapter('chapter-02')?.id, 'chapter-03')
 assert.equal(chapterRegistry.getChapter('chapter-03').startSceneId, 'ch3_morning_after')
 
-// CH3 scene chain integrity (morning → desk → storage → aftermath → end)
+// CH3 scene chain integrity (mainline scenes exist + maps resolve)
 const ch3Path = [
-  'ch3_morning_after', 'desk_drawer', 'ch3_storage_entry', 'recorder_found', 'caretaker_warning',
-  'guardian_recall', 'bathroom_glitch', 'ch3_end',
+  'ch3_morning_after', 'desk_assignment_vn', 'desk_drawer_rpg', 'resignation_letter_clue',
+  'family_photo_clue', 'recorder_found_clue', 'guardian_recall_vn', 'groomy_absence_chat',
+  'bathroom_glitch_vn', 'floor3_decision_chat', 'floor3_decision_continue', 'storage_entry_vn',
+  'storage_rpg', 'storage_clue_recorder_full', 'body_discovery_vn', 'groomy_comforted_at_body',
+  'recorder_playback_vn', 'caretaker_first_contact_chat', 'caretaker_pressed', 'ch3_deduction_chat',
+  'ch3_deduction_after_homicide', 'ch3_chapter_closing', 'chapter_end',
 ]
 for (const sceneId of ch3Path) {
   const integrity = safeResolveSceneTransition({
@@ -115,7 +131,7 @@ for (const sceneId of ch3Path) {
   assert.equal(integrity.ok, true, `broken chapter-03 link: ${sceneId}`)
 }
 
-const ch3End = chapterRegistry.getScene('chapter-03', 'ch3_end')
+const ch3End = chapterRegistry.getScene('chapter-03', 'chapter_end')
 assert.equal(ch3End.mode, SceneModes.END)
 assert.equal(ch3End.nextChapterId, 'chapter-04')
 assert.equal(ch3End.end?.nextChapterId, 'chapter-04')

@@ -40,6 +40,10 @@ export function splitChatDeliveryChunks(text, { keepTogether = false } = {}) {
   return chunks.length ? chunks : [raw]
 }
 
+export function isPlayerChatLine(line) {
+  return line?.char === 'player'
+}
+
 export function buildChatDeliveries(lines = [], resolveLineText, context = {}) {
   const deliveries = []
   let sequence = 0
@@ -47,6 +51,7 @@ export function buildChatDeliveries(lines = [], resolveLineText, context = {}) {
   for (const [lineIndex, line] of lines.entries()) {
     const text = resolveLineText(line, context)
     const chunks = splitChatDeliveryChunks(text, { keepTogether: shouldKeepLineTogether(line) })
+    const isPlayer = isPlayerChatLine(line)
 
     for (const [chunkIndex, chunkText] of chunks.entries()) {
       deliveries.push({
@@ -54,8 +59,12 @@ export function buildChatDeliveries(lines = [], resolveLineText, context = {}) {
         chunkIndex,
         char: line.char,
         text: chunkText,
-        isNarration: Boolean(line.isNarration || line.char === 'system'),
+        isPlayer,
+        isNarration: Boolean(!isPlayer && (line.isNarration || line.char === 'system')),
         sequence: sequence++,
+        ...(chunkIndex === 0 && typeof line.delayMs === 'number' ? { delayMs: line.delayMs } : {}),
+        ...(line.emotion ? { lineEmotion: line.emotion } : {}),
+        ...(line.unstable ? { forceUnstable: true } : {}),
       })
     }
   }

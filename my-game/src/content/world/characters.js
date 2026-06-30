@@ -2,6 +2,8 @@
 // 변경: 박서이(seoi), CARETAKER 추가. emotions에 glitch/cold 추가.
 // 기존 8캐릭터(groomy/iseol/kim/choi/yoon/unknown/system/player)는 그대로 보존.
 
+import { GUARDIAN_NAME } from './company.js'
+
 export const characters = {
   groomy: {
     id: 'groomy',
@@ -53,6 +55,26 @@ export const characters = {
     border: '#5b411c',
     text: '#ffe5ad',
   },
+  guard: {
+    id: 'guard',
+    name: '보안요원 서준',
+    dept: '보안팀',
+    initial: '서',
+    accent: '#6a8a9a',
+    bubble: '#1a2830',
+    border: '#2a4050',
+    text: '#c8dce8',
+  },
+  analyst: {
+    id: 'analyst',
+    name: '분석가 리아',
+    dept: '데이터 분석팀',
+    initial: '리',
+    accent: '#7ab0c8',
+    bubble: '#182830',
+    border: '#284858',
+    text: '#d0e8f4',
+  },
   unknown: {
     id: 'unknown',
     name: '???',
@@ -84,6 +106,16 @@ export const characters = {
     bubble: '#1a1a08',
     border: '#3a3a18',
     text: '#d8d8a0',
+  },
+  guardian: {
+    id: 'guardian',
+    name: GUARDIAN_NAME,
+    dept: '보호자 · 회상',
+    initial: '아',
+    accent: '#b088c8',
+    bubble: '#241a30',
+    border: '#3a2850',
+    text: '#e8d8f8',
   },
   system: {
     id: 'system',

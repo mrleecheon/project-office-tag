@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { emitAudioCue } from '../../engine/audio/audioBus'
 import { interactionKeys, movementKeys } from '../../engine/events/inputBindings'
 import { canTriggerInteraction, isBlockedTile, resolveInteractableTarget } from '../../game/runtime/exploration/explorationRuntime'
+import { resolveInvestigationTrigger, resolveMapInvestigationProgress } from '../../game/runtime/exploration/investigationProgress'
+import Button from '../../ui/controls/Button'
 import DPad from '../../ui/controls/DPad'
 import InteractionHint from './InteractionHint'
 import TileMap from './TileMap'
@@ -54,6 +56,7 @@ export default function RpgScene({ chapter, map, state, onTrigger, onMove }) {
   const findInteractable = useCallback((pos) => resolveInteractableTarget(map, pos ?? positionRef.current), [map])
 
   const activeTarget = useMemo(() => resolveInteractableTarget(map, position), [map, position])
+  const investigation = useMemo(() => resolveMapInvestigationProgress(map, state), [map, state])
   const ambientEnabled = (map.ambientFlags ?? []).some((flag) => flag.enabled)
 
   const move = useCallback((dr, dc) => {
@@ -80,8 +83,8 @@ export default function RpgScene({ chapter, map, state, onTrigger, onMove }) {
       return
     }
     emitAudioCue('rpg:interact', { target: target.label })
-    onTrigger(target.trigger)
-  }, [findInteractable, onTrigger])
+    onTrigger(resolveInvestigationTrigger(map, state, target.trigger))
+  }, [findInteractable, map, onTrigger, state])
 
   useEffect(() => {
     const onKey = (event) => {
@@ -124,14 +127,46 @@ export default function RpgScene({ chapter, map, state, onTrigger, onMove }) {
             playerPosition={position}
             activeTarget={activeTarget}
             moveTick={moveTick}
+            visitedTileKeys={investigation?.visitedTileKeys}
           />
         </div>
         {activeTarget && (
-          <div className="rpgTargetBadge">{activeTarget.label}</div>
+          <div className={`rpgTargetBadge ${investigation?.visitedTileKeys?.has(activeTarget.key) ? 'visited' : ''}`}>
+            {investigation?.visitedTileKeys?.has(activeTarget.key)
+              ? `${activeTarget.label} · 완료`
+              : activeTarget.label}
+          </div>
         )}
       </div>
 
       <footer className="rpgControls">
+        {investigation && (
+          <div className="rpgInvestigationPanel" aria-label="조사 진행도">
+            <div className="rpgInvestigationHead">
+              <strong>{investigation.label}</strong>
+              <span>{investigation.visited}/{investigation.total}</span>
+            </div>
+            <div className="rpgInvestigationBar" aria-hidden="true">
+              <span style={{ width: `${investigation.total ? (investigation.visited / investigation.total) * 100 : 0}%` }} />
+            </div>
+            <ul className="rpgInvestigationSpots">
+              {investigation.spots.map((spot) => (
+                <li key={spot.flag} className={spot.done ? 'done' : ''}>
+                  {spot.done ? `${spot.label} · 완료` : spot.label}
+                </li>
+              ))}
+            </ul>
+            {investigation.exitScene && investigation.canExitEarly && (
+              <Button
+                type="button"
+                className="rpgInvestigationExit"
+                onClick={() => onTrigger(investigation.exitScene)}
+              >
+                조사 마치기
+              </Button>
+            )}
+          </div>
+        )}
         <InteractionHint>{activeTarget ? `[●] ${activeTarget.label}` : map.hint}</InteractionHint>
         <DPad onMove={move} onInteract={interact} />
       </footer>

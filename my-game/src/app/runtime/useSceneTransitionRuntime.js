@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef } from 'react'
+import { resolveChapter03SceneDoneTarget } from '../../content/chapters/chapter-03/deskContinuations.js'
 import { eventBus } from '../../engine/events/eventBus.js'
 import { GameEvents } from '../../engine/events/gameEvents.js'
 import { setMapPosition } from '../../engine/state/actions.js'
 
-export function useSceneTransitionRuntime({ dispatch, orchestrator, chapter, scene }) {
+export function useSceneTransitionRuntime({ dispatch, orchestrator, chapter, scene, getState }) {
   const sceneRef = useRef(scene)
   const chapterRef = useRef(chapter)
 
@@ -20,8 +21,19 @@ export function useSceneTransitionRuntime({ dispatch, orchestrator, chapter, sce
       orchestrator.completeChapter(activeChapter, activeScene.end.nextChapterId)
       return
     }
-    if (nextSceneId) orchestrator.goToScene(nextSceneId)
-  }, [orchestrator])
+    if (!nextSceneId) return
+
+    let target = nextSceneId
+    if (activeChapter?.id === 'chapter-03' && activeScene?.localId && getState) {
+      target = resolveChapter03SceneDoneTarget(
+        activeScene.localId,
+        nextSceneId,
+        getState(),
+      ) ?? nextSceneId
+    }
+
+    orchestrator.goToScene(target)
+  }, [getState, orchestrator])
 
   const handleMapMove = useCallback((mapId, position) => {
     eventBus.emit(GameEvents.MAP_MOVED, { mapId, position })

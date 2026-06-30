@@ -41,14 +41,14 @@ assert.equal(trueEnding.id, 'true')
 
 const badAEnding = resolveProjectGroomyEnding({
   ...initialGameState,
-  flags: ['dismantledGroomy', 'groomyStayedClose', 'truthExposed'],
+  flags: ['dismantledGroomy', 'dismantledWithFullKnowledge', 'truthExposed'],
   scores: { groomyAffinity: 6 },
 })
 assert.equal(badAEnding.id, 'badA')
 
 const mainline = [
   'perception_off', 'office_truth', 'ch5_battery_weight', 'groomy_only_alive', 'guardian_call', 'final_choice_pick',
-  'final_choice_high', 'ending_true', 'ch5_end',
+  'final_choice_high', 'ending_true', 'ending_true_silent_walk', 'ch5_closing', 'ch5_end',
 ]
 for (const sceneId of mainline) {
   const integrity = safeResolveSceneTransition({

@@ -1,3 +1,0 @@
-export default function TextInput(props) {
-  return <input className="uiTextInput" {...props} />
-}

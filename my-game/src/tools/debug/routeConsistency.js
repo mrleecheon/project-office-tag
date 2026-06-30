@@ -1,6 +1,7 @@
 function collectTargets(scene, chapter) {
   const targets = new Set()
   if (scene.next) targets.add(scene.next)
+  if (scene.continuationNext) targets.add(scene.continuationNext)
   if (scene.returnTo) targets.add(scene.returnTo)
   if (scene.input?.next) targets.add(scene.input.next)
   for (const choice of scene.choices ?? []) {

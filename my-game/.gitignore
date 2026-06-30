@@ -22,3 +22,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local backups and review bundles
+_phase1_extract/
+claude_review_bundle.txt
+*.zip
+tools/butler/
+
+# Generated debug output (keep authored .md docs in docs/)
+docs/full-playthrough-transcript.txt
+docs/route-audit.txt

@@ -1,9 +1,6 @@
-import { chapters, demoPlayableChapters } from '../../content/chapters/index.js'
-import { DEMO_MODE } from '../../config/demo.js'
+import { chapters } from '../../content/chapters/index.js'
 
-const registryChapterList = DEMO_MODE ? demoPlayableChapters : chapters
-
-export function createChapterRegistry(chapterList = registryChapterList) {
+export function createChapterRegistry(chapterList = chapters) {
   const byId = new Map(chapterList.map((chapter) => [chapter.id, chapter]))
 
   return {

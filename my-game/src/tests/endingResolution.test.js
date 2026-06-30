@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import {
   PROJECT_GROOMY_ENDINGS,
+  isMysterySolvedFully,
   isNormalEndingTruthMidAffinity,
   resolveProjectGroomyEnding,
   resolveProjectGroomyEndingSummaryKo,
@@ -15,18 +16,30 @@ function endingState({ flags = [], scores = {} }) {
   }
 }
 
-// dismantled + truthExposed → badA (affinity irrelevant)
+// dismantled + dismantledWithFullKnowledge → badA (affinity irrelevant)
 assert.equal(
   resolveProjectGroomyEnding(
     endingState({
-      flags: ['dismantledGroomy', 'truthExposed'],
+      flags: ['dismantledGroomy', 'dismantledWithFullKnowledge', 'truthExposed'],
       scores: { groomyAffinity: 6 },
     }),
   ).id,
   PROJECT_GROOMY_ENDINGS.badA.id,
-  'dismantled + truthExposed → badA',
+  'dismantled + dismantledWithFullKnowledge → badA',
 )
 
+assert.equal(
+  resolveProjectGroomyEnding(
+    endingState({
+      flags: ['dismantledGroomy', 'dismantledWithFullKnowledge', 'truthExposed'],
+      scores: { groomyAffinity: 0 },
+    }),
+  ).id,
+  PROJECT_GROOMY_ENDINGS.badA.id,
+  'dismantled + dismantledWithFullKnowledge stays badA at low affinity',
+)
+
+// dismantled + truthExposed but no full-knowledge flag → badB (low-affinity path)
 assert.equal(
   resolveProjectGroomyEnding(
     endingState({
@@ -34,8 +47,8 @@ assert.equal(
       scores: { groomyAffinity: 0 },
     }),
   ).id,
-  PROJECT_GROOMY_ENDINGS.badA.id,
-  'dismantled + truthExposed stays badA at low affinity',
+  PROJECT_GROOMY_ENDINGS.badB.id,
+  'dismantled + truthExposed without dismantledWithFullKnowledge → badB',
 )
 
 // dismantled + no truth → badB
@@ -93,8 +106,8 @@ assert.equal(
 
 assert.match(
   resolveProjectGroomyEndingSummaryKo(truthMidState, PROJECT_GROOMY_ENDINGS.normal),
-  /진실을 알았지만.*가까워지지 못했다/,
-  'truth-mid NORMAL epilogue must acknowledge truth without closeness',
+  /진실의 절반만 손에 쥔 채/,
+  'truth-mid NORMAL without mystery conclusion uses truth-mid mystery-unsolved epilogue',
 )
 
 // path C: no dismantle + no truth + affinity 3 → NORMAL (default epilogue)
@@ -111,8 +124,8 @@ assert.equal(
 
 assert.equal(
   resolveProjectGroomyEndingSummaryKo(pathCState, PROJECT_GROOMY_ENDINGS.normal),
-  PROJECT_GROOMY_ENDINGS.normal.summaryKo,
-  'path C: no-truth NORMAL keeps default epilogue',
+  PROJECT_GROOMY_ENDINGS.normal.summaryKoMysteryUnsolved,
+  'path C: no-truth NORMAL uses mystery-unsolved epilogue',
 )
 
 // path C (high affinity): truthExposed false, affinity 6, not dismantled → NORMAL
@@ -125,6 +138,28 @@ assert.equal(
   ).id,
   PROJECT_GROOMY_ENDINGS.normal.id,
   'path C: no truth + affinity 6 without dismantle → NORMAL (not TRUE)',
+)
+
+assert.equal(
+  isMysterySolvedFully(
+    endingState({
+      flags: ['ch3ConcludedHomicide'],
+      scores: { mysteryEvidence: 8 },
+    }),
+  ),
+  true,
+  'mystery evidence 8 + homicide conclusion → mystery solved',
+)
+
+assert.equal(
+  isMysterySolvedFully(
+    endingState({
+      flags: ['ch3WithheldFinalDeduction'],
+      scores: { mysteryEvidence: 10 },
+    }),
+  ),
+  false,
+  'withheld deduction blocks mystery-solved even with high evidence',
 )
 
 console.log('endingResolution.test.js passed')

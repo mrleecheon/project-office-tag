@@ -3,11 +3,16 @@ import { SceneModes } from '../contracts.js'
 function collectTargets(scene, chapter = null) {
   const targets = []
   if (scene.next) targets.push(scene.next)
+  if (scene.continuationNext) targets.push(scene.continuationNext)
   if (scene.returnTo) targets.push(scene.returnTo)
   if (scene.input?.next) targets.push(scene.input.next)
   for (const choice of scene.choices ?? []) targets.push(choice.next)
-  if (scene.mode === SceneModes.RPG && chapter?.maps?.[scene.mapId]?.triggers) {
-    targets.push(...Object.values(chapter.maps[scene.mapId].triggers))
+  if (scene.mode === SceneModes.RPG && chapter?.maps?.[scene.mapId]) {
+    const map = chapter.maps[scene.mapId]
+    if (map.triggers) targets.push(...Object.values(map.triggers))
+    for (const spot of map.investigation?.spots ?? []) {
+      if (spot.revisitScene) targets.push(spot.revisitScene)
+    }
   }
   return targets.filter(Boolean)
 }

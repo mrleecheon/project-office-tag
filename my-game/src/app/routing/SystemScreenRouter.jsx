@@ -2,7 +2,6 @@ import { SceneModes } from '../../engine/contracts.js'
 import { resolveChapterClearCopy } from '../../engine/progression/endings.js'
 import BootScreen from '../../renderers/system/BootScreen.jsx'
 import ChapterClearScreen from '../../renderers/system/ChapterClearScreen.jsx'
-import DemoEndScreen from '../../renderers/system/DemoEndScreen.jsx'
 import NfcScreen from '../../renderers/system/NfcScreen.jsx'
 
 export default function SystemScreenRouter({
@@ -39,10 +38,6 @@ export default function SystemScreenRouter({
 
   if (state.screen === 'boot') {
     return <BootScreen lines={chapter?.bootLines ?? []} onDone={onBootDone} />
-  }
-
-  if (state.screen === 'demoEnd') {
-    return <DemoEndScreen onRestart={onRestart} />
   }
 
   if (state.screen === 'chapterClear') {

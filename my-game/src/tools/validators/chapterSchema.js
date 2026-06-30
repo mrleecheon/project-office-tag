@@ -78,6 +78,9 @@ function validateLines(lines, scenePath, errors) {
     if (!(typeof line.text === 'string' || typeof line.text === 'function' || typeof line.textKey === 'string')) {
       errors.push(`${linePath}: text must be string/function or textKey must be string`)
     }
+    if (line.delayMs != null && typeof line.delayMs !== 'number') {
+      errors.push(`${linePath}: delayMs must be a number`)
+    }
   }
 }
 
