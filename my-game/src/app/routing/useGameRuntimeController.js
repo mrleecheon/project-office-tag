@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useReducer, useState } from 'react'
 import { SceneModes } from '../../engine/contracts.js'
 import { chapterRegistry } from '../../engine/progression/chapterRegistry.js'
+import { resolveChapterClearCopy } from '../../engine/progression/endings.js'
 import { loadSave, resetGame, setScreen } from '../../engine/state/actions.js'
 import { gameReducer } from '../../engine/state/gameReducer.js'
 import { selectActiveChapter, selectActiveMap, selectActiveScene, selectRuntimeContext } from '../../engine/state/selectors.js'
@@ -88,6 +89,14 @@ export function useGameRuntimeController({ afterOfficeIntro = false } = {}) {
     }
 
     if (clearCopy?.continueLabel === '처음으로') {
+      setClearCopy(null)
+      setNextChapterId(null)
+      restart()
+      return
+    }
+
+    const endingCopy = resolveChapterClearCopy(state.activeChapterId, state)
+    if (endingCopy?.continueLabel === '처음으로') {
       setClearCopy(null)
       setNextChapterId(null)
       restart()
