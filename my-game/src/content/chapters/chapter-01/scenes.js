@@ -819,7 +819,11 @@ const rawChapter01Scenes = {
       { char: 'system', text: '아직 회의실 쪽을 확인하지 않았다.', isNarration: true, important: true },
       { char: 'groomy', text: '회의부터 하고 가요.' },
       { char: 'groomy', text: '아마.' }],
-    returnTo: 'after_first_clue',
+    choices: [
+      {
+        text: '회의실로 이동한다.',
+        next: 'meeting_entry',
+      }],
   },
   floor3_access_denied_bypass: {
     id: 'chapter-01.floor3_access_denied_bypass',
@@ -831,7 +835,11 @@ const rawChapter01Scenes = {
       { char: 'system', text: '아직 회의실 쪽을 확인하지 않았다.', isNarration: true, important: true },
       { char: 'groomy', text: '회의부터 하고 가요.' },
       { char: 'groomy', text: '아마.' }],
-    returnTo: 'groomy_bypass',
+    choices: [
+      {
+        text: '회의실로 이동한다.',
+        next: 'meeting_entry',
+      }],
   },
   desk_assignment: {
     id: 'chapter-01.desk_assignment',
@@ -1331,6 +1339,11 @@ const rawChapter01Scenes = {
         requirements: [needsMeetingRoom],
       },
       {
+        text: '회의실을 먼저 확인한다.',
+        next: 'meeting_entry',
+        requirements: [needsMeetingRoom],
+      },
+      {
         text: '그루미에게 괜찮은지 묻는다.',
         next: 'check_groomy',
         effects: [
@@ -1363,7 +1376,8 @@ const rawChapter01Scenes = {
       { char: 'groomy', text: '다시 말 걸어줄래?' }],
     choices: [
       { text: '3층 로그를 찾는다.', next: 'request_floor3_log', requirements: [visitedMeetingRoom] },
-      { text: '3층 로그를 찾는다.', next: 'floor3_access_denied', requirements: [needsMeetingRoom] }],
+      { text: '3층 로그를 찾는다.', next: 'floor3_access_denied', requirements: [needsMeetingRoom] },
+      { text: '회의실을 먼저 확인한다.', next: 'meeting_entry', requirements: [needsMeetingRoom] }],
   },
   hide_battery_clue: {
     id: 'chapter-01.hide_battery_clue',
@@ -1382,7 +1396,8 @@ const rawChapter01Scenes = {
       { char: 'groomy', text: '뭘 두려워하는지 알 수 있거든요.' }],
     choices: [
       { text: '3층 로그를 찾는다.', next: 'request_floor3_log', requirements: [visitedMeetingRoom] },
-      { text: '3층 로그를 찾는다.', next: 'floor3_access_denied', requirements: [needsMeetingRoom] }],
+      { text: '3층 로그를 찾는다.', next: 'floor3_access_denied', requirements: [needsMeetingRoom] },
+      { text: '회의실을 먼저 확인한다.', next: 'meeting_entry', requirements: [needsMeetingRoom] }],
   },
   request_floor3_log: {
     id: 'chapter-01.request_floor3_log',
