@@ -33,6 +33,16 @@ export default function RpgScene({ chapter, map, state, onTrigger, onMove }) {
   }, [position])
 
   useEffect(() => {
+    const saved = state.mapPositions[map.id]
+    if (!saved) return
+    setPosition({
+      row: saved.row,
+      col: saved.col,
+      facing: saved.facing ?? { dr: 0, dc: 1 },
+    })
+  }, [map.id, state.mapPositions])
+
+  useEffect(() => {
     const node = mapAreaRef.current
     if (!node) return undefined
 
