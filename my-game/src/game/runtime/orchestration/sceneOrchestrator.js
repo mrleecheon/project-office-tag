@@ -32,10 +32,12 @@ export function createSceneOrchestrator({ dispatch, getState, setClearCopy, setN
     const targetScene = chapterRegistry.getScene(state.activeChapterId, transition.sceneId)
     const allowed = canEnterScene({ state, targetScene })
     if (!allowed.ok) {
-      setRuntimeError({
-        code: allowed.reason,
-        message: '씬 진입 조건을 만족하지 못했습니다.',
-      })
+      if (allowed.reason !== 'requirements-failed') {
+        setRuntimeError({
+          code: allowed.reason,
+          message: '씬 진입 조건을 만족하지 못했습니다.',
+        })
+      }
       return false
     }
     if (transition.recovered) setRuntimeError(transition.error)

@@ -115,7 +115,6 @@ const rawChapter01Maps = {
     rows: 9,
     tileSize: 44,
     backgroundAssetId: ASSETS.bg.meetingRoom,
-    backgroundAssetId: ASSETS.bg.office,
     playerStart: { row: 5, col: 2, facing: { dr: -1, dc: 0 } },
     grid: [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -184,7 +183,6 @@ const rawChapter01Maps = {
     rows: 9,
     tileSize: 44,
     backgroundAssetId: ASSETS.bg.stairwell,
-    backgroundAssetId: ASSETS.bg.office,
     playerStart: { row: 7, col: 1, facing: { dr: 0, dc: 1 } },
     grid: [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
