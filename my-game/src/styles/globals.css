@@ -1109,12 +1109,31 @@ button, input { font: inherit; }
   letter-spacing: .06em;
 }
 
-.vnChoiceLayer {
+.vnScene.hasChoices > .vnBox:not(.sfx):not(.textOnly):not(.welcomeCaption) {
+  position: relative;
+  inset: auto;
+  bottom: auto;
+  left: auto;
+  z-index: 5;
   flex: 0 0 auto;
 }
 
-.vnChoiceLayer .choiceDock {
+.vnChoiceLayer {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 8;
+}
+
+.vnScene.hasChoices .vnChoiceLayer {
+  padding: 10px 12px;
   background: #060d15;
+  border-top: 1px solid #273f58;
+  max-height: min(42vh, 280px);
+  overflow-y: auto;
+}
+
+.vnChoiceLayer .choiceDock {
+  background: transparent;
   border-top-color: #273f58;
 }
 

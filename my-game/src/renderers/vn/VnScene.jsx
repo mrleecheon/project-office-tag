@@ -131,6 +131,22 @@ export default function VnScene({ scene, context, onChoice, onDone }) {
   }, [advance, done, isSfx, line?.autoAdvance, line?.autoAdvanceDelay])
 
   const skipAll = () => {
+    if (availableChoices.length) {
+      const lastIndex = (scene.lines?.length ?? 1) - 1
+      const lastLine = scene.lines?.[lastIndex]
+      if (lastLine) {
+        const lastText = resolveLineText(lastLine, context)
+        setBacklog((previous) => [...previous, {
+          id: `${scene.id}-skip-${lastIndex}`,
+          speaker: lastLine.char ?? 'system',
+          text: lastText,
+        }].slice(-10))
+        setIndex(lastIndex)
+        setShown(lastText)
+        setDone(true)
+      }
+      return
+    }
     if (!scene.lines?.length) {
       onDone(scene.next ?? scene.returnTo)
       return
@@ -151,6 +167,7 @@ export default function VnScene({ scene, context, onChoice, onDone }) {
         hideStage ? 'stageHidden' : '',
         line?.textOnly ? 'lineTextOnly' : '',
         line?.welcomeCaption ? 'hasWelcomeCaption' : '',
+        showChoices ? 'hasChoices' : '',
       ].filter(Boolean).join(' ')}
       onClick={advance}
     >
@@ -163,7 +180,7 @@ export default function VnScene({ scene, context, onChoice, onDone }) {
           </>
         )}
       </div>
-      <VnDialogBox line={{ ...line, important }} shown={shown} done={done} />
+      <VnDialogBox line={{ ...line, important }} shown={shown} done={done} awaitingChoice={showChoices} />
       {showChoices && (
         <div className="vnChoiceLayer" onClick={(event) => event.stopPropagation()}>
           <ChoiceDock choices={availableChoices} disabled={false} onChoose={onChoice} />

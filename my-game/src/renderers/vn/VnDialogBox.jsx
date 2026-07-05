@@ -1,14 +1,14 @@
 import { characters } from '../../content/world/characters'
 import { resolveUiText } from '../../content/manifests/text'
 
-export default function VnDialogBox({ line, shown, done }) {
+export default function VnDialogBox({ line, shown, done, awaitingChoice = false }) {
   const char = characters[line?.char] ?? characters.system
   const isNarration = line?.isNarration || line?.char === 'system'
   const isSfx = Boolean(line?.sfx)
   const isTextOnly = Boolean(line?.textOnly)
   const isWelcomeCaption = Boolean(line?.welcomeCaption)
   const autoAdvance = Boolean(line?.autoAdvance)
-  const showTapHint = done && !autoAdvance && !isSfx && !isWelcomeCaption
+  const showTapHint = done && !awaitingChoice && !autoAdvance && !isSfx && !isWelcomeCaption
 
   return (
     <div
