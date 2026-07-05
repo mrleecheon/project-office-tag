@@ -39,7 +39,10 @@ function applyEffect(state, effect) {
         ...state,
         mapPositions: {
           ...state.mapPositions,
-          [effect.mapId]: effect.position,
+          [effect.mapId]: {
+            mapId: effect.mapId,
+            ...effect.position,
+          },
         },
       }
     default:
@@ -76,7 +79,10 @@ export function gameReducer(state, action) {
         ...state,
         mapPositions: {
           ...state.mapPositions,
-          [action.mapId]: action.position,
+          [action.mapId]: {
+            mapId: action.mapId,
+            ...action.position,
+          },
         },
       }
     case GameActionTypes.LOAD_SAVE:
