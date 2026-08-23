@@ -1,7 +1,8 @@
-# GROOMY OFFICE
+# GROOMY OFFICE (groomy-office / project-office-tag)
 
 > 사내 메신저·CCTV·출입 로그를 통해 전임자의 죽음을 파헤치는 하이브리드 내러티브 게임  
-> *(TalkLine INTERNAL × 비주얼노벨 × 탐색 RPG)*
+> *(TalkLine INTERNAL × 비주얼노벨 × 탐색 RPG)*  
+> GitHub 저장소 이름: `project-office-tag` (Private). 로컬: `OneDrive\문서\cursor`
 
 **GROOMY OFFICE**는 신입 사원이 되어 폐건물 위에 덮인 「회사」 환영을 탐색하며,  
 전임자 **박서이**의 죽음과 안드로이드 동료 **그루미**의 비밀을 밝혀 나가는 오피스 미스터리입니다.
