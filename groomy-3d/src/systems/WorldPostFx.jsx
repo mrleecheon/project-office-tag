@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { EffectComposer, Bloom, Vignette, ChromaticAberration, Scanline } from '@react-three/postprocessing'
 import { useGameState } from '../state/gameStateStore.js'
+import WorldErrorBoundary from '../runtime/WorldErrorBoundary.jsx'
 
-export default function WorldPostFx() {
+function PostFxInner() {
   const ar = useGameState((s) => s.arFilterOn)
   const prev = useRef(ar)
   const [burst, setBurst] = useState(false)
@@ -26,5 +27,13 @@ export default function WorldPostFx() {
         </>
       ) : null}
     </EffectComposer>
+  )
+}
+
+export default function WorldPostFx() {
+  return (
+    <WorldErrorBoundary fallback={null}>
+      <PostFxInner />
+    </WorldErrorBoundary>
   )
 }

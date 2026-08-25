@@ -56,7 +56,14 @@ export function RoomLightRig({ ar = false }) {
 export function RoomEnvironment({ ar = false }) {
   return (
     <Environment
-      files={ar ? assetUrl('/hdri/empty_warehouse_01_1k.hdr') : assetUrl('/hdri/abandoned_workshop_1k.hdr')}
+      files={
+        typeof window === 'undefined'
+          ? assetUrl('/hdri/abandoned_workshop_1k.hdr')
+          : new URL(
+              ar ? assetUrl('/hdri/empty_warehouse_01_1k.hdr') : assetUrl('/hdri/abandoned_workshop_1k.hdr'),
+              window.location.origin,
+            ).href
+      }
       environmentIntensity={ar ? 0.42 : 0.16}
     />
   )

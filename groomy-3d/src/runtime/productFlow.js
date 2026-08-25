@@ -36,10 +36,10 @@ export const INTRO_SCENE = Object.freeze({
 })
 
 export const OPENING_BEATS = Object.freeze([
-  { id: 'beat-1a', type: 'dialogue', speaker: '그루미', presentation: 'black-caption', voice: false, text: '이 멍청한 새끼는 대체 뭘 하려고 여기까지 온 거지?', next: 'beat-1b' },
-  { id: 'beat-1b', type: 'dialogue', speaker: '그루미', presentation: 'black-caption', voice: false, text: '귀찮게 시체 처리반 짓이나 시키고.', next: 'beat-1c' },
-  { id: 'beat-1c', type: 'dialogue', speaker: '그루미', presentation: 'black-caption', voice: false, text: '... 죽은 건 쓸모도 없잖아.', next: 'beat-1d' },
-  { id: 'beat-1d', type: 'dialogue', speaker: '그루미', presentation: 'black-caption', voice: false, text: '이래서는 이번에도 결국 허탕-', next: 'beat-2' },
+  { id: 'beat-1a', type: 'dialogue', speaker: '그루미', presentation: 'black-caption', auto: true, voice: false, text: '이 멍청한 새끼는 대체 뭘 하려고 여기까지 온 거지?', next: 'beat-1b' },
+  { id: 'beat-1b', type: 'dialogue', speaker: '그루미', presentation: 'black-caption', auto: true, voice: false, text: '귀찮게 시체 처리반 짓이나 시키고.', next: 'beat-1c' },
+  { id: 'beat-1c', type: 'dialogue', speaker: '그루미', presentation: 'black-caption', auto: true, voice: false, text: '... 죽은 건 쓸모도 없잖아.', next: 'beat-1d' },
+  { id: 'beat-1d', type: 'dialogue', speaker: '그루미', presentation: 'black-caption', auto: true, voice: false, text: '이래서는 이번에도 결국 허탕-', next: 'beat-2' },
 
   { id: 'beat-2', type: 'dialogue', speaker: '주인공', text: '...아, 여기는.', next: 'beat-3a' },
 

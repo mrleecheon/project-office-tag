@@ -14,6 +14,7 @@ import CoffeeStation, {
 } from '../scenes/CoffeeStation.jsx'
 import PlayerController from '../systems/PlayerController.jsx'
 import WorldCanvas from '../systems/WorldCanvas.jsx'
+import WorldErrorBoundary from '../runtime/WorldErrorBoundary.jsx'
 import WorldPrompt from '../systems/WorldPrompt.jsx'
 import VNOverlay from '../ui/VNOverlay.jsx'
 import { ROOM_GRAPH, useGameState } from '../state/gameStateStore.js'
@@ -429,6 +430,7 @@ export default function ChipWakeStage() {
     <div className="opening-stage">
       <div className="opening-frame">
         <div className={`opening-canvas ${inputMode === 'vn' ? 'is-vn' : 'is-3d'}`}>
+          <WorldErrorBoundary fallback={null}>
           <WorldCanvas camera={{ fov: 70, position: inOffice ? officeSpawn : WHITE_SPAWN }}>
             <Suspense fallback={null}>
               {inOffice ? (
@@ -514,6 +516,7 @@ export default function ChipWakeStage() {
               />
             )}
           </WorldCanvas>
+          </WorldErrorBoundary>
         </div>
         {blinkOn && chipWakeStep === CHIP_WAKE_STEP.BLINK && <div className="opening-blink" />}
         {phoneUp && (

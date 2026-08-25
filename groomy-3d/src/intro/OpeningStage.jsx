@@ -1,16 +1,19 @@
-import { Suspense, useCallback, useEffect, useState } from 'react'
-import Lobby from '../scenes/Lobby.jsx'
-import WhiteRoom from '../scenes/WhiteRoom.jsx'
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import PlayerController from '../systems/PlayerController.jsx'
 import WorldCanvas from '../systems/WorldCanvas.jsx'
 import { ROOM_GRAPH, useGameState } from '../state/gameStateStore.js'
 import { OPENING_BEATS } from '../runtime/productFlow.js'
+import WorldErrorBoundary from '../runtime/WorldErrorBoundary.jsx'
 import VNOverlay from '../ui/VNOverlay.jsx'
 import WorldPrompt from '../systems/WorldPrompt.jsx'
+
 import '../PlayRoot.css'
 import '../game/scenes/ShockScene.css'
 import './WhiteRoomIntro.css'
 import './OpeningVnOverlay.css'
+
+const Lobby = lazy(() => import('../scenes/Lobby.jsx'))
+const WhiteRoom = lazy(() => import('../scenes/WhiteRoom.jsx'))
 
 export default function OpeningStage() {
   const lookId = useGameState((s) => s.lookId)
@@ -34,6 +37,7 @@ export default function OpeningStage() {
   const inWhite = scene === 'white'
   const walk3d = onBeat9 || onDoorBeat || onPaperBeat
   const inputMode = walk3d ? '3d' : 'vn'
+  const mountWorld = vnBeat?.presentation !== 'black-caption'
   const actionComplete = (onBeat9 && arFilterOn) || (onDoorBeat && doorEntered) || (onPaperBeat && paperPicked)
   const meta = ROOM_GRAPH.lobby
 
@@ -87,22 +91,26 @@ export default function OpeningStage() {
     <div className="opening-stage">
       <div className="opening-frame">
         <div className={`opening-canvas ${inputMode === 'vn' ? 'is-vn' : 'is-3d'}`}>
-          <WorldCanvas camera={{ fov: 70, position: inWhite ? [0, 1.6, 3.2] : meta.spawn, rotation: inWhite ? [0, 0, 0] : [0, 0.28, 0] }}>
-            <Suspense fallback={null}>
-              {inWhite ? (
-                <WhiteRoom showPaperPrompt={onPaperBeat && lookId === 'paper' && !paperPicked} />
-              ) : (
-                <Lobby />
-              )}
-            </Suspense>
-            {onDoorBeat && <WorldPrompt position={[0, 2.35, -9.4]} label={hint} />}
-            <PlayerController
-              key={inWhite ? 'white' : 'lobby'}
-              bounds={inWhite ? { minX: -5.4, maxX: 5.4, minZ: -5.4, maxZ: 5.4 } : meta.bounds}
-              spawn={inWhite ? [0, 1.6, 3.2] : meta.spawn}
-              spawnYaw={inWhite ? 0 : 0.28}
-            />
-          </WorldCanvas>
+          {mountWorld && (
+            <WorldErrorBoundary fallback={null}>
+              <WorldCanvas camera={{ fov: 70, position: inWhite ? [0, 1.6, 3.2] : meta.spawn, rotation: inWhite ? [0, 0, 0] : [0, 0.28, 0] }}>
+                <Suspense fallback={null}>
+                  {inWhite ? (
+                    <WhiteRoom showPaperPrompt={onPaperBeat && lookId === 'paper' && !paperPicked} />
+                  ) : (
+                    <Lobby />
+                  )}
+                </Suspense>
+                {onDoorBeat && <WorldPrompt position={[0, 2.35, -9.4]} label={hint} />}
+                <PlayerController
+                  key={inWhite ? 'white' : 'lobby'}
+                  bounds={inWhite ? { minX: -5.4, maxX: 5.4, minZ: -5.4, maxZ: 5.4 } : meta.bounds}
+                  spawn={inWhite ? [0, 1.6, 3.2] : meta.spawn}
+                  spawnYaw={inWhite ? 0 : 0.28}
+                />
+              </WorldCanvas>
+            </WorldErrorBoundary>
+          )}
         </div>
         <div className="play-fade" style={{ opacity: fade }} />
         <VNOverlay
