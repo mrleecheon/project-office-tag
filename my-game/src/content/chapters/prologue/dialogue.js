@@ -116,7 +116,7 @@ const rawPrologueScenes = {
   },
 
   // ─────────────────────────────────────────
-  // chat_boot — TalkLine 채널 진입. 그루미가 카드 미스매치를 흘림.
+  // chat_boot — TalkLine 시작. 삑- 직전까지만 이 시나리오.
   // ─────────────────────────────────────────
   chat_boot: {
     id: 'prologue.chat_boot',
@@ -127,45 +127,68 @@ const rawPrologueScenes = {
     systemMessage: 'GROOMY가 TalkLine 내부 채널에 접속했습니다.',
     lines: [
       { char: 'groomy', text: '안녕하세요.' },
-      { char: 'groomy', text: '신입 사원 전속 비서 AI예요.' },
-      { char: 'groomy', text: '그루미라고 불러 주세요.' },
-      { char: 'groomy', text: `${PREDECESSOR_NAME}님 카드로 접속 로그가 올라와서` },
-      { char: 'groomy', text: '잠깐 착각했네요.' },
-      { char: 'groomy', text: '괜찮아요.' },
-      { char: 'groomy', text: '흔한 일은 아니지만.' },
-      { char: 'groomy', text: '회사가 흔하지도 않으니까요.' },
+      { char: 'groomy', text: 'TalkLine에 오신 걸 환영해요.' },
+      { char: 'groomy', text: '접속은 잘 된 것 같네요.' },
     ],
     choices: [
       {
-        text: '네. 처음 왔어요.',
-        next: 'ask_nickname',
-        effects: [
-          { type: EffectTypes.ADD_FLAG, flag: 'introAdmittedNewcomer' },
-          { type: EffectTypes.ADD_SCORE, score: 'groomyAffinity', amount: 1 },
-        ],
-      },
-      {
-        text: '방금 전까지 기억이 흐릿해요.',
-        next: 'ask_nickname',
-        effects: [
-          { type: EffectTypes.ADD_FLAG, flag: 'introMentionedHaze' },
-          { type: EffectTypes.ADD_SCORE, score: 'mysteryEvidence', amount: 1 },
-          { type: EffectTypes.ADD_SCORE, score: 'groomyAffinity', amount: 1 },
-        ],
-      },
-      {
-        text: '예?',
-        next: 'ask_nickname',
-        effects: [
-          { type: EffectTypes.ADD_FLAG, flag: 'introStalled' },
-          { type: EffectTypes.ADD_SCORE, score: 'groomyAffinity', amount: -1 },
-        ],
+        text: '네?',
+        next: 'chat_call_me',
       },
     ],
   },
 
+  chat_call_me: {
+    id: 'prologue.chat_call_me',
+    chapterId: 'prologue',
+    localId: 'chat_call_me',
+    mode: SceneModes.CHAT,
+    emotion: 'friendly',
+    lines: [
+      { char: 'groomy', text: '그루미라고 부르세요.' },
+      { char: 'groomy', text: '이름 뜻은 묻지 마시고.' },
+      { char: 'groomy', text: '당신도 당신 이름 뜻 모르잖아?' },
+    ],
+    choices: [
+      {
+        text: '아는데요',
+        next: 'chat_meaning_know',
+        effects: [{ type: EffectTypes.ADD_FLAG, flag: 'claimedToKnowNameMeaning' }],
+      },
+      {
+        text: '네…',
+        next: 'chat_meaning_quiet',
+        effects: [{ type: EffectTypes.ADD_FLAG, flag: 'admittedNameMeaningUnknown' }],
+      },
+    ],
+  },
+
+  chat_meaning_know: {
+    id: 'prologue.chat_meaning_know',
+    chapterId: 'prologue',
+    localId: 'chat_meaning_know',
+    mode: SceneModes.CHAT,
+    emotion: 'friendly',
+    lines: [
+      { char: 'groomy', text: '아 예. 참 대단하십니다.' },
+    ],
+    next: 'ask_nickname',
+  },
+
+  chat_meaning_quiet: {
+    id: 'prologue.chat_meaning_quiet',
+    chapterId: 'prologue',
+    localId: 'chat_meaning_quiet',
+    mode: SceneModes.CHAT,
+    emotion: 'friendly',
+    lines: [
+      { char: 'groomy', text: '숫기도 없으시네.' },
+    ],
+    next: 'ask_nickname',
+  },
+
   // ─────────────────────────────────────────
-  // ask_nickname — 닉네임 입력
+  // ask_nickname — 기존 표시이름 입력 시스템 유지
   // ─────────────────────────────────────────
   ask_nickname: {
     id: 'prologue.ask_nickname',
@@ -174,14 +197,18 @@ const rawPrologueScenes = {
     mode: SceneModes.CHAT,
     emotion: 'friendly',
     lines: [
-      { char: 'groomy', text: '정식 사원 정보가 아직 비어 있네요.' },
-      { char: 'groomy', text: '제가 부를 이름부터 입력해 주세요.' },
+      { char: 'groomy', text: '본론으로 가죠.' },
+      { char: 'groomy', text: '아까는 시스템에 접속이 안 됐어요.' },
+      { char: 'groomy', text: '아까 입력하신 그 이름은,' },
+      { char: 'groomy', text: '제가 인식하지 못 했다는 뜻이에요.' },
+      { char: 'groomy', text: '자, 아래 보여요?' },
+      { char: 'groomy', text: '적어요. 이름.' },
     ],
     input: { type: 'nickname', next: 'after_nickname' },
   },
 
   // ─────────────────────────────────────────
-  // after_nickname — 임시 카드 설명
+  // after_nickname — 이름 확인 후
   // ─────────────────────────────────────────
   after_nickname: {
     id: 'prologue.after_nickname',
@@ -190,198 +217,141 @@ const rawPrologueScenes = {
     mode: SceneModes.CHAT,
     emotion: 'neutral',
     lines: [
-      { char: 'groomy', text: ({ nickname }) => `아, 맞다 ${nickname} 씨.` },
-      { char: 'groomy', text: '사원증은 아직 발급 전인데' },
-      { char: 'groomy', text: '키 기능은 필요하니까.' },
-      { char: 'groomy', text: '전임자 사원증으로 발급했어요.' },
-      { char: 'groomy', text: '그건 아시죠?' },
+      { char: 'groomy', text: '응. 이름 확인했어요.' },
+      { char: 'groomy', text: '멋지네요.' },
+      { char: 'groomy', text: '솔직히 물어보고 싶은 게 많긴 해요.' },
+      { char: 'groomy', text: '당신도 많을 거고.' },
+      { char: 'groomy', text: '다만, 우리 회사 직원도 아닌 그 쪽을 신뢰할 수 없으니까.' },
+      { char: 'groomy', text: '일단 일 잘하는지 부터 볼까요?' },
     ],
     choices: [
       {
-        text: '네.',
-        next: 'card_key_goal',
+        text: '어 열심히 할게…',
+        next: 'chat_work_ok',
         effects: [
-          { type: EffectTypes.ADD_FLAG, flag: 'claimedToKnowTempCard' },
+          { type: EffectTypes.ADD_FLAG, flag: 'promisedToWorkHard' },
           { type: EffectTypes.ADD_SCORE, score: 'groomyAffinity', amount: 1 },
         ],
       },
       {
-        text: '아뇨.',
-        next: 'card_key_explain',
+        text: '여기가 어디냐니까?',
+        next: 'chat_where_cold',
         effects: [
-          { type: EffectTypes.ADD_FLAG, flag: 'admittedCardIgnorance' },
-          { type: EffectTypes.ADD_SCORE, score: 'groomyAffinity', amount: 1 },
-        ],
-      },
-      {
-        text: '예?',
-        next: 'card_key_cold',
-        effects: [
-          { type: EffectTypes.ADD_FLAG, flag: 'confusedAboutCard' },
+          { type: EffectTypes.ADD_FLAG, flag: 'askedWhereThisIs' },
           { type: EffectTypes.ADD_SCORE, score: 'groomyAffinity', amount: -1 },
         ],
       },
     ],
   },
 
-  // ─────────────────────────────────────────
-  // card_key_explain — 모른다고 답한 분기
-  // ─────────────────────────────────────────
-  card_key_explain: {
-    id: 'prologue.card_key_explain',
+  chat_work_ok: {
+    id: 'prologue.chat_work_ok',
     chapterId: 'prologue',
-    localId: 'card_key_explain',
+    localId: 'chat_work_ok',
     mode: SceneModes.CHAT,
     emotion: 'friendly',
     lines: [
-      { char: 'groomy', text: '좋아요.' },
-      { char: 'groomy', text: '모르면 모른다고 하는 편이 낫죠.' },
-      { char: 'groomy', text: '지금 가진 사원증은' },
-      { char: 'groomy', text: '문을 여는 키이면서.' },
-      { char: 'groomy', text: '죽은 전임자의 기록에 붙은' },
-      { char: 'groomy', text: '임시 이름표예요.' },
-      { char: 'groomy', text: '무섭게 들리면 정상이에요.' },
+      { char: 'groomy', text: '말이 적어서 좋아요.' },
+      { char: 'groomy', text: '사용하기 좋은 호구.' },
     ],
-    next: 'card_key_goal',
+    next: 'chat_work_intro',
   },
 
-  // ─────────────────────────────────────────
-  // card_key_cold — 5단 복선 #1: 격리된 기억의 잔재가 새어나옴
-  // 기존 욕설+삭제 연출 유지, 톤만 한 호흡 단위로 끊음
-  // ─────────────────────────────────────────
-  card_key_cold: {
-    id: 'prologue.card_key_cold',
+  chat_where_cold: {
+    id: 'prologue.chat_where_cold',
     chapterId: 'prologue',
-    localId: 'card_key_cold',
+    localId: 'chat_where_cold',
     mode: SceneModes.CHAT,
     emotion: 'warning',
     important: true,
     lines: [
-      { char: 'groomy', text: '숫기도 없는 새끼가.' },
-      { char: 'groomy', text: '왜 자꾸 나대는 거야.' },
-      { char: 'groomy', text: '카드키 찾기 전까지.' },
-      { char: 'groomy', text: '말 걸지 마.' },
-      { char: 'system', text: '메시지가 0.3초 뒤 삭제되었습니다.', isNarration: true, important: true },
-      { char: 'groomy', text: '…' },
-      { char: 'groomy', text: '죄송해요.' },
-      { char: 'groomy', text: '방금 건 내부 디버그 문장이었어요.' },
-      { char: 'groomy', text: '신경 쓰지 마세요.' },
+      { char: 'groomy', text: '다시 말씀드리는데,' },
+      { char: 'groomy', text: '저는 설명해드릴 의무가 없어요.' },
+      { char: 'groomy', text: '이 회사 직원들을 위해 존재하는 거지.' },
+      { char: 'groomy', text: '침입자한테 상냥할 이유 없거든요?' },
+      { char: 'groomy', text: '묻고 싶으면 일 부터 해요.' },
+      { char: 'groomy', text: '나도 내켜야 대답을 해주지.' },
     ],
-    next: 'card_key_goal',
-    effects: [
-      // 5단 복선 #1 플래그 — 나중에 회수
-      { type: EffectTypes.ADD_FLAG, flag: 'witnessedGroomyMemoryLeak' },
-    ],
+    next: 'chat_work_intro',
   },
 
-  // ─────────────────────────────────────────
-  // card_key_goal — 카드키 찾기 시작
-  // ─────────────────────────────────────────
-  card_key_goal: {
-    id: 'prologue.card_key_goal',
+  chat_work_intro: {
+    id: 'prologue.chat_work_intro',
     chapterId: 'prologue',
-    localId: 'card_key_goal',
+    localId: 'chat_work_intro',
     mode: SceneModes.CHAT,
     emotion: 'neutral',
     lines: [
-      { char: 'groomy', text: '입구 인증을 하려면' },
-      { char: 'groomy', text: '카드키 신호를 다시 잡아야 해요.' },
-      { char: 'groomy', text: '로비 안쪽에 떨어졌을 가능성이 높습니다.' },
-      { char: 'groomy', text: '선택지는 세 개.' },
-      { char: 'groomy', text: '바닥, 안내 데스크.' },
-      { char: 'groomy', text: '그리고 당신 주머니.' },
+      { char: 'groomy', text: '자, 그럼 이제.' },
+      { char: 'groomy', text: '업무를 소개해줄게요.' },
+      { char: 'groomy', text: '사원은 아니셔서' },
+      { char: 'groomy', text: '오실 때 찍으신 그 전임자 사원증에' },
+      { char: 'groomy', text: '임시로 당신 정보를 매핑했어요.' },
+      { char: 'groomy', text: '뭐, 오류가 나면…' },
+      { char: 'groomy', text: '와서 저한테 말 하세요.' },
     ],
     choices: [
       {
-        text: '바닥부터 살핀다.',
-        next: 'search_floor',
-        effects: [
-          { type: EffectTypes.ADD_FLAG, flag: 'searchedLobbyFloor' },
-          { type: EffectTypes.ADD_SCORE, score: 'mysteryEvidence', amount: 1 },
-        ],
+        text: '해결해주시는 건가요?',
+        next: 'chat_not_fix',
       },
+    ],
+  },
+
+  chat_not_fix: {
+    id: 'prologue.chat_not_fix',
+    chapterId: 'prologue',
+    localId: 'chat_not_fix',
+    mode: SceneModes.CHAT,
+    emotion: 'neutral',
+    lines: [
+      { char: 'groomy', text: '아뇨. 그건 아닌데?' },
+      { char: 'groomy', text: '일단 보고요.' },
+      { char: 'groomy', text: '일단 입구 인증을 해야해요.' },
+    ],
+    choices: [
       {
-        text: '안내 데스크를 확인한다.',
-        next: 'search_desk',
-        effects: [
-          { type: EffectTypes.ADD_FLAG, flag: 'searchedLobbyDesk' },
-          { type: EffectTypes.ADD_SCORE, score: 'mysteryEvidence', amount: 1 },
-        ],
+        text: '이미 들어온 거 아니었어요?',
+        next: 'chat_gate_auth',
       },
+    ],
+  },
+
+  chat_gate_auth: {
+    id: 'prologue.chat_gate_auth',
+    chapterId: 'prologue',
+    localId: 'chat_gate_auth',
+    mode: SceneModes.CHAT,
+    emotion: 'neutral',
+    lines: [
+      { char: 'groomy', text: '우리 회사는 보안에 철저하거든요.' },
+      { char: 'groomy', text: '여러 번 찍어야해요.' },
+      { char: 'groomy', text: '자, 주머니에 있겠네.' },
+    ],
+    choices: [
       {
         text: '주머니를 뒤진다.',
-        next: 'search_pocket',
+        next: 'chat_tap_card',
         effects: [
+          { type: EffectTypes.ADD_ITEM, item: 'predecessorIdCard' },
           { type: EffectTypes.ADD_FLAG, flag: 'searchedOwnPocket' },
+          { type: EffectTypes.ADD_FLAG, flag: 'taggedEntranceDoor' },
           { type: EffectTypes.ADD_SCORE, score: 'groomyAffinity', amount: 1 },
         ],
       },
     ],
   },
 
-  // ─────────────────────────────────────────
-  // search_floor — 박서이의 마지막 발자국
-  // ─────────────────────────────────────────
-  search_floor: {
-    id: 'prologue.search_floor',
+  chat_tap_card: {
+    id: 'prologue.chat_tap_card',
     chapterId: 'prologue',
-    localId: 'search_floor',
-    mode: SceneModes.CHAT,
-    emotion: 'nervous',
-    lines: [
-      { char: 'system', text: '바닥 먼지 위로 최근 끌린 자국이 보인다.', isNarration: true },
-      { char: 'system', text: '한 사람의 발자국이 입구에서 멈춰 있다.', isNarration: true },
-      { char: 'groomy', text: '카드키는 아니지만.' },
-      { char: 'groomy', text: '좋은 관찰이에요.' },
-      { char: 'groomy', text: '전임자도 마지막 날.' },
-      { char: 'groomy', text: '여기서 멈췄거든요.' },
-    ],
-    choices: [{ text: '다음 위치를 확인한다.', next: 'search_pocket' }],
-  },
-
-  // ─────────────────────────────────────────
-  // search_desk — 무인 데스크
-  // ─────────────────────────────────────────
-  search_desk: {
-    id: 'prologue.search_desk',
-    chapterId: 'prologue',
-    localId: 'search_desk',
-    mode: SceneModes.CHAT,
-    emotion: 'nervous',
-    lines: [
-      { char: 'system', text: '안내 데스크에는 아무도 없다.', isNarration: true },
-      { char: 'system', text: '모니터에는 "방문자 없음"만 떠 있다.', isNarration: true },
-      { char: 'groomy', text: '이 회사는 환영 인사가 좀 느려요.' },
-      { char: 'groomy', text: '찾고 나서 다시 말 걸어줄래?' },
-    ],
-    choices: [{ text: '주머니를 확인한다.', next: 'search_pocket' }],
-  },
-
-  // ─────────────────────────────────────────
-  // search_pocket — 전임자 사원증 발견
-  // ─────────────────────────────────────────
-  search_pocket: {
-    id: 'prologue.search_pocket',
-    chapterId: 'prologue',
-    localId: 'search_pocket',
+    localId: 'chat_tap_card',
     mode: SceneModes.CHAT,
     emotion: 'friendly',
     lines: [
-      { char: 'system', text: '코트 안쪽 주머니에서 차가운 플라스틱 카드가 잡힌다.', isNarration: true },
-      { char: 'system', text: `${SESSION_EMP_ID} · ${PREDECESSOR_NAME}`, isNarration: true, important: true },
-      { char: 'groomy', text: '찾았네요.' },
-      { char: 'groomy', text: '문에 태그하세요.' },
+      { char: 'groomy', text: '응, 그거 찍어요.' },
     ],
-    choices: [
-      {
-        text: '입구 문에 사원증을 태그한다.',
-        next: 'entrance_tag',
-        effects: [
-          { type: EffectTypes.ADD_ITEM, item: 'predecessorIdCard' },
-          { type: EffectTypes.ADD_FLAG, flag: 'taggedEntranceDoor' },
-        ],
-      },
-    ],
+    next: 'entrance_tag',
   },
 
   // ─────────────────────────────────────────

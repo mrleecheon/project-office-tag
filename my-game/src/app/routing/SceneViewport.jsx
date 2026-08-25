@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { SceneModes } from '../../engine/contracts.js'
-import { fadeScreen } from '../../engine/animation/motionPresets.js'
+import { resolveScreenPreset } from '../../engine/animation/motionPresets.js'
 import ChatScene from '../../renderers/chat/ChatScene.jsx'
 import RpgScene from '../../renderers/rpg/RpgScene.jsx'
 import VnScene from '../../renderers/vn/VnScene.jsx'
@@ -71,13 +71,16 @@ export default function SceneViewport({
   onMove,
 }) {
   if (!scene) return null
+  const screenPreset = scene.mode === SceneModes.CHAT
+    ? resolveScreenPreset('default')
+    : resolveScreenPreset('cinematic')
 
   return (
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={scene.id}
         className="sceneViewportLayer"
-        {...fadeScreen}
+        {...screenPreset}
       >
         {renderSceneContent({
           scene,

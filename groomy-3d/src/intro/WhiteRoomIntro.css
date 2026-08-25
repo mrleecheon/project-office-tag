@@ -1,0 +1,55 @@
+.vnOverlay3d {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: auto;
+}
+
+.vnOverlay3d .appRoot,
+.vnOverlay3d .phoneFrame {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  box-shadow: none;
+  border: 0;
+  background: transparent;
+}
+
+.white-room-input {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  z-index: 9;
+  transform: translate(-50%, -50%);
+  display: grid;
+  gap: 10px;
+  min-width: 240px;
+  padding: 16px 18px;
+  background: rgba(8, 16, 24, .92);
+  border: 1px solid rgba(180, 210, 230, .35);
+  color: #e8f2f8;
+}
+
+.white-room-input label {
+  font-size: 13px;
+  letter-spacing: .04em;
+}
+
+.white-room-input input,
+.white-room-input button {
+  font: inherit;
+  padding: 8px 10px;
+}
+
+.white-room-input input {
+  background: #101820;
+  border: 1px solid #3a5568;
+  color: #f2f7fb;
+}
+
+.white-room-input button {
+  background: #1c3344;
+  border: 1px solid #5a8aa8;
+  color: #d7eef8;
+  cursor: pointer;
+}

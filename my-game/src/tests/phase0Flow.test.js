@@ -41,19 +41,18 @@ const context = () => ({
 
 // Nickname substitution
 orchestrator.handleInput({ type: 'nickname', next: 'after_nickname' }, '테스터')
+assert.equal(state.nickname, '테스터')
 const afterNickname = chapterRegistry.getScene('prologue', 'after_nickname')
-const nicknameLine = afterNickname.lines.find((line) => typeof line.text === 'function')
-assert.match(resolveLineText(nicknameLine, context()), /테스터/)
 
 // groomyAffinity accumulation
 const affinityBefore = state.scores.groomyAffinity ?? 0
-choose(afterNickname.choices.find((entry) => entry.text === '네.'))
+choose(afterNickname.choices.find((entry) => entry.text === '어 열심히 할게…'))
 assert.equal(state.scores.groomyAffinity, affinityBefore + 1)
 
 // Prologue mainline scene links
 const prologuePath = [
   'start', 'entrance_bridge', 'lobby_reveal', 'groomy_intro', 'chat_boot', 'ask_nickname', 'after_nickname',
-  'card_key_goal', 'search_pocket', 'entrance_tag', 'iseol_intro', 'prologue_complete',
+  'chat_work_intro', 'chat_tap_card', 'entrance_tag', 'iseol_intro', 'prologue_complete',
 ]
 for (const sceneId of prologuePath) {
   const integrity = safeResolveSceneTransition({

@@ -4,8 +4,22 @@ import OverlayLayer from './OverlayLayer.jsx'
 import SystemScreenRouter from './SystemScreenRouter.jsx'
 import { useGameRuntimeController } from './useGameRuntimeController.js'
 
-export default function GameRouter({ afterOfficeIntro = false }) {
-  const runtime = useGameRuntimeController({ afterOfficeIntro })
+export default function GameRouter({
+  afterOfficeIntro = false,
+  skipLoad = false,
+  startSceneId = null,
+  startChapterId = null,
+  nickname = null,
+  onInterceptScene,
+} = {}) {
+  const runtime = useGameRuntimeController({
+    afterOfficeIntro,
+    skipLoad,
+    startSceneId,
+    startChapterId,
+    nickname,
+    onInterceptScene,
+  })
   const {
     state,
     chapter,
@@ -48,6 +62,7 @@ export default function GameRouter({ afterOfficeIntro = false }) {
         clearCopy={clearCopy}
         runtimeError={runtimeError}
         onNfcDone={handleNfcDone}
+        onMenuStart={handleNfcDone}
         onBootDone={handleBootDone}
         onClearContinue={handleClearContinue}
         onRestart={restart}
@@ -65,10 +80,19 @@ export default function GameRouter({ afterOfficeIntro = false }) {
         context={context}
         map={map}
         state={state}
-        onChoice={orchestrator.handleChoice}
-        onInput={orchestrator.handleInput}
+        onChoice={(choice) => {
+          if (onInterceptScene?.(choice?.next)) return
+          orchestrator.handleChoice(choice)
+        }}
+        onInput={(input, value) => {
+          if (onInterceptScene?.(input?.next)) return
+          orchestrator.handleInput(input, value)
+        }}
         onDone={handleSceneDone}
-        onTrigger={orchestrator.goToScene}
+        onTrigger={(sceneId) => {
+          if (onInterceptScene?.(sceneId)) return
+          orchestrator.goToScene(sceneId)
+        }}
         onMove={handleMapMove}
         onOpenSaveMenu={() => setSaveMenuOpen(true)}
         onRestart={restart}

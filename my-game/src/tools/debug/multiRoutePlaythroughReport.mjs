@@ -282,10 +282,14 @@ function runPrologueNeutral(rt) {
   rt.enterNextChapter()
 }
 
-function runCh1BadBOrganic(rt) {
+function enterCh1MeetingFromTour(rt) {
   rt.choose('알겠습니다. 안내 부탁드립니다.')
-  rt.choose('회의실부터 간다.')
+  rt.done('office7_rpg')
   rt.go('meeting_entry')
+}
+
+function runCh1BadBOrganic(rt) {
+  enterCh1MeetingFromTour(rt)
   rt.choose('안으로 들어간다.')
   rt.go('meeting_room_rpg')
   rt.go('meeting_chat')
@@ -303,8 +307,8 @@ function runCh1BadBOrganic(rt) {
 }
 
 function runCh1Warm(rt) {
-  rt.choose('알겠습니다. 안내 부탁드립니다.')
-  rt.choose('회의실부터 간다.')
+  enterCh1MeetingFromTour(rt)
+  rt.choose('안으로 들어간다.')
   rt.go('meeting_room_rpg')
   rt.go('meeting_chat')
   rt.choose('전임자 자리 기록을 남긴다.')
@@ -341,9 +345,7 @@ function runCh1Cold(rt) {
 }
 
 function runCh1Moderate(rt) {
-  rt.choose('알겠습니다. 안내 부탁드립니다.')
-  rt.choose('회의실부터 간다.')
-  rt.go('meeting_entry')
+  enterCh1MeetingFromTour(rt)
   rt.choose('안으로 들어간다.')
   rt.go('meeting_room_rpg')
   rt.go('meeting_chat')

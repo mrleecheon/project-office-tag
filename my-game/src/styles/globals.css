@@ -8,6 +8,23 @@ body {
   background: var(--bg);
   overflow: hidden;
 }
+body,
+.appRoot,
+.phoneFrame,
+.screen,
+.chatScene,
+.vnScene,
+.rpgScene {
+  user-select: none;
+  -webkit-user-select: none;
+}
+input,
+textarea,
+[contenteditable='true'],
+[data-allow-copy='true'] {
+  user-select: text;
+  -webkit-user-select: text;
+}
 button, input { font: inherit; }
 
 .systemEyebrow {
@@ -583,32 +600,42 @@ button, input { font: inherit; }
   padding: 0 13px;
 }
 
+.messengerPanel,
 .messengerPanel {
   position: absolute;
   inset: 0;
   overflow: auto;
-  padding: 16px 14px 20px;
-  background:
-    radial-gradient(circle at 100% 0, rgba(114, 224, 194, .08), transparent 30%),
-    var(--messenger-panel);
-  color: #b9d4e6;
+  padding: 16px 14px 18px;
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius);
 }
 
+.messengerPanel header,
 .messengerPanel header {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-hairline);
 }
 
+.messengerPanel header small,
 .messengerPanel header small {
   display: block;
-  color: var(--groomy-mint);
-  font: 10px ui-monospace, Consolas, monospace;
-  letter-spacing: .12em;
+  color: var(--text-system-mono);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
 }
 
 .messengerPanel h2 {
-  margin: 5px 0 6px;
-  color: #e2f3f7;
-  font-size: 20px;
+  margin: 7px 0 6px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 19px;
+  letter-spacing: .015em;
 }
 
 .messengerPanel h3 {
@@ -619,20 +646,20 @@ button, input { font: inherit; }
 
 .messengerPanel p {
   margin: 0;
-  color: #6f8da0;
+  color: #7fa0b5;
   line-height: 1.55;
-  font-size: 12.5px;
+  font-size: 12px;
 }
 
 .idCardPreview {
   margin-bottom: 14px;
-  padding: 15px;
-  border: 1px solid #28516a;
-  border-radius: 16px;
+  padding: 15px 14px;
+  border: 1px solid rgba(101, 164, 199, .42);
+  border-radius: 10px;
   background:
-    linear-gradient(135deg, rgba(216, 236, 240, .12), rgba(114, 224, 194, .04)),
-    #081723;
-  box-shadow: 0 12px 28px rgba(0,0,0,.28);
+    linear-gradient(135deg, rgba(216, 236, 240, .1), rgba(114, 224, 194, .04)),
+    rgba(7, 20, 31, .9);
+  box-shadow: 0 10px 24px rgba(0,0,0,.34);
 }
 
 .idCardPreview span,
@@ -661,10 +688,10 @@ button, input { font: inherit; }
 .statusGrid div,
 .clueCard,
 .settingsGroup {
-  border: 1px solid #1d3b54;
-  border-radius: 12px;
-  background: rgba(7, 18, 29, .74);
-  padding: 10px;
+  border: 1px solid rgba(82, 136, 168, .35);
+  border-radius: 8px;
+  background: rgba(7, 18, 29, .88);
+  padding: 10px 9px;
 }
 
 .statusGrid dt {
@@ -719,12 +746,13 @@ button, input { font: inherit; }
 .scoreStrip span,
 .recordPill {
   display: inline-flex;
-  border: 1px solid #24465c;
-  border-radius: 999px;
-  background: #0a1b28;
-  color: #91bbd1;
-  padding: 6px 10px;
-  font-size: 11px;
+  border: 1px solid rgba(80, 136, 170, .36);
+  border-radius: 6px;
+  background: rgba(10, 26, 39, .9);
+  color: #a7d2e9;
+  padding: 5px 8px;
+  font-size: 10px;
+  letter-spacing: .04em;
 }
 
 .panelList {
@@ -753,12 +781,96 @@ button, input { font: inherit; }
 
 .settingsGroup {
   display: grid;
-  gap: 8px;
-  margin-bottom: 14px;
+  gap: 10px;
 }
 
 .settingsGroup strong {
-  color: #d6eef5;
+  color: #dff3ff;
+  letter-spacing: .04em;
+  font: 700 10px ui-monospace, Consolas, monospace;
+}
+
+.settingsPanel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  border-color: var(--border-hairline);
+  border-radius: var(--radius);
+}
+
+.settingsPanel header {
+  border-bottom-color: var(--border-hairline);
+}
+
+.settingsLayout {
+  display: grid;
+  grid-template-columns: 168px minmax(0, 1fr);
+  gap: 16px;
+  min-height: 0;
+  flex: 1;
+}
+
+.settingsTabs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settingsTabs button {
+  text-align: left;
+  padding: 12px 4px 10px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--border-hairline);
+  border-radius: 0;
+}
+
+.settingsTabs button:hover,
+.settingsTabs button.is-active {
+  color: var(--accent-groomy);
+  background: none;
+  border-bottom-color: var(--accent-groomy);
+}
+
+.settingsPane {
+  min-height: 0;
+  overflow: auto;
+  padding: 4px 2px 4px 8px;
+  border-left: 1px solid rgba(232, 228, 214, 0.16);
+}
+
+.settingsPanel .uiButton {
+  border: 0;
+  border-bottom: 1px solid var(--border-hairline);
+  border-radius: 0;
+  min-height: 44px;
+  justify-content: flex-start;
+  padding-inline: 4px;
+  background: none;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  box-shadow: none;
+}
+
+.settingsPanel .uiButton:hover,
+.settingsPanel .uiButton:focus-visible {
+  border-bottom-color: var(--accent-groomy);
+  color: var(--accent-groomy);
+  transform: none;
+  box-shadow: none;
+}
+
+.settingsPanel .statusGrid {
+  gap: 10px;
 }
 
 .vnScene {
@@ -922,6 +1034,30 @@ button, input { font: inherit; }
   opacity: .22;
   pointer-events: none;
 }
+.vnStageFx {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+.vnStageFx.fxScanline {
+  opacity: .12;
+  mix-blend-mode: screen;
+}
+.vnStageFx.fxGlitch {
+  opacity: .08;
+  mix-blend-mode: soft-light;
+  animation: fade .9s ease-in-out infinite;
+}
+.vnStageBackground::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 40%, transparent 38%, rgba(0, 0, 0, .28) 100%);
+}
 .vnStageFallback {
   position: absolute;
   inset: 0;
@@ -937,17 +1073,24 @@ button, input { font: inherit; }
 }
 .vnPortrait {
   position: absolute;
-  bottom: 20px;
-  width: 34%;
-  max-width: 240px;
+  bottom: 0;
+  height: 86%;
+  width: 36%;
+  max-width: 280px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
 }
-.vnPortrait.left { left: 4%; }
+.vnPortrait.left { left: 3%; }
 .vnPortrait.center { left: 50%; transform: translateX(-50%); }
-.vnPortrait.right { right: 4%; }
+.vnPortrait.right { right: 3%; left: auto; }
 .vnPortrait img {
   width: 100%;
-  border: 1px solid #2f4f68;
-  background: rgba(5, 11, 18, .66);
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+  background: transparent;
 }
 .vnPortraitFallback {
   width: 100%;
@@ -1075,10 +1218,31 @@ button, input { font: inherit; }
   width: fit-content;
   max-width: 100%;
   border: 1px solid #2b4b66;
-  border-radius: 999px;
-  padding: 2px 9px;
+  border-radius: 3px;
+  padding: 3px 10px;
   background: rgba(10, 25, 38, .72);
 }
+.vnNameplateWrap {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.vnFrameDecor {
+  position: absolute;
+  inset: 6px;
+  pointer-events: none;
+}
+.vnFrameDecor .corner {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-color: rgba(120, 211, 241, .7);
+  border-style: solid;
+}
+.vnFrameDecor .corner.tl { left: 0; top: 0; border-width: 2px 0 0 2px; }
+.vnFrameDecor .corner.tr { right: 0; top: 0; border-width: 2px 2px 0 0; }
+.vnFrameDecor .corner.bl { left: 0; bottom: 0; border-width: 0 0 2px 2px; }
+.vnFrameDecor .corner.br { right: 0; bottom: 0; border-width: 0 2px 2px 0; }
 .vnBox strong small { opacity: .45; font-weight: 400; }
 .vnBox p {
   margin: 0;
@@ -1118,23 +1282,89 @@ button, input { font: inherit; }
   flex: 0 0 auto;
 }
 
-.vnChoiceLayer {
-  flex: 0 0 auto;
-  position: relative;
-  z-index: 8;
+.vnScene.choicesModalOpen .vnBox,
+.vnScene.choicesModalOpen .vnControls,
+.vnScene.choicesModalOpen .modeBar {
+  pointer-events: none;
 }
 
-.vnScene.hasChoices .vnChoiceLayer {
-  padding: 10px 12px;
-  background: #060d15;
-  border-top: 1px solid #273f58;
-  max-height: min(42vh, 280px);
+.vnChoiceBackdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: rgba(3, 9, 16, .46);
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.vnChoiceLayer {
+  width: min(92%, 460px);
+  max-height: min(56vh, 420px);
   overflow-y: auto;
+  border: 1px solid rgba(95, 160, 205, .55);
+  border-radius: 18px;
+  padding: 14px;
+  background: linear-gradient(180deg, rgba(6, 16, 28, .88), rgba(5, 12, 22, .92));
+  box-shadow:
+    0 0 0 1px rgba(95, 160, 205, .2),
+    0 18px 42px rgba(0, 0, 0, .55),
+    0 0 28px rgba(86, 186, 240, .22);
 }
 
 .vnChoiceLayer .choiceDock {
   background: transparent;
   border-top-color: #273f58;
+}
+.vnChoiceLayer .choiceDock.isVn {
+  display: grid;
+  gap: 12px;
+}
+.vnChoiceLayer .choiceDock.isVn > small {
+  color: #9bc6e1;
+  letter-spacing: .14em;
+  font: 10px ui-monospace, Consolas, monospace;
+}
+.vnChoiceLayer .choiceDock.isVn .vnChoiceButton {
+  width: 100%;
+  min-height: 54px;
+  border: 1px solid rgba(88, 150, 193, .62);
+  border-left: 4px solid #74d8ee;
+  border-radius: 16px;
+  background-image:
+    linear-gradient(120deg, rgba(114, 224, 194, .1), rgba(114, 224, 194, 0) 28%),
+    url('/assets/ui/vn/choice_button_base.svg');
+  background-size: cover, cover;
+  background-position: center, center;
+  background-repeat: no-repeat, no-repeat;
+  color: #e0f2ff;
+  font-weight: 500;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .34);
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+.vnChoiceLayer .choiceDock.isVn .vnChoiceButton:hover:not(:disabled) {
+  transform: scale(1.015);
+  border-color: #70c6f3;
+  background-image:
+    linear-gradient(120deg, rgba(114, 224, 194, .18), rgba(114, 224, 194, .04) 32%),
+    url('/assets/ui/vn/choice_button_border.svg');
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, .45),
+    0 0 22px rgba(93, 197, 255, .28);
+  filter: brightness(1.05);
+}
+.vnChoiceLayer .choiceDock.isVn .vnChoiceButton span {
+  color: #95e6ff;
+  margin-right: 10px;
+}
+.modeBar {
+  background-image:
+    linear-gradient(180deg, rgba(5, 11, 20, .9), rgba(5, 11, 20, .86)),
+    url('/assets/ui/vn/divider_edges.svg');
+  background-repeat: repeat, repeat-x;
+  background-size: auto, auto 100%;
+  background-position: center, center;
 }
 
 .rpgScene {
@@ -1583,6 +1813,12 @@ button, input { font: inherit; }
   margin-bottom: 12px;
   color: #8eb7d6;
 }
+.saveSlotOverlay__sub {
+  margin: 0 0 10px;
+  color: #6f99b4;
+  font: 10px ui-monospace, Consolas, monospace;
+  letter-spacing: .13em;
+}
 
 .saveSlotOverlay > header button {
   border: 1px solid #22415a;
@@ -1632,4 +1868,290 @@ button, input { font: inherit; }
 
 .saveSlotOverlay__slot button:disabled {
   opacity: .4;
+}
+
+/* Commercial UI/UX overhaul */
+.screen.mainMenuScreen {
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  background: #050608;
+}
+.mainMenuWideFrame {
+  position: relative;
+  width: min(100vw, calc(100vh * 16 / 9));
+  height: min(100vh, calc(100vw * 9 / 16));
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+.mainMenuStage {
+  position: absolute;
+  inset: 0;
+}
+.mainMenuStage .menuLayer {
+  position: absolute;
+  inset: -6%;
+}
+.mainMenuStage .menuLayer.bg {
+  background:
+    radial-gradient(circle at 70% 25%, rgba(99, 204, 255, .26), transparent 35%),
+    radial-gradient(circle at 18% 68%, rgba(103, 232, 212, .22), transparent 40%),
+    linear-gradient(155deg, #081826, #040a11 60%);
+  transform: scale(1.03);
+}
+.mainMenuStage .menuLayer.volumetricLight {
+  background:
+    linear-gradient(118deg, transparent 35%, rgba(94, 216, 255, .15) 54%, transparent 74%),
+    linear-gradient(160deg, transparent 44%, rgba(103, 232, 212, .12) 63%, transparent 78%);
+  mix-blend-mode: screen;
+  animation: menuPulse 4.8s ease-in-out infinite;
+}
+.mainMenuStage .menuLayer.fog {
+  background:
+    radial-gradient(circle at 22% 65%, rgba(126, 196, 226, .22), transparent 42%),
+    radial-gradient(circle at 74% 46%, rgba(83, 183, 164, .2), transparent 38%);
+  filter: blur(26px);
+  animation: menuFogDrift 14s ease-in-out infinite;
+}
+.mainMenuStage .menuLayer.noise {
+  background-image: url('/assets/effects/overlays/scanline.png');
+  opacity: .08;
+  mix-blend-mode: soft-light;
+}
+.mainMenuStage .menuLayer.vignette {
+  background: radial-gradient(circle at 50% 50%, transparent 50%, rgba(0, 0, 0, .6) 100%);
+}
+.mainMenuStage .menuLayer.glitch {
+  background-image: url('/assets/effects/overlays/glitch_soft.png');
+  opacity: .06;
+  mix-blend-mode: screen;
+  animation: menuGlitch 7s linear infinite;
+}
+.menuParticles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.menuParticles span {
+  position: absolute;
+  bottom: -12%;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: rgba(204, 240, 255, .9);
+  box-shadow: 0 0 12px rgba(100, 210, 255, .6);
+  animation-name: menuParticleFloat;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.mainMenuHud,
+.mainMenuHud,
+.vnTonePanel {
+  position: relative;
+  z-index: 6;
+  width: min(92%, 920px);
+  margin: auto;
+  padding: 22px 28px 20px;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  box-shadow: none;
+  display: grid;
+  gap: 18px;
+  text-align: center;
+  font-family: var(--font-body);
+  color: var(--text-primary);
+}
+.mainMenuTitleBlock small {
+  display: block;
+  color: var(--text-system-mono);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.mainMenuTitleBlock h1 {
+  margin: 10px 0 8px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: clamp(28px, 5vw, 44px);
+  letter-spacing: .1em;
+}
+.mainMenuTitleBlock p {
+  margin: 0;
+  color: var(--text-system-mono);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: .08em;
+}
+.mainMenuButtons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.mainMenuButtons button {
+  position: relative;
+  border: 0;
+  border-bottom: 1px solid var(--border-hairline);
+  border-radius: 0;
+  padding: 14px 4px;
+  background: none;
+  color: var(--text-primary);
+  text-align: center;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: none;
+}
+.mainMenuButtons button:hover,
+.mainMenuButtons button:focus-visible {
+  transform: none;
+  border-bottom-color: var(--accent-groomy);
+  color: var(--accent-groomy);
+  box-shadow: none;
+}
+.mainMenuUtility {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+.mainMenuUtility button {
+  min-width: 120px;
+  border: 0;
+  border-bottom: 1px solid var(--border-hairline);
+  border-radius: 0;
+  background: none;
+  color: var(--text-system-mono);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 8px 4px;
+}
+
+.mainMenuUtility button:hover,
+.mainMenuUtility button:focus-visible {
+  color: var(--accent-groomy);
+  border-bottom-color: var(--accent-groomy);
+}
+
+.startupSequence {
+  position: absolute;
+  inset: 0;
+  z-index: 120;
+  background: #000;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  cursor: default;
+}
+.startupNoise,
+.startupScanline,
+.startupGlow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.startupNoise {
+  background-image: url('/assets/effects/overlays/glitch_soft.png');
+  opacity: .12;
+  animation: startupFlicker 1.6s linear infinite;
+}
+.startupScanline {
+  background-image: url('/assets/effects/overlays/scanline.png');
+  opacity: .22;
+  mix-blend-mode: screen;
+}
+.startupGlow {
+  background: radial-gradient(circle at 50% 45%, rgba(94, 216, 255, .26), transparent 60%);
+  animation: startupGlowPulse 2.4s ease-in-out infinite;
+}
+.startupContent {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+.startupContent small {
+  color: #6b8ca5;
+  letter-spacing: .14em;
+  font: 10px ui-monospace, Consolas, monospace;
+}
+.startupContent h2 {
+  margin: 10px 0 6px;
+  color: #d9f0ff;
+  font-size: clamp(20px, 5vw, 30px);
+  letter-spacing: .18em;
+}
+.startupContent p {
+  margin: 0;
+  color: #7fb6d4;
+  font-size: 11px;
+}
+
+.uiButton {
+  border: 1px solid var(--stroke-1);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(180deg, rgba(16, 37, 56, .95), rgba(10, 22, 36, .98));
+  color: var(--text-secondary);
+  transition: border-color .14s ease, transform .14s ease, box-shadow .14s ease;
+}
+.uiButton:hover,
+.uiButton:focus-visible {
+  border-color: var(--neon-cyan);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--glow-cyan);
+}
+
+.vnScene > .vnBox:not(.sfx):not(.textOnly):not(.welcomeCaption) {
+  border-top: 1px solid rgba(116, 186, 255, .5);
+  background:
+    linear-gradient(180deg, rgba(5, 14, 22, .92), rgba(4, 10, 18, .95)),
+    url('/assets/effects/overlays/scanline.png');
+  backdrop-filter: blur(10px);
+}
+.vnSpeakerTag {
+  border-color: rgba(116, 186, 255, .4);
+  background: rgba(12, 30, 45, .75);
+}
+.saveSlotOverlay {
+  background: rgba(3, 9, 15, 0.72);
+  backdrop-filter: blur(8px);
+}
+
+.modalShellBackdrop {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: grid;
+  place-items: center;
+  background: rgba(2, 8, 14, 0.72);
+  backdrop-filter: blur(5px);
+}
+.modalShell {
+  width: min(90%, 420px);
+  border: 1px solid var(--stroke-1);
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, rgba(9, 21, 34, .96), rgba(7, 15, 24, .98));
+  box-shadow: var(--shadow-heavy);
+  padding: 18px;
+}
+.modalShell h3 {
+  margin: 0 0 8px;
+  color: var(--text-primary);
+}
+.modalShell p {
+  margin: 0 0 14px;
+  color: var(--text-tertiary);
+}
+.modalShellActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }

@@ -1,14 +1,63 @@
 :root {
+  --bg-panel: rgba(10, 10, 14, 0.85);
+  --border-hairline: #2a2e35;
+  --text-primary: #e8eef2;
+  --text-system-mono: #9aa5b1;
+  --text-glitch-warn: #ffb020;
+  --accent-groomy: #4fd1c5;
+  --radius: 2px;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
   --bg: #040810;
   --panel: #050b13;
   --panel-2: #0b1520;
-  --line: #172638;
-  --text: #c0d8f0;
-  --muted: #3a5870;
-  --accent: #5b9bd5;
+  --line: #1a3148;
+  --text: #d3e8f9;
+  --muted: #5d7890;
+  --accent: #69c7e8;
   --groomy-mint: #72e0c2;
   --groomy-warn: #ff8a54;
   --office-paper: #d7e3ea;
   --messenger-tab: #07111c;
   --messenger-panel: #0b1724;
+
+  --surface-0: #040810;
+  --surface-1: #081522;
+  --surface-2: #0c1d2d;
+  --surface-3: #102437;
+  --surface-glass: rgba(8, 22, 36, 0.72);
+  --surface-glass-strong: rgba(7, 18, 30, 0.9);
+  --stroke-1: rgba(146, 210, 240, 0.28);
+  --stroke-2: rgba(146, 210, 240, 0.14);
+  --text-primary: #e7f5ff;
+  --text-secondary: #b9d7eb;
+  --text-tertiary: #7fa0b8;
+  --neon-cyan: #5ed8ff;
+  --neon-teal: #67e8d4;
+  --neon-blue: #74baff;
+  --danger-soft: #ff8f7a;
+
+  --shadow-soft: 0 10px 26px rgba(0, 0, 0, 0.35);
+  --shadow-heavy: 0 20px 56px rgba(0, 0, 0, 0.56);
+  --glow-cyan: 0 0 28px rgba(94, 216, 255, 0.25);
+  --glass-blur: 14px;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 22px;
+  --space-6: 28px;
+
+  --z-base: 1;
+  --z-content: 8;
+  --z-overlay: 40;
+  --z-modal: 80;
+  --z-debug: 99;
 }

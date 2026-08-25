@@ -22,12 +22,37 @@ const devBootstrapFromUrl = typeof window !== 'undefined'
   ? parseDevBootstrapFromUrl(window.location.search)
   : null
 
-export function useGameRuntimeController({ afterOfficeIntro = false } = {}) {
+export function useGameRuntimeController({
+  afterOfficeIntro = false,
+  skipLoad = false,
+  startSceneId = null,
+  startChapterId = null,
+  nickname = null,
+  onInterceptScene,
+} = {}) {
   const [state, dispatch] = useReducer(
     gameReducer,
-    { afterOfficeIntro, devBootstrap: devBootstrapFromUrl },
-    ({ afterOfficeIntro: skipBoot, devBootstrap }) => createBootstrapState({
+    {
+      afterOfficeIntro,
+      skipLoad,
+      startSceneId,
+      startChapterId,
+      nickname,
+      devBootstrap: devBootstrapFromUrl,
+    },
+    ({
+      afterOfficeIntro: skipBoot,
+      skipLoad: skipStored,
+      startSceneId: bootScene,
+      startChapterId: bootChapter,
+      nickname: bootNickname,
+      devBootstrap,
+    }) => createBootstrapState({
       afterOfficeIntro: devBootstrap ? false : skipBoot,
+      skipLoad: skipStored,
+      startSceneId: bootScene,
+      startChapterId: bootChapter,
+      nickname: bootNickname,
       devBootstrap,
     }),
   )
@@ -69,6 +94,7 @@ export function useGameRuntimeController({ afterOfficeIntro = false } = {}) {
     chapter,
     scene,
     getState: () => state,
+    onInterceptScene,
   })
 
   const handleClearContinue = useCallback(() => {

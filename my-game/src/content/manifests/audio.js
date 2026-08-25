@@ -20,6 +20,21 @@ export const audioCueManifest = {
     bump: 'rpg:bump',
     interact: 'rpg:interact',
   },
+  ui: {
+    hover: 'ui:hover',
+    click: 'ui:click',
+    confirm: 'ui:confirm',
+    cancel: 'ui:cancel',
+    open: 'ui:open',
+    close: 'ui:close',
+    save: 'ui:save',
+    load: 'ui:load',
+    toggle: 'ui:toggle',
+    transition: 'ui:transition',
+    scroll: 'ui:scroll',
+    notification: 'ui:notification',
+    glitch: 'ui:glitch',
+  },
 }
 
 export function resolveChatCueProfile(profileId = 'normal') {

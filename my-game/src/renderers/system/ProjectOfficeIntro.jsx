@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { emitAudioCue } from '../../engine/audio/audioBus'
-import { resolvePublicPath } from '../../engine/assets/publicPath.js'
+import { resolveImageAsset } from '../../content/manifests/assets.js'
 
-const img1 = resolvePublicPath('/assets/intro/scene1_door.png')
-const img2 = resolvePublicPath('/assets/intro/scene2_reader_closeup.png')
-const img3 = resolvePublicPath('/assets/intro/scene3_card_tag.png')
-const img4 = resolvePublicPath('/assets/intro/scene4_title.png')
+const img1 = resolveImageAsset('intro_scene1_door')?.src
+const img2 = resolveImageAsset('intro_scene2_reader')?.src
+const img3 = resolveImageAsset('intro_scene3_card_tag')?.src
+const img4 = resolveImageAsset('intro_scene4_title')?.src
 
 const SCENES = [
   {

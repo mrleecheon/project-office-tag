@@ -1,10 +1,12 @@
 import { resolveUiText } from '../../content/manifests/text.js'
+import { emitAudioCue } from '../../engine/audio/audioBus.js'
+import { clearHoverAudioState, playHoverAudioOnce } from '../../ui/interaction/hoverAudio.js'
 
 const tabs = [
-  { id: 'chat', labelKey: 'tabChat', badgeKey: 'tabChatBadge', fallbackLabel: '채팅', fallbackBadge: 'Talk' },
-  { id: 'profile', labelKey: 'tabProfile', badgeKey: 'tabProfileBadge', fallbackLabel: '프로필', fallbackBadge: 'ID' },
-  { id: 'clues', labelKey: 'tabClues', badgeKey: 'tabCluesBadge', fallbackLabel: '단서', fallbackBadge: 'Log' },
-  { id: 'settings', labelKey: 'tabSettings', badgeKey: 'tabSettingsBadge', fallbackLabel: '설정', fallbackBadge: 'Sys' },
+  { id: 'chat', icon: '◉', labelKey: 'tabChat', badgeKey: 'tabChatBadge', fallbackLabel: '채팅', fallbackBadge: 'COMMS' },
+  { id: 'profile', icon: '◎', labelKey: 'tabProfile', badgeKey: 'tabProfileBadge', fallbackLabel: '프로필', fallbackBadge: 'ID' },
+  { id: 'clues', icon: '◇', labelKey: 'tabClues', badgeKey: 'tabCluesBadge', fallbackLabel: '단서', fallbackBadge: 'EVID' },
+  { id: 'settings', icon: '▣', labelKey: 'tabSettings', badgeKey: 'tabSettingsBadge', fallbackLabel: '설정', fallbackBadge: 'CTRL' },
 ]
 
 export default function BottomTabBar({ activeTab, onSelect }) {
@@ -16,10 +18,17 @@ export default function BottomTabBar({ activeTab, onSelect }) {
           type="button"
           className={activeTab === tab.id ? 'active' : ''}
           aria-current={activeTab === tab.id ? 'page' : undefined}
-          onClick={() => onSelect(tab.id)}
+          onMouseEnter={(event) => playHoverAudioOnce(event)}
+          onMouseLeave={(event) => clearHoverAudioState(event)}
+          onFocus={(event) => playHoverAudioOnce(event)}
+          onClick={() => {
+            emitAudioCue(activeTab === tab.id ? 'ui:click' : 'ui:confirm')
+            onSelect(tab.id)
+          }}
         >
-          <span>{resolveUiText(tab.badgeKey, tab.fallbackBadge)}</span>
-          {resolveUiText(tab.labelKey, tab.fallbackLabel)}
+          <span className="navGlyph">{tab.icon}</span>
+          <b>{resolveUiText(tab.badgeKey, tab.fallbackBadge)}</b>
+          <small>{resolveUiText(tab.labelKey, tab.fallbackLabel)}</small>
         </button>
       ))}
     </nav>

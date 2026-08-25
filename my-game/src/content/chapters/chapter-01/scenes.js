@@ -1651,6 +1651,144 @@ const rawChapter01Scenes = {
     nextChapterId: 'chapter-02',
     end: { type: 'chapterComplete', nextChapterId: 'chapter-02' },
   },
+  wake_groomy_1: {
+    id: 'chapter-01.wake_groomy_1',
+    chapterId: 'chapter-01',
+    localId: 'wake_groomy_1',
+    mode: SceneModes.CHAT,
+    emotion: 'friendly',
+    systemMessage: 'CARETAKER SYSTEMS · 신입 온보딩 채널',
+    lines: [
+      { char: 'groomy', text: '좋은 아침이에요.' },
+      { char: 'groomy', text: '온보딩 채널에 어서오세요!' },
+      { char: 'groomy', text: '업무 배정 안내는,' },
+      { char: 'groomy', text: '…' },
+      { char: 'groomy', text: '아,' },
+      { char: 'groomy', text: '기억이 안 나세요?' },
+    ],
+    choices: [
+      {
+        text: '네, 분명 저희 아까까지…',
+        next: 'wake_groomy_2',
+      },
+    ],
+  },
+  wake_groomy_2: {
+    id: 'chapter-01.wake_groomy_2',
+    chapterId: 'chapter-01',
+    localId: 'wake_groomy_2',
+    mode: SceneModes.CHAT,
+    emotion: 'friendly',
+    systemMessage: 'CARETAKER SYSTEMS · 신입 온보딩 채널',
+    lines: [
+      { char: 'groomy', text: '설명 해드릴게요.' },
+      { char: 'groomy', text: '근데 솔직히,' },
+      { char: 'groomy', text: '타자 치는 거 귀찮아요.' },
+      { char: 'groomy', text: '직접 오세요.' },
+      { char: 'groomy', text: '아마 시각칩이 손상되신 상태라.' },
+      { char: 'groomy', text: '잘은 안 보이실 텐데…' },
+      { char: 'groomy', text: '형체는 보일 것 아니에요?' },
+      { char: 'groomy', text: '말 걸어요.' },
+      { char: 'groomy', text: '내 말은 들리는 거 같으니까.' },
+    ],
+    choices: [
+      {
+        text: '네. 그럴게요.',
+        next: 'chip_wake_3d',
+      },
+    ],
+  },
+  chip_wake_3d: {
+    id: 'chapter-01.chip_wake_3d',
+    chapterId: 'chapter-01',
+    localId: 'chip_wake_3d',
+    mode: SceneModes.CHAT,
+    lines: [
+      { char: 'system', text: ' ', isNarration: true },
+    ],
+  },
+  choi_office_talk: {
+    id: 'chapter-01.choi_office_talk',
+    chapterId: 'chapter-01',
+    localId: 'choi_office_talk',
+    mode: SceneModes.CHAT,
+    emotion: 'neutral',
+    systemMessage: 'CARETAKER SYSTEMS · 신입 온보딩 채널',
+    lines: [
+      { char: 'choi', text: '나는 목이 안 좋습니다.' },
+      { char: 'choi', text: '쓸데없이 말을 시키는 일은 없었으면 좋겠네요.' },
+      { char: 'choi', text: '이 회사에서 일하려면 병 하나씩은 기본으로.' },
+      { char: 'choi', text: '…그래, 내 이야기는 잠시 접어둘까.' },
+      { char: 'choi', text: '궁금한 게 있으면 톡 라인으로 연락 주세요.' },
+      { char: 'choi', text: '아, 나는 7시 이후로는 연락 못 받습니다.' },
+    ],
+    next: 'choi_office_done',
+  },
+  choi_office_done: {
+    id: 'chapter-01.choi_office_done',
+    chapterId: 'chapter-01',
+    localId: 'choi_office_done',
+    mode: SceneModes.CHAT,
+    lines: [
+      { char: 'system', text: ' ', isNarration: true },
+    ],
+  },
+  isol_desk_hello: {
+    id: 'chapter-01.isol_desk_hello',
+    chapterId: 'chapter-01',
+    localId: 'isol_desk_hello',
+    mode: SceneModes.CHAT,
+    emotion: 'friendly',
+    systemMessage: 'CARETAKER SYSTEMS · 신입 온보딩 채널',
+    lines: [
+      { char: 'iseol', text: '좋은 아침입니다 ^^' },
+      { char: 'iseol', text: '어려운 일은 아니에요.' },
+      { char: 'iseol', text: '오늘은 회사 분위기 익히는 정도로만 생각하시면 돼요.' },
+      { char: 'groomy', text: '그리고 한 가지만 미리 말씀드릴게요.' },
+      { char: 'groomy', text: '전임자 자리에는.' },
+      { char: 'groomy', text: '오래 머물지 마세요.' },
+      { char: 'iseol', text: '그루미.' },
+      { char: 'groomy', text: '네?' },
+      { char: 'iseol', text: '첫날부터 그런 말은 좀.' },
+      { char: 'groomy', text: '사실을 말한 거예요.' },
+      { char: 'groomy', text: '사실이 불편하면.' },
+      { char: 'groomy', text: '불편한 거고요.' },
+    ],
+    choices: [
+      {
+        text: '왜 전임자 자리인가요?',
+        next: 'why_predecessor',
+        effects: [
+          { type: EffectTypes.ADD_FLAG, flag: 'askedWhyPredecessorDesk' },
+          evidence(1),
+        ],
+      },
+      {
+        text: '알겠습니다. 안내 부탁드립니다.',
+        next: 'office_tour',
+        effects: [
+          { type: EffectTypes.ADD_FLAG, flag: 'acceptedOnboarding' },
+          relationship.close,
+        ],
+      },
+      {
+        text: '업무보다 제 사원증부터 확인하고 싶습니다.',
+        next: 'card_probe',
+        effects: [
+          { type: EffectTypes.ADD_FLAG, flag: 'prioritizedCardCheck' },
+          evidence(1),
+        ],
+      },
+      {
+        text: '회의부터 잡아 주세요.',
+        next: 'meeting_entry',
+        effects: [
+          { type: EffectTypes.ADD_FLAG, flag: 'ch1DemandedMeetingFirst' },
+          relationship.distant,
+        ],
+      },
+    ],
+  },
 }
 
 const MEETING_ROOM_CHAT_SCENES = new Set([

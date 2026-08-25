@@ -22,7 +22,15 @@ export default function VnPortraitLayer({ entries = [] }) {
         const label = entry.expression ? `${char.name} · ${entry.expression}` : char.name
         const failed = failedByKey[key]
         return (
-          <div key={key} className={`vnPortrait ${slotClass(entry.slot)}`}>
+          <div
+            key={key}
+            className={[
+              'vnPortrait',
+              slotClass(entry.slot),
+              entry.animation === 'enter' ? 'enter' : '',
+              entry.animation === 'idleBlink' || entry.idle === 'blink' ? 'idleBlink' : '',
+            ].filter(Boolean).join(' ')}
+          >
             {src && !failed
               ? <img src={src} alt={label} onError={() => setFailedByKey((previous) => ({ ...previous, [key]: true }))} />
               : <div className="vnPortraitFallback" style={{ '--accent': char.accent }}>{label}</div>}

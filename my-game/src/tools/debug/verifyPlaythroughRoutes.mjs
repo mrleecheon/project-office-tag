@@ -97,7 +97,7 @@ function runPrologueCold(rt) {
 
 function runCh1BadBOrganic(rt) {
   rt.choose('알겠습니다. 안내 부탁드립니다.')
-  rt.choose('회의실부터 간다.')
+  rt.done('office7_rpg')
   rt.go('meeting_entry')
   rt.choose('안으로 들어간다.')
   rt.go('meeting_room_rpg')
@@ -113,7 +113,8 @@ function runCh1BadBOrganic(rt) {
 
 function runCh1Warm(rt) {
   rt.choose('알겠습니다. 안내 부탁드립니다.')
-  rt.choose('회의실부터 간다.')
+  rt.done('office7_rpg')
+  rt.go('meeting_entry')
   rt.choose('안으로 들어간다.')
   rt.go('meeting_room_rpg')
   rt.go('meeting_chat')

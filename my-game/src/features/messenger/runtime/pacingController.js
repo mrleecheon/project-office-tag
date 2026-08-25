@@ -1,3 +1,6 @@
+/** Per-character typing interval for TalkLine bubbles. Tune this one value. */
+const TYPING_SPEED_MS = 46
+
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value))
 }
@@ -28,7 +31,7 @@ export function createMessengerPacingController(sceneId) {
   return {
     getTypingDuration({ text, index, emotionalPressure = 0 }) {
       const length = String(text ?? '').length
-      const base = (520 + (length * 30)) * slowdown
+      const base = (520 + (length * TYPING_SPEED_MS)) * slowdown
       const jitter = seededNoise(sceneSeed + index * 31, 280)
       const pressureSlowdown = clamp(emotionalPressure, 0, 1.4) * 240
       const maxDuration = emotionalPressure > 1.0 ? 5200 : 3400

@@ -1,0 +1,145 @@
+/* Caption dock: isolated so dialogue chrome can be restyled without moving the stage. */
+
+.vnCaptionDock {
+  position: relative;
+  z-index: 8;
+  flex: 0 0 auto;
+  width: 100%;
+  pointer-events: none;
+}
+
+.vnCaptionDock .vnBox {
+  pointer-events: none;
+  margin: 0;
+}
+
+.vnCaptionDock .vnBox:not(.sfx):not(.textOnly):not(.welcomeCaption) {
+  position: relative;
+  inset: auto;
+  left: auto;
+  bottom: auto;
+  width: 100%;
+  border-radius: 0;
+}
+
+.vnCaptionDock .vnBox p {
+  max-width: 100%;
+}
+
+.vnCaptionDock .vnBox em {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 480px) {
+  .vnCaptionDock .vnBox p {
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+}
+
+.vnCaptionDock.effect-pop .vnBox p {
+  animation: vnCaptionPop .42s ease-out;
+  transform-origin: left center;
+}
+
+@keyframes vnCaptionPop {
+  0% { transform: scale(1); }
+  32% { transform: scale(1.055); }
+  58% { transform: translateX(-1.5px) scale(1.02); }
+  100% { transform: scale(1) translateX(0); }
+}
+
+.vnEventLayer {
+  position: absolute;
+  inset: 12% 8% 18%;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.vnEventBadgeWrap {
+  position: relative;
+  width: min(42vw, 168px);
+  aspect-ratio: 1.55 / 1;
+  display: grid;
+  place-items: center;
+}
+
+.vnEventBadgeArt {
+  width: 100%;
+  height: 100%;
+  border: 1px dashed rgba(150, 210, 230, .45);
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(18, 42, 58, .55), rgba(8, 16, 26, .7));
+}
+
+.vnEventTagMotion {
+  position: absolute;
+  inset: -18% -12%;
+  border: 1px solid rgba(116, 216, 240, .55);
+  border-radius: 14px;
+  animation: introTagRing 1.4s ease-out infinite;
+}
+
+.vnEventCue {
+  position: absolute;
+  bottom: -1.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  color: #9fd4e8;
+  font: 10px ui-monospace, Consolas, monospace;
+  letter-spacing: .16em;
+  white-space: nowrap;
+}
+
+.portraitStage.eyeOpen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  background: #000;
+  animation: vnEyeOpen .95s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes vnEyeOpen {
+  0% { opacity: 1; }
+  35% { opacity: .72; }
+  100% { opacity: 0; }
+}
+
+.vnPortrait.enter.center {
+  animation: vnPortraitEnterCenter .55s ease-out;
+}
+.vnPortrait.enter.left {
+  animation: vnPortraitEnterLeft .55s ease-out;
+}
+.vnPortrait.enter.right {
+  animation: vnPortraitEnterRight .55s ease-out;
+}
+
+@keyframes vnPortraitEnterCenter {
+  from { opacity: 0; transform: translateX(-50%) translateY(14px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+@keyframes vnPortraitEnterLeft {
+  from { opacity: 0; transform: translateX(-18px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes vnPortraitEnterRight {
+  from { opacity: 0; transform: translateX(18px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.vnPortrait.idleBlink img,
+.vnPortrait.idleBlink .vnPortraitFallback {
+  animation: vnIdleBlink 3.8s ease-in-out infinite;
+}
+
+@keyframes vnIdleBlink {
+  0%, 88%, 100% { filter: brightness(1); }
+  91%, 94% { filter: brightness(.35); }
+}

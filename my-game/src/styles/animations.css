@@ -50,3 +50,50 @@
   18% { opacity: 1; transform: scale(1.04); }
   100% { opacity: 1; transform: scale(1); }
 }
+
+@keyframes menuFogDrift {
+  0% { transform: translate3d(-2%, 0, 0) scale(1.02); opacity: 0.35; }
+  50% { transform: translate3d(2%, -1%, 0) scale(1.06); opacity: 0.5; }
+  100% { transform: translate3d(-2%, 0, 0) scale(1.02); opacity: 0.35; }
+}
+
+@keyframes menuPulse {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes menuParticleFloat {
+  0% { transform: translateY(0) scale(0.85); opacity: 0; }
+  10% { opacity: 0.5; }
+  90% { opacity: 0.35; }
+  100% { transform: translateY(-110vh) scale(1.05); opacity: 0; }
+}
+
+@keyframes menuGlitch {
+  0%, 92%, 100% { opacity: 0.06; transform: translateX(0); }
+  93% { opacity: 0.12; transform: translateX(-1px); }
+  94% { opacity: 0.18; transform: translateX(1px); }
+  95% { opacity: 0.06; transform: translateX(0); }
+}
+
+@keyframes uiFocusPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(103, 232, 212, 0); }
+  50% { box-shadow: 0 0 0 6px rgba(103, 232, 212, 0.1); }
+}
+
+@keyframes panelReveal {
+  0% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes startupFlicker {
+  0%, 100% { opacity: .12; }
+  48% { opacity: .22; }
+  50% { opacity: .06; }
+  54% { opacity: .2; }
+}
+
+@keyframes startupGlowPulse {
+  0%, 100% { opacity: .18; transform: scale(1); }
+  50% { opacity: .34; transform: scale(1.04); }
+}

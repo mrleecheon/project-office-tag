@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { chapters } from '../../content/chapters/index.js'
+import { listRegisteredAssetPaths } from '../../content/manifests/assetPaths.js'
 
 const oneByOnePng = globalThis.Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7s2YQAAAAASUVORK5CYII=',
@@ -47,6 +48,10 @@ function writePlaceholder(fullPath, extname, relativeAssetPath) {
 function main() {
   const assetPaths = new Set()
   collectAssetPaths(chapters, assetPaths)
+  for (const registered of listRegisteredAssetPaths()) {
+    const relative = registered.replace(/^\//, '')
+    if (relative.startsWith('assets/')) assetPaths.add(relative)
+  }
 
   const publicRoot = path.resolve(globalThis.process.cwd(), 'public')
   let created = 0

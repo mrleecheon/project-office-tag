@@ -4,7 +4,7 @@ import { eventBus } from '../../engine/events/eventBus.js'
 import { GameEvents } from '../../engine/events/gameEvents.js'
 import { setMapPosition } from '../../engine/state/actions.js'
 
-export function useSceneTransitionRuntime({ dispatch, orchestrator, chapter, scene, getState }) {
+export function useSceneTransitionRuntime({ dispatch, orchestrator, chapter, scene, getState, onInterceptScene }) {
   const sceneRef = useRef(scene)
   const chapterRef = useRef(chapter)
 
@@ -32,8 +32,9 @@ export function useSceneTransitionRuntime({ dispatch, orchestrator, chapter, sce
       ) ?? nextSceneId
     }
 
+    if (onInterceptScene?.(target)) return
     orchestrator.goToScene(target)
-  }, [getState, orchestrator])
+  }, [getState, onInterceptScene, orchestrator])
 
   const handleMapMove = useCallback((mapId, position) => {
     eventBus.emit(GameEvents.MAP_MOVED, { mapId, position })

@@ -1,6 +1,7 @@
 import './sceneGraph.test.js'
 import './progression.test.js'
 import './saveSchema.test.js'
+import './assetManifestPaths.test.js'
 import './mapPositionSave.test.js'
 import './saveSlots.test.js'
 import './contentSchema.test.js'

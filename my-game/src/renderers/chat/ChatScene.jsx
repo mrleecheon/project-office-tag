@@ -44,6 +44,7 @@ export default function ChatScene({ scene, context, onChoice, onInput, onAutoNex
   const scrollRef = useRef(null)
   const choiceTimerRef = useRef(null)
   const progressionWatchdogRef = useRef(null)
+  const lastScrollCueRef = useRef(0)
   const lockedRef = useRef(false)
   const onChoiceRef = useRef(onChoice)
   const onAutoNextRef = useRef(onAutoNext)
@@ -62,6 +63,7 @@ export default function ChatScene({ scene, context, onChoice, onInput, onAutoNex
   }
 
   useEffect(() => {
+    emitAudioCue('ui:open')
     const timers = createTimerBag()
     const emotionalPressure = resolveEmotionalPressure(scene)
     const cueProfile = resolveChatCueProfile(scene.chatTheme?.profileId)
@@ -161,6 +163,7 @@ export default function ChatScene({ scene, context, onChoice, onInput, onAutoNex
     return () => {
       timers.clear()
       clearProgressionWatchdog()
+      emitAudioCue('ui:close')
     }
   }, [context, scene])
 
@@ -182,6 +185,7 @@ export default function ChatScene({ scene, context, onChoice, onInput, onAutoNex
     event.preventDefault()
     const nickname = nameDraft.trim().slice(0, 14)
     if (nickname.length < 2) return
+    emitAudioCue('ui:confirm')
     onInput(scene.input, nickname)
   }
 
@@ -200,7 +204,7 @@ export default function ChatScene({ scene, context, onChoice, onInput, onAutoNex
       text: choice.text,
       meta: metadata.resolveOutgoingMeta(previous.length),
     }])
-    emitAudioCue('choice:selected')
+    emitAudioCue('ui:confirm')
     choiceTimerRef.current = setTimeout(() => {
       choiceTimerRef.current = null
       onChoiceRef.current(choice)
@@ -208,6 +212,12 @@ export default function ChatScene({ scene, context, onChoice, onInput, onAutoNex
   }
 
   const typingLabel = typing ? resolveTypingSpeakerLabel(typing.char) : null
+  const handleThreadScroll = () => {
+    const now = Date.now()
+    if (now - lastScrollCueRef.current < 180) return
+    lastScrollCueRef.current = now
+    emitAudioCue('ui:scroll')
+  }
 
   return (
     <div
@@ -226,7 +236,7 @@ export default function ChatScene({ scene, context, onChoice, onInput, onAutoNex
         )}
 
         <section className="chatPanelContainer">
-          <main className="chatPanelScroll" ref={scrollRef}>
+          <main className="chatPanelScroll" ref={scrollRef} onScroll={handleThreadScroll}>
             <div className="chatThread">
               {messages.map((message) => <ChatBubble key={message.id} message={message} />)}
               {narrationLog.map((message) => <ChatBubble key={message.id} message={message} />)}

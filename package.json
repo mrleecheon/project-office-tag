@@ -1,24 +1,18 @@
 {
-  "name": "cursor-project",
+  "name": "groomy",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
+  "workspaces": [
+    "my-game",
+    "groomy-3d"
+  ],
   "scripts": {
-    "dev": "npm --prefix my-game run dev --",
-    "build": "npm --prefix my-game run build --",
-    "lint": "npm --prefix my-game run lint --",
+    "dev": "npm --prefix groomy-3d run dev --",
+    "dev:2d": "npm --prefix my-game run dev --",
+    "build": "npm --prefix groomy-3d run build --",
+    "build:2d": "npm --prefix my-game run build --",
     "test": "npm --prefix my-game run test --",
-    "preview": "npm --prefix my-game run preview --"
-  },
-  "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
-  },
-  "devDependencies": {
-    "@types/react": "^18.2.66",
-    "@types/react-dom": "^18.2.22",
-    "@vitejs/plugin-react": "^4.2.1",
-    "eslint": "^8.57.0",
-    "vite": "^5.2.0"
+    "lint": "npm --prefix my-game run lint --"
   }
 }

@@ -2,7 +2,8 @@ import { characters } from '../../content/world/characters'
 import { resolveUiText } from '../../content/manifests/text'
 
 export default function VnDialogBox({ line, shown, done, awaitingChoice = false }) {
-  const char = characters[line?.char] ?? characters.system
+  const speakerId = line?.speaker ?? line?.char
+  const char = characters[speakerId] ?? characters.system
   const isNarration = line?.isNarration || line?.char === 'system'
   const isSfx = Boolean(line?.sfx)
   const isTextOnly = Boolean(line?.textOnly)
@@ -30,7 +31,7 @@ export default function VnDialogBox({ line, shown, done, awaitingChoice = false 
         </strong>
       )}
       <p>
-        {shown}
+        {shown ?? ''}
         {!done && !isSfx && !isWelcomeCaption && <b />}
       </p>
       {showTapHint && <em>{resolveUiText('vnTapToContinue', '▶ 탭하여 계속')}</em>}

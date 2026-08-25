@@ -3,14 +3,15 @@ import ScreenTransition from '../../ui/layout/ScreenTransition'
 
 export default function BootScreen({ lines, onDone }) {
   const [visible, setVisible] = useState([])
+  const bootLines = Array.isArray(lines) ? lines : []
 
   useEffect(() => {
-    const timers = lines.map((line, index) => (
+    const timers = bootLines.map((line, index) => (
       setTimeout(() => setVisible((previous) => [...previous, line]), 350 + index * 180)
     ))
-    timers.push(setTimeout(onDone, 350 + lines.length * 180 + 600))
+    timers.push(setTimeout(onDone, 350 + bootLines.length * 180 + 600))
     return () => timers.forEach(clearTimeout)
-  }, [lines, onDone])
+  }, [bootLines, onDone])
 
   return (
     <ScreenTransition className="screen boot">

@@ -111,7 +111,7 @@ function runCh1Cold(rt) {
 }
 
 function runCh1BadBOrganic(rt) {
-  rt.choose('알겠습니다. 안내 부탁드립니다.'); rt.choose('회의실부터 간다.'); rt.go('meeting_entry')
+  rt.choose('알겠습니다. 안내 부탁드립니다.'); rt.done('office7_rpg'); rt.go('meeting_entry')
   rt.choose('안으로 들어간다.'); rt.go('meeting_room_rpg'); rt.go('meeting_chat')
   rt.choose('전임자 자리 기록을 남긴다.'); rt.choose('사진을 찍어 보관한다.'); rt.choose('3층 출입 로그를 요청한다.')
   rt.choose('그루미에게 우회 권한을 맡긴다.'); rt.go('floor3_vn'); rt.go('floor3_rpg'); rt.go('exit_floor3'); rt.go('deduction_chat')

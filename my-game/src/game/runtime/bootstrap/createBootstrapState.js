@@ -23,22 +23,48 @@ function buildDevChapterState({ chapterId, sceneId }) {
   }
 }
 
-export function createBootstrapState({ afterOfficeIntro = false, devBootstrap = null } = {}) {
+export function createBootstrapState({
+  afterOfficeIntro = false,
+  skipLoad = false,
+  startSceneId = null,
+  startChapterId = null,
+  nickname = null,
+  devBootstrap = null,
+} = {}) {
   if (devBootstrap) {
     saveService.clear()
     return buildDevChapterState(devBootstrap)
   }
 
-  const loadedState = saveService.load()
+  if (startChapterId) {
+    const chapter = chapterRegistry.getChapter(startChapterId)
+    const sceneId = startSceneId || chapter?.startSceneId
+    const saved = saveService.load()
+    return {
+      ...initialGameState,
+      ...(saved ?? {}),
+      screen: 'playing',
+      chapterEnded: false,
+      activeChapterId: startChapterId,
+      activeSceneId: sceneId,
+      nickname: nickname || saved?.nickname || initialGameState.nickname,
+      flags: [...new Set([...(saved?.flags ?? []), 'enteredThroughOfficeIntro'])],
+      visitedScenes: [...new Set([...(saved?.visitedScenes ?? []), `${startChapterId}.${sceneId}`])],
+      routeHistory: [...(saved?.routeHistory ?? []), { chapterId: startChapterId, sceneId }],
+    }
+  }
+
+  const loadedState = skipLoad ? null : saveService.load()
   if (!loadedState) {
     if (afterOfficeIntro) {
+      const sceneId = startSceneId || 'entrance_bridge'
       return {
         ...initialGameState,
         screen: 'playing',
-        activeSceneId: 'entrance_bridge',
+        activeSceneId: sceneId,
         flags: ['enteredThroughOfficeIntro'],
-        visitedScenes: ['prologue.entrance_bridge'],
-        routeHistory: [{ chapterId: 'prologue', sceneId: 'entrance_bridge' }],
+        visitedScenes: [`prologue.${sceneId}`],
+        routeHistory: [{ chapterId: 'prologue', sceneId }],
       }
     }
     return initialGameState

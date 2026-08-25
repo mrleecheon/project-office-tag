@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion'
-import { fadeScreen } from '../../engine/animation/motionPresets'
+import { resolveScreenPreset } from '../../engine/animation/motionPresets'
 
-export default function ScreenTransition({ children, className = '' }) {
+export default function ScreenTransition({ children, className = '', variant = 'default' }) {
+  const preset = resolveScreenPreset(variant)
   return (
-    <motion.div className={className} {...fadeScreen}>
+    <motion.div className={className} {...preset}>
       {children}
     </motion.div>
   )

@@ -15,8 +15,10 @@
   height: 100svh;
   position: relative;
   overflow: hidden;
-  background: var(--panel);
-  box-shadow: 0 0 70px rgba(0,0,0,.55);
+  background: linear-gradient(180deg, #070f19, #050a12);
+  box-shadow: 0 0 72px rgba(0, 0, 0, .62);
+  border-left: 1px solid rgba(128, 182, 220, .12);
+  border-right: 1px solid rgba(128, 182, 220, .12);
   touch-action: manipulation;
 }
 
@@ -58,19 +60,22 @@
 .messengerAppShell {
   position: absolute;
   inset: 0;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   background:
-    linear-gradient(180deg, rgba(6, 18, 30, .96), rgba(4, 9, 16, .98)),
+    radial-gradient(circle at 92% 8%, rgba(90, 194, 230, .14), transparent 32%),
+    radial-gradient(circle at 4% 72%, rgba(101, 232, 203, .1), transparent 36%),
+    linear-gradient(180deg, rgba(5, 14, 24, .98), rgba(3, 8, 14, .99)),
     var(--panel);
 }
 
 .messengerAppShell.cinematic {
-  display: flex;
+  display: block;
 }
 
 .messengerAppShell.cinematic .companyStatusHeader,
-.messengerAppShell.cinematic .bottomTabBar {
+.messengerAppShell.cinematic .navRailFrame,
+.messengerAppShell.cinematic .dossierDeck {
   display: none;
 }
 
@@ -80,6 +85,44 @@
 
 .messengerAppShell.cinematic .messengerViewport {
   display: block;
+}
+
+.messengerAppShell.cinematic .messengerShellBody {
+  display: block;
+  padding: 0;
+}
+
+.messengerAppShell.overlay3d,
+.messengerAppShell.overlay3d .messengerViewport,
+.vnScene.overlay3d,
+.vnScene.overlay3d .portraitStage {
+  background: transparent;
+}
+
+.vnScene.inputGlitch {
+  animation: vnInputGlitch .45s steps(2, end);
+}
+
+@keyframes vnInputGlitch {
+  0% { filter: none; transform: none; }
+  20% { filter: contrast(1.25); transform: translateX(1px); }
+  45% { filter: saturate(0.7); transform: translateX(-1px); }
+  70% { filter: contrast(1.1); }
+  100% { filter: none; transform: none; }
+}
+
+.vnBlockedInput {
+  position: relative;
+  z-index: 9;
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px 12px;
+  background: rgba(6, 14, 24, .92);
+  pointer-events: auto;
+}
+
+.vnBlockedInput .uiTextInput {
+  flex: 1;
 }
 
 .sceneViewportLayer {
@@ -94,9 +137,12 @@
   align-items: center;
   gap: 12px;
   padding: max(10px, env(safe-area-inset-top)) 14px 10px;
-  border-bottom: 1px solid #163047;
-  background: linear-gradient(180deg, #081522, #06101b);
-  color: #9fc7db;
+  border-bottom: 1px solid rgba(113, 180, 220, .26);
+  background:
+    linear-gradient(180deg, rgba(8, 21, 34, .88), rgba(6, 16, 27, .92)),
+    url('/assets/effects/overlays/scanline.png');
+  color: #b2d8eb;
+  backdrop-filter: blur(10px);
 }
 
 .companyStatusHeader small,
@@ -118,6 +164,9 @@
 
 .companyStatusHeader aside {
   text-align: right;
+  display: grid;
+  justify-items: end;
+  gap: 4px;
 }
 
 .companyStatusHeader em {
@@ -125,57 +174,204 @@
   color: var(--groomy-mint);
 }
 
+.headerGearButton {
+  margin-top: 2px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(112, 180, 220, .42);
+  border-radius: 999px;
+  background: rgba(7, 19, 30, .74);
+  color: #bce5f7;
+  font-size: 14px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+}
+
 .messengerShellBody {
-  flex: 1;
+  display: block;
   min-height: 0;
-  position: relative;
-  overflow: hidden;
+  height: 100%;
+  padding: 10px 10px max(12px, env(safe-area-inset-bottom));
 }
 
 .messengerViewport {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  inset: auto;
   z-index: 1;
   display: none;
+  height: 100%;
+  border: 1px solid rgba(102, 169, 208, .34);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, .42);
 }
 
 .messengerViewport.active {
   display: block;
+  animation: panelReveal .22s ease-out;
 }
 
-.bottomTabBar {
-  flex: 0 0 auto;
+.sceneDeck {
+  min-height: 0;
+  height: 100%;
+  position: relative;
+  display: flex;
+}
+
+.sceneDeck .messengerViewport {
+  width: 100%;
+}
+
+@media (max-width: 520px) {
+  .messengerShellBody {
+    padding: 8px 8px max(10px, env(safe-area-inset-bottom));
+  }
+}
+.floatingPanel {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 10px;
+  bottom: calc(56px + env(safe-area-inset-bottom));
+  z-index: 18;
+  border: 1px solid rgba(112, 183, 225, .42);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(8, 22, 36, .78), rgba(5, 13, 24, .86)),
+    url('/assets/effects/overlays/scanline.png');
+  backdrop-filter: blur(14px);
+  box-shadow:
+    0 24px 50px rgba(0, 0, 0, .48),
+    0 0 32px rgba(90, 193, 238, .16);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.menuModalBackdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 17;
+  background: rgba(3, 9, 16, .46);
+  backdrop-filter: blur(7px);
+}
+
+.sceneDeck.menuModalOpen .messengerViewport {
+  pointer-events: none;
+}
+
+.messengerAppShell.menuOverlayOpen .companyStatusHeader {
+  pointer-events: none;
+}
+
+.modalPanel {
+  inset: 0;
+  margin: auto;
+  width: min(640px, calc(100% - 28px));
+}
+
+.floatingPanel > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(100, 167, 202, .3);
+}
+
+.floatingPanel > header button {
+  border: 1px solid rgba(108, 165, 192, .34);
+  border-radius: 10px;
+  background: rgba(8, 20, 32, .8);
+  color: #b7ddef;
+  padding: 4px 10px;
+}
+
+.floatingPanelBody {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.homeHubPanel {
+  height: min(500px, calc(100% - 92px - env(safe-area-inset-bottom)));
+}
+
+.settingsOverlayPanel {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(100vw - 32px, calc((100vh - 32px) * 16 / 9), 1080px);
+  height: min(100vh - 32px, calc((100vw - 32px) * 9 / 16), 608px);
+  border-radius: 2px;
+  border: 1px solid rgba(232, 228, 214, 0.28);
+  background: rgba(8, 9, 12, 0.82);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.settingsOverlayPanel .floatingPanelBody {
+  padding: 16px 18px 18px;
+  overflow: hidden;
+}
+
+.hubGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-  padding: 8px 8px max(8px, env(safe-area-inset-bottom));
-  border-top: 1px solid #183048;
-  background: var(--messenger-tab);
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 16px 18px 18px;
 }
 
-.bottomTabBar button {
-  min-height: 48px;
-  border: 1px solid transparent;
-  border-radius: 12px;
-  background: transparent;
-  color: #557287;
-  font-size: 11.5px;
+.hubActionCard {
+  min-height: 62px;
+  border: 1px solid rgba(105, 171, 207, .36);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(12, 31, 46, .86), rgba(7, 19, 31, .9));
+  color: #d2ecfb;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  text-align: left;
+  transition: transform .24s ease, border-color .24s ease, box-shadow .24s ease;
 }
 
-.bottomTabBar button span {
-  display: block;
-  margin-bottom: 3px;
-  color: #2f536d;
-  font: 9px ui-monospace, Consolas, monospace;
-  letter-spacing: .1em;
+.hubActionCard span {
+  color: #83e0ff;
+  font-size: 14px;
 }
 
-.bottomTabBar button.active {
-  border-color: #24516d;
-  background: #0d2130;
-  color: #b9dff0;
+.hubActionCard b {
+  font: 600 13px 'Noto Sans KR', system-ui, sans-serif;
+  letter-spacing: .025em;
 }
 
-.bottomTabBar button.active span {
-  color: var(--groomy-mint);
+.hubActionCard:hover,
+.hubActionCard:focus-visible {
+  transform: translateY(-2px) scale(1.01);
+  border-color: #70c6f3;
+  box-shadow: 0 0 20px rgba(93, 197, 255, .22);
+}
+
+.hubActionCard:active {
+  transform: scale(.985);
+}
+
+.hubActionCard.full {
+  grid-column: 1 / -1;
+}
+
+.archiveQuickPanel {
+  padding: 16px 14px;
+}
+
+.archiveQuickPanel p {
+  margin-bottom: 10px;
+}
+
+.archiveQuickPanel button {
+  border: 1px solid rgba(105, 171, 207, .34);
+  border-radius: 8px;
+  background: rgba(9, 23, 35, .8);
+  color: #b5dced;
+  padding: 8px 10px;
 }
