@@ -40,3 +40,20 @@
 .opening-frame .play-fade {
   z-index: 12;
 }
+
+.demo-end {
+  position: absolute;
+  inset: 0;
+  z-index: 14;
+  display: flex;
+  align-items: center;
+  padding: 8vh 10vw;
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+.demo-end p {
+  margin: 0;
+  letter-spacing: 0.12em;
+}

@@ -58,13 +58,16 @@ export default function VNOverlay({
   const [glitch, setGlitch] = useState(false)
   const [afterInput, setAfterInput] = useState(false)
   const [waitingAction, setWaitingAction] = useState(false)
+  const [skipType, setSkipType] = useState(false)
 
   const actionDoneRef = useRef(false)
 
   const body = afterInput ? beat?.afterGlitchText : beat?.text
   const isPopup = beat?.presentation === 'system-popup'
   const typing = Boolean(body) && beat?.type !== 'choice' && !waitingAction && !isPopup
-  const { shown, done } = useTypewriter(body, typing)
+  const { shown, done: typed } = useTypewriter(body, typing && !skipType)
+  const done = skipType || typed
+  const shownText = skipType ? (body ?? '') : shown
 
   const goComplete = useCallback(() => {
     onComplete?.()
@@ -79,6 +82,7 @@ export default function VNOverlay({
     setAfterInput(false)
     setGlitch(false)
     setNameDraft('')
+    setSkipType(false)
     onBeatChange?.(next)
   }, [goComplete, onBeatChange])
 
@@ -143,6 +147,10 @@ export default function VNOverlay({
       if (event.code !== 'Space' || event.repeat) return
       event.preventDefault()
       if (!beat || waitingAction || beat.type === 'choice' || beat.input) return
+      if (!done) {
+        setSkipType(true)
+        return
+      }
       advance()
     }
     window.addEventListener('keydown', onKey)
@@ -161,6 +169,10 @@ export default function VNOverlay({
   const clickPanel = () => {
     if (!beat || waitingAction || beat.type === 'choice') return
     if (beat.input && !afterInput) return
+    if (!done) {
+      setSkipType(true)
+      return
+    }
     advance()
   }
 
@@ -171,7 +183,10 @@ export default function VNOverlay({
   if (!beat) return null
 
   return (
-    <div className={isPopup ? 'vn-overlay is-popup' : 'vn-overlay'} onClick={isPopup ? clickPanel : undefined}>
+    <div
+      className={`vn-overlay${isPopup ? ' is-popup' : ''}${!waitingAction && beat.type !== 'choice' && beat.type !== 'action' ? ' is-advance' : ''}`}
+      onClick={clickPanel}
+    >
       {!dimOff && <div className="vn-overlay-dim" />}
       {beat.presentation === 'black-caption' && <div className="vn-overlay-black" />}
       {beat.presentation === 'blink-groomy-enter' && <div className="vn-overlay-blink" />}
@@ -217,8 +232,7 @@ export default function VNOverlay({
 
       {showBar && (
         <div
-          className={`vn-overlay-panel${beat.speaker === '그루미' ? ' is-groomy' : ''}`}
-          onClick={clickPanel}
+          className={`vn-overlay-panel${beat.speaker === '그루미' ? ' is-groomy' : ''}${beat.auto ? ' is-auto' : ''}`}
           role="presentation"
         >
           <div className="vn-overlay-dialogue">
@@ -231,7 +245,7 @@ export default function VNOverlay({
               }`}
               data-effect={waitingAction ? undefined : beat.effect || undefined}
             >
-              {waitingAction ? (beat.text || '조사하세요. (E)') : (showText ? shown : '\u00a0')}
+              {waitingAction ? (beat.text || '조사하세요. (E)') : (showText ? shownText : '\u00a0')}
             </p>
           </div>
           {beat.input && !afterInput && done && !waitingAction && (

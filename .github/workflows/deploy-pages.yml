@@ -15,9 +15,6 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: my-game
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -27,7 +24,7 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: my-game/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -35,24 +32,24 @@ jobs:
       - name: Run validation tests
         run: npm run test
 
-      - name: Build for GitHub Pages
+      - name: Build 3D demo for GitHub Pages
         run: npm run build
         env:
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
 
       - name: Add SPA fallback for GitHub Pages
-        run: cp dist/index.html dist/404.html
+        run: cp groomy-3d/dist/index.html groomy-3d/dist/404.html
 
       - name: Verify build output
         run: |
-          test -f dist/index.html
-          test -f dist/404.html
-          ls -la dist
+          test -f groomy-3d/dist/index.html
+          test -f groomy-3d/dist/404.html
+          ls -la groomy-3d/dist
 
       - name: Publish to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: my-game/dist
+          publish_dir: groomy-3d/dist
           publish_branch: gh-pages
           enable_jekyll: false

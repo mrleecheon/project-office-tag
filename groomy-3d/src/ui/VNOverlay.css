@@ -5,8 +5,10 @@
   pointer-events: none;
 }
 
-.vn-overlay.is-popup {
+.vn-overlay.is-popup,
+.vn-overlay.is-advance {
   pointer-events: auto;
+  cursor: pointer;
 }
 
 .vn-overlay-dim {
@@ -129,7 +131,7 @@
 }
 
 .vn-overlay-panel.is-auto {
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .vn-overlay-panel.is-groomy::before {

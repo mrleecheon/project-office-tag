@@ -62,8 +62,20 @@ function serveMyGamePublic() {
   }
 }
 
+function copyMyGamePublic() {
+  return {
+    name: 'copy-my-game-public',
+    closeBundle() {
+      const dest = path.resolve(rootDir, 'dist')
+      if (!fs.existsSync(dest) || !fs.existsSync(myGamePublic)) return
+      fs.cpSync(myGamePublic, dest, { recursive: true })
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [serveMyGamePublic(), react()],
+  base: process.env.VITE_BASE_PATH || '/',
+  plugins: [serveMyGamePublic(), copyMyGamePublic(), react()],
   resolve: {
     dedupe: ['react', 'react-dom', 'framer-motion'],
     alias: {

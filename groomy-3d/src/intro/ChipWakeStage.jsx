@@ -8,6 +8,9 @@ import CoffeeStation, {
   COFFEE_MACHINE_ORIGIN,
   GROOMY_APPROACH_START,
   GROOMY_DELIVERY_POINT,
+  GROOMY_ENTER_CAMERA,
+  GROOMY_ENTER_LOOK,
+  coffeeRecipientForLook,
 } from '../scenes/CoffeeStation.jsx'
 import PlayerController from '../systems/PlayerController.jsx'
 import WorldCanvas from '../systems/WorldCanvas.jsx'
@@ -141,7 +144,7 @@ function GroomyApproach({ playing }) {
   }, [playing])
   useFrame((_, delta) => {
     if (!group.current) return
-    if (playing) progress.current = Math.min(1, progress.current + delta * 0.32)
+    if (playing) progress.current = Math.min(1, progress.current + delta * 0.11)
     const t = progress.current
     const a = GROOMY_APPROACH_START
     const b = GROOMY_DELIVERY_POINT
@@ -150,10 +153,11 @@ function GroomyApproach({ playing }) {
       a[1] + (b[1] - a[1]) * t,
       a[2] + (b[2] - a[2]) * t,
     )
+    group.current.rotation.y += delta * 0.4
   })
   return (
     <group ref={group}>
-      <mesh userData={{ interactId: 'coffee-groomy', interactReach: 2.2 }}>
+      <mesh>
         <icosahedronGeometry args={[0.42, 0]} />
         <meshStandardMaterial
           color="#7dffd4"
@@ -164,6 +168,15 @@ function GroomyApproach({ playing }) {
         />
       </mesh>
     </group>
+  )
+}
+
+function GroomyDeliveryAnchor() {
+  return (
+    <mesh position={GROOMY_DELIVERY_POINT} userData={{ interactId: 'coffee-groomy', interactReach: 2.2 }}>
+      <boxGeometry args={[0.9, 1.7, 0.9]} />
+      <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+    </mesh>
   )
 }
 
@@ -210,8 +223,9 @@ export default function ChipWakeStage() {
   const markStaffTalked = useGameState((s) => s.markStaffTalked)
   const markGroomyOfficeNudgeDone = useGameState((s) => s.markGroomyOfficeNudgeDone)
   const coffeeGame = useGameState((s) => s.coffeeGame)
-  const startOfficeCoffeeBrewing = useGameState((s) => s.startOfficeCoffeeBrewing)
+  const startCoffeeBrewing = useGameState((s) => s.startCoffeeBrewing)
   const pourCoffeeShot = useGameState((s) => s.pourCoffeeShot)
+  const deliverCoffeeOrder = useGameState((s) => s.deliverCoffeeOrder)
   const beginChoiOfficeTalkline = useGameState((s) => s.beginChoiOfficeTalkline)
   const clearChipWakeResume = useGameState((s) => s.clearChipWakeResume)
 
@@ -222,12 +236,15 @@ export default function ChipWakeStage() {
   const [guideTalked, setGuideTalked] = useState(false)
   const [officeTalk, setOfficeTalk] = useState(!chipOfficeIntroDone)
   const [staffEvent, setStaffEvent] = useState(null)
+  const [groomyEnter, setGroomyEnter] = useState(false)
   const officeMeta = ROOM_GRAPH.office
   const choiBoot = new URLSearchParams(window.location.search).has('choi')
   const officeSpawn = choiBoot ? [2.55, 1.6, 1.85] : officeMeta.spawn
   const inOffice = chipWakeStep === CHIP_WAKE_STEP.OFFICE
   const inGuide = chipWakeStep === CHIP_WAKE_STEP.GUIDE_3D
   const coffeeCam = staffEvent === 'isol-coffee-cam'
+  const showGroomy = officeAfterMorning && (groomyEnter || coffeeBriefingDone)
+  const coffeeOrder = coffeeGame.orders[coffeeGame.currentOrderIndex] ?? null
   const walking = ((inGuide && !guideTalk) || (inOffice && !officeTalk && !phoneUp && !staffEvent))
   const inputMode = walking ? '3d' : 'vn'
   const machineLook = [
@@ -245,18 +262,9 @@ export default function ChipWakeStage() {
 
   useEffect(() => {
     if (!coffeeCam) return undefined
-    const id = window.setTimeout(() => {
-      markCoffeeBriefingDone()
-      setStaffEvent(null)
-    }, 2600)
+    const id = window.setTimeout(() => setStaffEvent(null), 2800)
     return () => window.clearTimeout(id)
-  }, [coffeeCam, markCoffeeBriefingDone])
-
-  useEffect(() => {
-    if (!officeAfterMorning || coffeeMachineVisited) return undefined
-    if (lookId === 'coffee-button' || lookId === 'coffee-deliver') markCoffeeMachineVisited()
-    return undefined
-  }, [officeAfterMorning, coffeeMachineVisited, lookId, markCoffeeMachineVisited])
+  }, [coffeeCam])
 
   useEffect(() => {
     setInputMode(inputMode)
@@ -310,6 +318,11 @@ export default function ChipWakeStage() {
       }
       if (inGuide && lookId === 'black-door' && guideTalked) enterChipOffice()
       if (!inOffice) return
+      if (coffeeGame.phase === 'carrying') {
+        const recipient = coffeeRecipientForLook(lookId)
+        if (recipient) deliverCoffeeOrder(recipient)
+        return
+      }
       if (lookId === 'staff-isol') {
         if (officeAfterMorning) {
           if (coffeeBriefingDone && !coffeeMachineVisited) {
@@ -334,9 +347,11 @@ export default function ChipWakeStage() {
         return
       }
       if (lookId === 'coffee-button' || lookId === 'coffee-deliver') {
-        if (coffeeGame.phase === 'brewing') {
-          pourCoffeeShot()
-        }
+        if (!coffeeBriefingDone) return
+        if (coffeeGame.phase === 'idle') {
+          startCoffeeBrewing()
+          markCoffeeMachineVisited()
+        } else if (coffeeGame.phase === 'brewing') pourCoffeeShot()
         return
       }
       if (lookId === 'sit-desk' && !officeAfterMorning) beginKangIsolMorning()
@@ -358,8 +373,10 @@ export default function ChipWakeStage() {
     coffeeGame.phase,
     enterChipOffice,
     beginKangIsolMorning,
-    startOfficeCoffeeBrewing,
+    startCoffeeBrewing,
     pourCoffeeShot,
+    deliverCoffeeOrder,
+    markCoffeeMachineVisited,
   ])
 
   useEffect(() => {
@@ -372,9 +389,14 @@ export default function ChipWakeStage() {
     }
     if (inOffice && !officeTalk && !staffEvent && !phoneUp) {
       if (officeAfterMorning) {
-        if (lookId === 'staff-isol') setHint('E  말 걸기')
-        else if (lookId === 'staff-kim' || lookId === 'staff-choi') setHint('...이 자리가 아닌 것 같다.')
-        else if ((lookId === 'coffee-button' || lookId === 'coffee-deliver') && coffeeGame.phase === 'brewing') {
+        if (lookId === 'staff-isol') {
+          if (!coffeeBriefingDone || !coffeeMachineVisited) setHint('E  말 걸기')
+          else setHint('')
+        } else if (coffeeGame.phase === 'carrying' && coffeeRecipientForLook(lookId) === coffeeOrder?.name) {
+          setHint('E  커피 전달')
+        } else if (lookId === 'staff-kim' || lookId === 'staff-choi') {
+          setHint('...이 자리가 아닌 것 같다.')
+        } else if ((lookId === 'coffee-button' || lookId === 'coffee-deliver') && coffeeBriefingDone && (coffeeGame.phase === 'idle' || coffeeGame.phase === 'brewing')) {
           setHint('E  추출')
         } else setHint('')
       } else if (lookId === 'staff-isol') setHint(isolTalked ? '이미 대화함' : 'E  말 걸기')
@@ -396,7 +418,10 @@ export default function ChipWakeStage() {
     kimTalked,
     choiTalked,
     officeAfterMorning,
+    coffeeBriefingDone,
+    coffeeMachineVisited,
     coffeeGame.phase,
+    coffeeOrder,
     setHint,
   ])
 
@@ -414,17 +439,29 @@ export default function ChipWakeStage() {
                   <StaffTrigger id="staff-kim" position={[-3.1, 0.8, 0.75]} />
                   <StaffTrigger id="staff-choi" position={[3.1, 0.8, 0.75]} />
                   {officeAfterMorning && (
+                    <CoffeeStation
+                      origin={COFFEE_MACHINE_ORIGIN}
+                      lookId={lookId}
+                      phase={coffeeGame.phase}
+                      order={coffeeOrder}
+                      shots={coffeeGame.currentShots}
+                      showPrompt={false}
+                    />
+                  )}
+                  {showGroomy && (
                     <>
-                      <CoffeeStation
-                        origin={COFFEE_MACHINE_ORIGIN}
-                        lookId={lookId}
-                        phase={coffeeGame.phase}
-                        order={coffeeGame.orders[coffeeGame.currentOrderIndex] ?? null}
-                        shots={coffeeGame.currentShots}
-                        showPrompt={coffeeGame.phase === 'brewing'}
-                      />
-                      <GroomyApproach playing />
+                      <GroomyApproach playing={groomyEnter && staffEvent === 'isol-coffee-part2'} />
+                      <GroomyDeliveryAnchor />
                     </>
+                  )}
+                  {staffEvent === 'isol-coffee-part2' && groomyEnter && (
+                    <DirectedCam
+                      active
+                      aim={GROOMY_ENTER_CAMERA}
+                      look={GROOMY_ENTER_LOOK}
+                      damp={0.85}
+                      fov={48}
+                    />
                   )}
                   {coffeeCam && (
                     <DirectedCam
@@ -517,7 +554,6 @@ export default function ChipWakeStage() {
           <VNOverlay
             key="isol-coffee"
             beats={KANG_ISOL_COFFEE_BEATS_PART1}
-            autoAdvanceMs={2000}
             onComplete={() => {
               setStaffEvent('isol-coffee-part2')
             }}
@@ -527,9 +563,10 @@ export default function ChipWakeStage() {
           <VNOverlay
             key="isol-coffee-part2"
             beats={KANG_ISOL_COFFEE_BEATS_PART2}
-            autoAdvanceMs={2000}
+            onBeatChange={(beat) => {
+              if (beat?.id === 'isol-c2-02') setGroomyEnter(true)
+            }}
             onComplete={() => {
-              startOfficeCoffeeBrewing()
               markCoffeeBriefingDone()
               setStaffEvent('isol-coffee-cam')
             }}
@@ -539,7 +576,6 @@ export default function ChipWakeStage() {
           <VNOverlay
             key="isol-coffee-nudge"
             beats={KANG_ISOL_COFFEE_NUDGE_BEATS}
-            autoAdvanceMs={2000}
             onComplete={() => setStaffEvent(null)}
           />
         )}
@@ -585,6 +621,20 @@ export default function ChipWakeStage() {
               setStaffEvent(null)
             }}
           />
+        )}
+        {inOffice && coffeeBriefingDone && coffeeOrder && (
+          <div className="play-hud" style={{ zIndex: 9, pointerEvents: 'none' }}>
+            <p>
+              {coffeeGame.phase === 'idle' && `다음 주문  ${coffeeOrder.name} · ${coffeeOrder.shots}샷`}
+              {coffeeGame.phase === 'brewing' && `추출 중  ${coffeeOrder.name}  ${coffeeGame.currentShots}/${coffeeOrder.shots}`}
+              {coffeeGame.phase === 'carrying' && `배달 중: ${coffeeOrder.name} 커피`}
+            </p>
+          </div>
+        )}
+        {inOffice && coffeeBriefingDone && !coffeeOrder && (
+          <div className="demo-end">
+            <p>시연은 커피 배달까지입니다</p>
+          </div>
         )}
         <div className="play-fade" style={{ opacity: fade }} />
       </div>

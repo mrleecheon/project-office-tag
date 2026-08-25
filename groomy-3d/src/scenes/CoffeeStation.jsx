@@ -3,8 +3,10 @@ import { Color } from 'three'
 import HeroProp from '../systems/HeroProp.jsx'
 import WorldPrompt from '../systems/WorldPrompt.jsx'
 
-export const GROOMY_APPROACH_START = [-2.6, 0.95, 2.6]
+export const GROOMY_APPROACH_START = [0.35, 0.95, 4.55]
 export const GROOMY_DELIVERY_POINT = [2.55, 0.95, -0.55]
+export const GROOMY_ENTER_CAMERA = [3.62, 1.5, -2.42]
+export const GROOMY_ENTER_LOOK = [0.45, 1.08, 2.15]
 export const COFFEE_MACHINE_ORIGIN = [0, 0, -4.5]
 export const COFFEE_BREW_CAMERA = [0, 1.6, -2.75]
 
