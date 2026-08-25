@@ -20,6 +20,7 @@ export {
 }
 
 export const PRODUCT_PHASE = Object.freeze({
+  TITLE: 'title',
   INTRO: 'intro',
   WHITE_ROOM: 'whiteRoom',
   TALKLINE: 'talkline',

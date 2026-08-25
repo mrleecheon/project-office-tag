@@ -1,4 +1,5 @@
 import IntroSequence from './intro/IntroSequence.jsx'
+import TitleScreen from './intro/TitleScreen.jsx'
 import WhiteRoomIntro from './intro/WhiteRoomIntro.jsx'
 import ExploreStage from './intro/ExploreStage.jsx'
 import OriginalMessenger from './ui/OriginalMessenger.jsx'
@@ -12,6 +13,7 @@ import { INTRO_SCENE, PRODUCT_PHASE } from './runtime/productFlow.js'
 /**
  * 제품 셸. 스토리 본문은 my-game에 두고, 여기서는 모드만 고른다.
  *
+ * title        타이틀 메뉴 (시작하기 / 이어하기 / 설정)
  * intro        광고 → 쇼크(삑) → 3D 로비 + opening beats → 흰 방 → 톡라인
  * whiteRoom    (오프닝 안에서 흰 방 마운트. 레거시 엔트리 유지)
  * talkline     기존 2D 톡라인
@@ -22,6 +24,7 @@ export default function App() {
   const beginExplore = useGameState((s) => s.beginExplore)
   const talklineChapterId = useGameState((s) => s.talklineChapterId)
   const talklineSceneId = useGameState((s) => s.talklineSceneId)
+  const talklineSkipLoad = useGameState((s) => s.talklineSkipLoad)
   const playerNickname = useGameState((s) => s.playerNickname)
   const chipWakeStep = useGameState((s) => s.chipWakeStep)
   const beginChipWakeGuide = useGameState((s) => s.beginChipWakeGuide)
@@ -33,6 +36,14 @@ export default function App() {
 
   if (new URLSearchParams(window.location.search).has('coffee')) {
     return <CoffeeDebug />
+  }
+
+  if (introPhase === PRODUCT_PHASE.TITLE) {
+    return <TitleScreen />
+  }
+
+  if (introPhase === PRODUCT_PHASE.INTRO) {
+    return <IntroSequence />
   }
 
   if (introPhase === PRODUCT_PHASE.WHITE_ROOM) {
@@ -51,8 +62,8 @@ export default function App() {
     return (
       <OriginalMessenger
         afterOfficeIntro
-        skipLoad
-        startSceneId={talklineSceneId || INTRO_SCENE.TALKLINE}
+        skipLoad={talklineSkipLoad !== false}
+        startSceneId={talklineSceneId || (talklineSkipLoad === false ? null : INTRO_SCENE.TALKLINE)}
         startChapterId={talklineChapterId}
         nickname={playerNickname}
         onInterceptScene={(sceneId) => {
@@ -80,5 +91,5 @@ export default function App() {
     return <ExploreStage />
   }
 
-  return <IntroSequence />
+  return <TitleScreen />
 }

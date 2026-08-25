@@ -111,7 +111,8 @@ export const useGameState = create((set, get) => ({
   lookId: null,
   hint: '머리가 너무 아파.',
   handoff2d: false,
-  introPhase: null,
+  introPhase: PRODUCT_PHASE.TITLE,
+  talklineSkipLoad: true,
   inputMode: '3d',
   fade: 0,
   rightEyeHold: false,
@@ -255,9 +256,49 @@ export const useGameState = create((set, get) => ({
     set({ introPhase: 'whiteRoom', fade: 0, lookId: null, hint: '백지를 확인하자.' })
   },
 
+  beginIntroFromTitle: () => {
+    document.exitPointerLock?.()
+    set({
+      introPhase: PRODUCT_PHASE.INTRO,
+      talklineSkipLoad: true,
+      talklineChapterId: null,
+      talklineSceneId: null,
+      hasKey: false,
+      arFilterOn: false,
+      doorOpen: false,
+      doorAnimating: false,
+      currentRoom: 'lobby',
+      fade: 0,
+      lookId: null,
+      handoff2d: false,
+      inputMode: '3d',
+      hint: '',
+    })
+  },
+
+  beginContinueFromSave: (slotId) => {
+    const slots = saveService.listSlots()
+    const autosave = saveService.load()
+    const saved = slotId
+      ? saveService.loadSlot(slotId)
+      : autosave ?? (slots[0] ? saveService.loadSlot(slots[0].slotId) : null)
+    if (!saved) return
+    document.exitPointerLock?.()
+    const useAutosave = Boolean(autosave) && !slotId
+    set({
+      introPhase: PRODUCT_PHASE.TALKLINE,
+      talklineSkipLoad: false,
+      talklineChapterId: useAutosave ? null : saved.activeChapterId ?? null,
+      talklineSceneId: useAutosave ? null : saved.activeSceneId ?? null,
+      playerNickname: saved.nickname || get().playerNickname,
+      handoff2d: true,
+      fade: 0,
+    })
+  },
+
   beginTalkline: () => {
     document.exitPointerLock?.()
-    set({ introPhase: 'talkline', handoff2d: true, fade: 0 })
+    set({ introPhase: 'talkline', talklineSkipLoad: true, handoff2d: true, fade: 0 })
   },
 
   beginExplore: () => {
@@ -390,6 +431,7 @@ export const useGameState = create((set, get) => ({
     document.exitPointerLock?.()
     set({
       introPhase: 'talkline',
+      talklineSkipLoad: true,
       chipWakeStep: 'talkline',
       inputMode: 'vn',
       talklineChapterId: 'chapter-01',
@@ -401,6 +443,7 @@ export const useGameState = create((set, get) => ({
     document.exitPointerLock?.()
     set({
       introPhase: 'talkline',
+      talklineSkipLoad: true,
       chipWakeStep: 'talkline',
       inputMode: 'vn',
       talklineChapterId: 'chapter-01',
@@ -438,6 +481,7 @@ export const useGameState = create((set, get) => ({
     document.exitPointerLock?.()
     set({
       introPhase: 'talkline',
+      talklineSkipLoad: true,
       inputMode: 'vn',
       fade: 0,
       handoff2d: true,
@@ -593,6 +637,7 @@ export const useGameState = create((set, get) => ({
     document.exitPointerLock?.()
     set({
       introPhase: 'talkline',
+      talklineSkipLoad: true,
       chipWakeStep: 'choiTalkline',
       inputMode: 'vn',
       talklineChapterId: 'chapter-01',
