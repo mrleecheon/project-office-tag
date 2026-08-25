@@ -1,9 +1,10 @@
-const TYPING_SPEAKER_IDS = new Set(['kim', 'groomy', 'iseol'])
+const TYPING_SPEAKER_IDS = new Set(['kim', 'groomy', 'iseol', 'choi'])
 
 const TYPING_SPEAKER_LABELS = {
   kim: '김수진 대리',
   groomy: '그루미',
   iseol: '강이솔',
+  choi: '최민준 팀장',
 }
 
 export function shouldShowTypingIndicator(charId) {

@@ -1,5 +1,5 @@
 /** Per-character typing interval for TalkLine bubbles. Tune this one value. */
-const TYPING_SPEED_MS = 46
+export const TYPING_SPEED_MS = 46
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value))

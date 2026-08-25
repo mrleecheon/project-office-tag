@@ -10,12 +10,12 @@ import {
 assert.equal(shouldShowTypingIndicator('kim'), true)
 assert.equal(shouldShowTypingIndicator('groomy'), true)
 assert.equal(shouldShowTypingIndicator('iseol'), true)
-assert.equal(shouldShowTypingIndicator('choi'), false)
+assert.equal(shouldShowTypingIndicator('choi'), true)
 assert.equal(shouldShowTypingIndicator('system'), false)
 
 assert.equal(resolveTypingSpeakerLabel('kim'), '김수진 대리')
 assert.equal(resolveTypingSpeakerLabel('groomy'), '그루미')
-assert.equal(resolveTypingSpeakerLabel('iseol'), '강이솔')
+assert.equal(resolveTypingSpeakerLabel('choi'), '최민준 팀장')
 
 assert.deepEqual(
   splitChatDeliveryChunks('첫 문장입니다. 둘째 문장이에요.'),

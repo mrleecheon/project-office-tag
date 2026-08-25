@@ -32,6 +32,7 @@ export default function MessengerAppShell({
   onMove,
   onOpenSaveMenu,
   onRestart,
+  children,
 }) {
   const [homeOpen, setHomeOpen] = useState(false)
   const [panelOpen, setPanelOpen] = useState(null)
@@ -108,18 +109,20 @@ export default function MessengerAppShell({
             className={`messengerViewport active ${isPersonalChannel ? 'personalChannel' : ''}`}
             aria-hidden={false}
           >
-            <SceneViewport
-              scene={scene}
-              chapter={chapter}
-              context={context}
-              map={map}
-              state={state}
-              onChoice={onChoice}
-              onInput={onInput}
-              onDone={onDone}
-              onTrigger={onTrigger}
-              onMove={onMove}
-            />
+            {children ?? (
+              <SceneViewport
+                scene={scene}
+                chapter={chapter}
+                context={context}
+                map={map}
+                state={state}
+                onChoice={onChoice}
+                onInput={onInput}
+                onDone={onDone}
+                onTrigger={onTrigger}
+                onMove={onMove}
+              />
+            )}
           </div>
           <AnimatePresence mode="wait" initial={false}>
             {overlayOpen && !isImmersive && (
