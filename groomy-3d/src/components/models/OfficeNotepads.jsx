@@ -5,9 +5,12 @@ Command: npx gltfjsx@6.5.3 public/models/polyhaven/office_notepads/office_notepa
 
 import { useGLTF } from '@react-three/drei'
 import HeroProp from '../../systems/HeroProp.jsx'
+import { assetUrl } from '../../runtime/assetUrl.js'
+
+const SRC = assetUrl('/models/polyhaven/office_notepads/office_notepads_1k.gltf')
 
 export function OfficeNotepads(props) {
-  const { nodes, materials } = useGLTF('/models/polyhaven/office_notepads/office_notepads_1k.gltf')
+  const { nodes, materials } = useGLTF(SRC)
   return (
     <HeroProp contactScale={1.6} {...props}>
       <mesh geometry={nodes.office_notepads_yellow_sheet.geometry} material={materials.office_notepads} position={[0.15, 0, 0.175]} />
@@ -24,4 +27,4 @@ export function OfficeNotepads(props) {
   )
 }
 
-useGLTF.preload('/models/polyhaven/office_notepads/office_notepads_1k.gltf')
+useGLTF.preload(SRC)

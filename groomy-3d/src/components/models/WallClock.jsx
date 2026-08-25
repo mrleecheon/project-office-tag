@@ -5,9 +5,12 @@ Command: npx gltfjsx@6.5.3 public/models/polyhaven/wall_clock/wall_clock_1k.gltf
 
 import { useGLTF } from '@react-three/drei'
 import HeroProp from '../../systems/HeroProp.jsx'
+import { assetUrl } from '../../runtime/assetUrl.js'
+
+const SRC = assetUrl('/models/polyhaven/wall_clock/wall_clock_1k.gltf')
 
 export function WallClock(props) {
-  const { nodes, materials } = useGLTF('/models/polyhaven/wall_clock/wall_clock_1k.gltf')
+  const { nodes, materials } = useGLTF(SRC)
   return (
     <HeroProp contact={false} {...props}>
       <mesh geometry={nodes.wall_clock_minute_hand.geometry} material={materials.wall_clock} />
@@ -19,4 +22,4 @@ export function WallClock(props) {
   )
 }
 
-useGLTF.preload('/models/polyhaven/wall_clock/wall_clock_1k.gltf')
+useGLTF.preload(SRC)

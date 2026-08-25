@@ -2,14 +2,15 @@ import { useLayoutEffect, useMemo } from 'react'
 import { useFBX } from '@react-three/drei'
 import * as THREE from 'three'
 import { usePbrMaps } from '../assets/PbrMaterial.jsx'
+import { assetUrl } from '../runtime/assetUrl.js'
 
 const FBX = {
-  floor: '/models/concrete-interior/fbx/Floor.fbx',
-  wall: '/models/concrete-interior/fbx/Wall.fbx',
-  doorway: '/models/concrete-interior/fbx/WallDoorway.fbx',
-  corner: '/models/concrete-interior/fbx/Wall_Corner.fbx',
-  pillar: '/models/concrete-interior/fbx/Pillar.fbx',
-  ceiling: '/models/concrete-interior/fbx/Ceiling.fbx',
+  floor: assetUrl('/models/concrete-interior/fbx/Floor.fbx'),
+  wall: assetUrl('/models/concrete-interior/fbx/Wall.fbx'),
+  doorway: assetUrl('/models/concrete-interior/fbx/WallDoorway.fbx'),
+  corner: assetUrl('/models/concrete-interior/fbx/Wall_Corner.fbx'),
+  pillar: assetUrl('/models/concrete-interior/fbx/Pillar.fbx'),
+  ceiling: assetUrl('/models/concrete-interior/fbx/Ceiling.fbx'),
 }
 
 const _box = new THREE.Box3()

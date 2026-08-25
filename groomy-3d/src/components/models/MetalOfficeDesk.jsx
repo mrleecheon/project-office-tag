@@ -5,9 +5,12 @@ Command: npx gltfjsx@6.5.3 public/models/polyhaven/metal_office_desk/metal_offic
 
 import { useGLTF } from '@react-three/drei'
 import HeroProp from '../../systems/HeroProp.jsx'
+import { assetUrl } from '../../runtime/assetUrl.js'
+
+const SRC = assetUrl('/models/polyhaven/metal_office_desk/metal_office_desk_1k.gltf')
 
 export function MetalOfficeDesk(props) {
-  const { nodes, materials } = useGLTF('/models/polyhaven/metal_office_desk/metal_office_desk_1k.gltf')
+  const { nodes, materials } = useGLTF(SRC)
   return (
     <HeroProp contactScale={3.4} {...props}>
       <mesh geometry={nodes.metal_office_desk_drawer_06.geometry} material={materials.metal_office_desk} />
@@ -23,4 +26,4 @@ export function MetalOfficeDesk(props) {
   )
 }
 
-useGLTF.preload('/models/polyhaven/metal_office_desk/metal_office_desk_1k.gltf')
+useGLTF.preload(SRC)

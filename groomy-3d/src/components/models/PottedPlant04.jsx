@@ -5,9 +5,12 @@ Command: npx gltfjsx@6.5.3 public/models/polyhaven/potted_plant_04/potted_plant_
 
 import { useGLTF } from '@react-three/drei'
 import HeroProp from '../../systems/HeroProp.jsx'
+import { assetUrl } from '../../runtime/assetUrl.js'
+
+const SRC = assetUrl('/models/polyhaven/potted_plant_04/potted_plant_04_1k.gltf')
 
 export function PottedPlant04(props) {
-  const { nodes, materials } = useGLTF('/models/polyhaven/potted_plant_04/potted_plant_04_1k.gltf')
+  const { nodes, materials } = useGLTF(SRC)
   return (
     <HeroProp contactScale={1.4} {...props}>
       <mesh geometry={nodes.potted_plant_04_ground.geometry} material={materials.potted_plant_04} />
@@ -18,4 +21,4 @@ export function PottedPlant04(props) {
   )
 }
 
-useGLTF.preload('/models/polyhaven/potted_plant_04/potted_plant_04_1k.gltf')
+useGLTF.preload(SRC)

@@ -5,9 +5,12 @@ Command: npx gltfjsx@6.5.3 public/models/polyhaven/SchoolChair_01/SchoolChair_01
 
 import { useGLTF } from '@react-three/drei'
 import HeroProp from '../../systems/HeroProp.jsx'
+import { assetUrl } from '../../runtime/assetUrl.js'
+
+const SRC = assetUrl('/models/polyhaven/SchoolChair_01/SchoolChair_01_1k.gltf')
 
 export function SchoolChair(props) {
-  const { nodes, materials } = useGLTF('/models/polyhaven/SchoolChair_01/SchoolChair_01_1k.gltf')
+  const { nodes, materials } = useGLTF(SRC)
   return (
     <HeroProp {...props}>
       <mesh geometry={nodes.SchoolChair_01.geometry} material={materials.SchoolChair_01} />
@@ -15,4 +18,4 @@ export function SchoolChair(props) {
   )
 }
 
-useGLTF.preload('/models/polyhaven/SchoolChair_01/SchoolChair_01_1k.gltf')
+useGLTF.preload(SRC)

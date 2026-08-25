@@ -3,6 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { Environment } from '@react-three/drei'
 import * as THREE from 'three'
 import { useGameState } from '../state/gameStateStore.js'
+import { assetUrl } from '../runtime/assetUrl.js'
 
 const RUIN_FOG = { color: new THREE.Color('#7a848c'), density: 0.038 }
 const AR_FOG = { color: new THREE.Color('#d2dbe3'), density: 0.01 }
@@ -55,7 +56,7 @@ export function RoomLightRig({ ar = false }) {
 export function RoomEnvironment({ ar = false }) {
   return (
     <Environment
-      files={ar ? '/hdri/empty_warehouse_01_1k.hdr' : '/hdri/abandoned_workshop_1k.hdr'}
+      files={ar ? assetUrl('/hdri/empty_warehouse_01_1k.hdr') : assetUrl('/hdri/abandoned_workshop_1k.hdr')}
       environmentIntensity={ar ? 0.42 : 0.16}
     />
   )

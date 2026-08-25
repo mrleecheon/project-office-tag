@@ -1,8 +1,9 @@
 import { useGLTF } from '@react-three/drei'
 import { useMemo } from 'react'
 import HeroProp from '../systems/HeroProp.jsx'
+import { assetUrl } from '../runtime/assetUrl.js'
 
-const BASE = '/models/kenney-furniture'
+const BASE = assetUrl('/models/kenney-furniture')
 
 export const KENNEY = {
   table: `${BASE}/table.glb`,

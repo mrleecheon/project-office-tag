@@ -2,26 +2,28 @@ import { useTexture } from '@react-three/drei'
 import { useLayoutEffect } from 'react'
 import * as THREE from 'three'
 
+import { assetUrl } from '../runtime/assetUrl.js'
+
 const SETS = {
   floorRuin: {
-    map: '/tex/concrete_floor_worn_001_diff_1k.jpg',
-    normalMap: '/tex/concrete_floor_worn_001_nor_gl_1k.jpg',
-    roughnessMap: '/tex/concrete_floor_worn_001_rough_1k.jpg',
+    map: assetUrl('/tex/concrete_floor_worn_001_diff_1k.jpg'),
+    normalMap: assetUrl('/tex/concrete_floor_worn_001_nor_gl_1k.jpg'),
+    roughnessMap: assetUrl('/tex/concrete_floor_worn_001_rough_1k.jpg'),
   },
   floorAr: {
-    map: '/tex/floor_tiles_06_diff_1k.jpg',
-    normalMap: '/tex/floor_tiles_06_nor_gl_1k.jpg',
-    roughnessMap: '/tex/floor_tiles_06_rough_1k.jpg',
+    map: assetUrl('/tex/floor_tiles_06_diff_1k.jpg'),
+    normalMap: assetUrl('/tex/floor_tiles_06_nor_gl_1k.jpg'),
+    roughnessMap: assetUrl('/tex/floor_tiles_06_rough_1k.jpg'),
   },
   wallRuin: {
-    map: '/tex/concrete_wall_008_diff_1k.jpg',
-    normalMap: '/tex/concrete_wall_008_nor_gl_1k.jpg',
-    roughnessMap: '/tex/concrete_wall_008_rough_1k.jpg',
+    map: assetUrl('/tex/concrete_wall_008_diff_1k.jpg'),
+    normalMap: assetUrl('/tex/concrete_wall_008_nor_gl_1k.jpg'),
+    roughnessMap: assetUrl('/tex/concrete_wall_008_rough_1k.jpg'),
   },
   wallAr: {
-    map: '/tex/painted_plaster_wall_diff_1k.jpg',
-    normalMap: '/tex/painted_plaster_wall_nor_gl_1k.jpg',
-    roughnessMap: '/tex/painted_plaster_wall_rough_1k.jpg',
+    map: assetUrl('/tex/painted_plaster_wall_diff_1k.jpg'),
+    normalMap: assetUrl('/tex/painted_plaster_wall_nor_gl_1k.jpg'),
+    roughnessMap: assetUrl('/tex/painted_plaster_wall_rough_1k.jpg'),
   },
 }
 
