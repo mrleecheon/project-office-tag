@@ -38,10 +38,12 @@ export function fadeAudioVolume(audio, targetVolume, fadeMs = DEFAULT_FADE_MS, o
   let frame = 0
   const step = (now) => {
     const t = Math.min(1, (now - start) / fadeMs)
-    audio.volume = from + (target - from) * t
+    // HTMLMediaElement.volume은 [0,1]만 허용 — float 오차로 음수/1초과 방지
+    audio.volume = clampVolume(from + (target - from) * t)
     if (t < 1) {
       frame = requestAnimationFrame(step)
     } else {
+      audio.volume = target
       onComplete?.()
     }
   }
