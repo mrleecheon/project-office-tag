@@ -2,11 +2,15 @@ import { useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { PointerLockControls } from '@react-three/drei'
 import * as THREE from 'three'
+import { AUDIO_PATHS } from './audioPaths.js'
+import { isGameAudioUnlocked, playOneShot, unlockGameAudio } from './gameAudioCore.js'
 import { ROOM_GRAPH, useGameState } from '../state/gameStateStore.js'
 
 const SPEED = 4.2
 const REACH = 11
 const NEAR = 8
+const FOOTSTEP_INTERVAL = 0.42
+const FOOTSTEP_VOLUME = 0.28
 const _world = new THREE.Vector3()
 
 function readInteractMeta(object) {
@@ -52,9 +56,11 @@ export default function PlayerController({ bounds, spawn, spawnYaw }) {
   const brewing = coffeePhase === 'brewing'
   const play3d = inputMode === '3d'
   const spawned = useRef(false)
+  const footstepAccum = useRef(0)
 
   useEffect(() => {
     spawned.current = false
+    footstepAccum.current = 0
   }, [currentRoom])
 
   useEffect(() => {
@@ -81,6 +87,7 @@ export default function PlayerController({ bounds, spawn, spawnYaw }) {
   useEffect(() => {
     if (!play3d) return undefined
     const down = (event) => {
+      unlockGameAudio()
       keys.current[event.code] = true
       if (event.code === 'KeyF') setRightEyeHold(true)
     }
@@ -121,7 +128,18 @@ export default function PlayerController({ bounds, spawn, spawnYaw }) {
       if (move.lengthSq() > 0) {
         move.normalize().multiplyScalar(SPEED * delta)
         camera.position.add(move)
+        if (isGameAudioUnlocked()) {
+          footstepAccum.current += delta
+          if (footstepAccum.current >= FOOTSTEP_INTERVAL) {
+            footstepAccum.current = 0
+            playOneShot(AUDIO_PATHS.footstep, FOOTSTEP_VOLUME)
+          }
+        }
+      } else {
+        footstepAccum.current = 0
       }
+    } else {
+      footstepAccum.current = 0
     }
 
     camera.position.x = THREE.MathUtils.clamp(camera.position.x, bounds.minX, bounds.maxX)

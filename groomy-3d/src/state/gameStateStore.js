@@ -1,6 +1,13 @@
 import { create } from 'zustand'
 import { saveService } from '@groomy/game/engine/save/saveService.js'
 import { OFFICE_INSPECT_IDS, POST_INVESTIGATION_STAGE, PRODUCT_PHASE } from '../runtime/productFlow.js'
+import { createCoffeeOrders } from '../scenes/CoffeeMinigame.jsx'
+import {
+  GROOMY_FRAGMENTS,
+  scatterFragmentPositions,
+} from '../content/dialogue/groomyFragments.js'
+
+export { GROOMY_FRAGMENTS }
 
 export const ROOM_ORDER = ['lobby', 'corridor', 'meetingRoom', 'serverRoom', 'stairwell', 'groomyRoom']
 
@@ -57,13 +64,13 @@ export const ROOM_GRAPH = {
   },
   stairwell: {
     id: 'stairwell',
-    prevRoom: 'serverRoom',
+    prevRoom: 'meetingRoom',
     nextRoom: 'groomyRoom',
-    size: [8, 3.4, 10],
-    spawn: [0, 1.6, 3.2],
-    bounds: { minX: -3.5, maxX: 3.5, minZ: -4.6, maxZ: 4.5 },
-    blockMinZ: -3.3,
-    hint: '계단. TODO 조사 콘텐츠',
+    size: [8, 4.2, 14],
+    spawn: [0, 1.6, 1.15],
+    bounds: { minX: -3.2, maxX: 3.2, minZ: -4.6, maxZ: 2.35 },
+    blockMinZ: null,
+    hint: '계단실.',
   },
   groomyRoom: {
     id: 'groomyRoom',
@@ -138,16 +145,39 @@ export const useGameState = create((set, get) => ({
   officeAfterMorning: false,
   coffeeBriefingDone: false,
   coffeeMachineVisited: false,
+  coffeeDeliveryFlags: {
+    minjunResponse: null,
+    groomyTrust: null,
+  },
+  isolPostCoffeeUnlocked: false,
+  isolPostCoffeeTalked: false,
   coffeeGame: {
-    orders: [
-      { name: '팀장님', shots: 2 },
-      { name: '대리님', shots: 1 },
-      { name: '그루미', shots: 5 },
-    ],
+    orders: createCoffeeOrders(),
     currentOrderIndex: 0,
     currentShots: 0,
     phase: 'idle',
+    coffeeGameDone: false,
   },
+  /** 흰 방 파편 — papers.length 가 총 개수 (하드코딩 금지) */
+  papers: GROOMY_FRAGMENTS,
+  paperPositions: {},
+  collectedFragments: [],
+  interactedFragmentIds: [],
+  fragmentsAllCollected: false,
+  fragmentsTimedOut: false,
+  fragmentHuntActive: false,
+  fragmentHuntComplete: false,
+  fragmentSecondsLeft: 10 * 60,
+  /** 다음 프롬프트(전화) 훅 */
+  pendingFragmentCall: false,
+  meetingWalkUnlocked: false,
+  meetingChoice: null,
+  corpseApproachDone: false,
+  corpseTimerActive: false,
+  corpseInspected: false,
+  corpseSecondsLeft: 30,
+  stairDownHintDone: false,
+  corpseSequenceDone: false,
 
   setInputMode: (inputMode) => set({ inputMode }),
   setLookId: (lookId) => set({ lookId }),
@@ -412,16 +442,29 @@ export const useGameState = create((set, get) => ({
       officeAfterMorning: false,
       coffeeBriefingDone: false,
       coffeeMachineVisited: false,
+      coffeeDeliveryFlags: {
+        minjunResponse: null,
+        groomyTrust: null,
+      },
+      isolPostCoffeeUnlocked: false,
+      isolPostCoffeeTalked: false,
       coffeeGame: {
-        orders: [
-          { name: '팀장님', shots: 2 },
-          { name: '대리님', shots: 1 },
-          { name: '그루미', shots: 5 },
-        ],
+        orders: createCoffeeOrders(),
         currentOrderIndex: 0,
         currentShots: 0,
         phase: 'idle',
+        coffeeGameDone: false,
       },
+      papers: GROOMY_FRAGMENTS,
+      paperPositions: {},
+      collectedFragments: [],
+      interactedFragmentIds: [],
+      fragmentsAllCollected: false,
+      fragmentsTimedOut: false,
+      fragmentHuntActive: false,
+      fragmentHuntComplete: false,
+      fragmentSecondsLeft: 10 * 60,
+      pendingFragmentCall: false,
     })
   },
 
@@ -525,6 +568,9 @@ export const useGameState = create((set, get) => ({
         ...get().coffeeGame,
         currentShots: 0,
         phase: 'idle',
+        coffeeGameDone: false,
+        currentOrderIndex: 0,
+        orders: createCoffeeOrders(),
       },
     })
   },
@@ -542,8 +588,9 @@ export const useGameState = create((set, get) => ({
 
   startCoffeeBrewing: () => {
     const { coffeeGame } = get()
+    if (coffeeGame.phase !== 'idle' || coffeeGame.coffeeGameDone) return
     const order = coffeeGame.orders[coffeeGame.currentOrderIndex]
-    if (!order || coffeeGame.phase !== 'idle') return
+    if (!order) return
     set({
       coffeeGame: {
         ...coffeeGame,
@@ -556,7 +603,7 @@ export const useGameState = create((set, get) => ({
   pourCoffeeShot: () => {
     const { coffeeGame } = get()
     const order = coffeeGame.orders[coffeeGame.currentOrderIndex]
-    if (!order || coffeeGame.phase !== 'brewing') return
+    if (!order || coffeeGame.phase !== 'brewing' || coffeeGame.coffeeGameDone) return
     if (coffeeGame.currentShots >= order.shots) return
     const currentShots = coffeeGame.currentShots + 1
     set({
@@ -568,34 +615,272 @@ export const useGameState = create((set, get) => ({
     })
   },
 
-  deliverCoffeeOrder: (recipient) => {
+  deliverCoffeeOrder: (lookIdOrName) => {
     const { coffeeGame } = get()
+    if (coffeeGame.phase !== 'carrying' || coffeeGame.coffeeGameDone) return
     const order = coffeeGame.orders[coffeeGame.currentOrderIndex]
-    if (!order || coffeeGame.phase !== 'carrying') return
+    if (!order) return
     if (coffeeGame.currentShots !== order.shots) return
-    if (recipient && recipient !== order.name) return
+    const matchesTarget = lookIdOrName === order.target || lookIdOrName === order.name
+    if (lookIdOrName && !matchesTarget) return
+    const nextIndex = coffeeGame.currentOrderIndex + 1
+    const coffeeGameDone = nextIndex >= coffeeGame.orders.length
     set({
       coffeeGame: {
         ...coffeeGame,
-        currentOrderIndex: coffeeGame.currentOrderIndex + 1,
+        currentOrderIndex: nextIndex,
         currentShots: 0,
         phase: 'idle',
+        coffeeGameDone,
       },
     })
   },
 
+  setCoffeeDeliveryFlag: (key, value) => {
+    set({
+      coffeeDeliveryFlags: {
+        ...get().coffeeDeliveryFlags,
+        [key]: value,
+      },
+    })
+  },
+
+  unlockIsolPostCoffee: () => set({ isolPostCoffeeUnlocked: true }),
+
+  markIsolPostCoffeeTalked: () => set({ isolPostCoffeeTalked: true }),
+
+  beginFragmentHunt: () => {
+    document.exitPointerLock?.()
+    const papers = GROOMY_FRAGMENTS
+    set({
+      introPhase: PRODUCT_PHASE.CHIP_WAKE,
+      chipWakeStep: 'fragmentRoom',
+      inputMode: '3d',
+      currentRoom: 'chipWhite',
+      lookId: null,
+      hint: '',
+      fade: 1,
+      handoff2d: false,
+      papers,
+      paperPositions: scatterFragmentPositions(papers.length),
+      collectedFragments: [],
+      interactedFragmentIds: [],
+      fragmentsAllCollected: false,
+      fragmentsTimedOut: false,
+      fragmentHuntActive: true,
+      fragmentHuntComplete: false,
+      fragmentSecondsLeft: 10 * 60,
+      pendingFragmentCall: false,
+      talklineChapterId: null,
+      talklineSceneId: null,
+    })
+    window.setTimeout(() => set({ fade: 0 }), 280)
+  },
+
+  tickFragmentTimer: () => {
+    const {
+      fragmentHuntActive,
+      fragmentHuntComplete,
+      fragmentSecondsLeft,
+    } = get()
+    if (!fragmentHuntActive || fragmentHuntComplete) return
+    if (fragmentSecondsLeft <= 1) {
+      get().completeFragmentHunt('timeout')
+      return
+    }
+    set({ fragmentSecondsLeft: fragmentSecondsLeft - 1 })
+  },
+
+  markFragmentInteracted: (id, { collected = true } = {}) => {
+    const {
+      interactedFragmentIds,
+      collectedFragments,
+      papers,
+      fragmentHuntComplete,
+    } = get()
+    if (fragmentHuntComplete || interactedFragmentIds.includes(id)) return
+    const nextInteracted = [...interactedFragmentIds, id]
+    const nextCollected = collected && !collectedFragments.includes(id)
+      ? [...collectedFragments, id]
+      : collectedFragments
+    const allDone = nextInteracted.length >= papers.length
+    set({
+      interactedFragmentIds: nextInteracted,
+      collectedFragments: nextCollected,
+      fragmentsAllCollected: allDone,
+    })
+    if (allDone) get().completeFragmentHunt('all')
+  },
+
+  completeFragmentHunt: (reason) => {
+    if (get().fragmentHuntComplete) return
+    const all = reason === 'all' || get().interactedFragmentIds.length >= get().papers.length
+    set({
+      fragmentHuntComplete: true,
+      fragmentHuntActive: false,
+      fragmentsAllCollected: all,
+      fragmentsTimedOut: reason === 'timeout',
+      fragmentSecondsLeft: reason === 'timeout' ? 0 : get().fragmentSecondsLeft,
+      pendingFragmentCall: true,
+      lookId: null,
+      hint: '',
+      inputMode: 'vn',
+    })
+    document.exitPointerLock?.()
+  },
+
+  /** QA / 부트: 흰 방 로직 없이 복귀 전화만 시작 */
+  beginFragmentReturnCall: (reason = 'all') => {
+    document.exitPointerLock?.()
+    const timedOut = reason === 'timeout'
+    set({
+      introPhase: PRODUCT_PHASE.CHIP_WAKE,
+      chipWakeStep: 'fragmentRoom',
+      inputMode: 'vn',
+      currentRoom: 'chipWhite',
+      lookId: null,
+      hint: '',
+      fade: 0,
+      handoff2d: false,
+      papers: GROOMY_FRAGMENTS,
+      paperPositions: {},
+      collectedFragments: timedOut ? [] : GROOMY_FRAGMENTS.map((p) => p.id),
+      interactedFragmentIds: timedOut ? [] : GROOMY_FRAGMENTS.map((p) => p.id),
+      fragmentsAllCollected: !timedOut,
+      fragmentsTimedOut: timedOut,
+      fragmentHuntActive: false,
+      fragmentHuntComplete: true,
+      fragmentSecondsLeft: timedOut ? 0 : 10 * 60,
+      pendingFragmentCall: true,
+      talklineChapterId: null,
+      talklineSceneId: null,
+    })
+  },
+
+  enterMeetingAfterFragmentCall: () => {
+    document.exitPointerLock?.()
+    set({
+      introPhase: PRODUCT_PHASE.CHIP_WAKE,
+      pendingFragmentCall: false,
+      chipWakeStep: 'meetingRoom',
+      currentRoom: 'meetingRoom',
+      arFilterOn: true,
+      inputMode: 'vn',
+      lookId: null,
+      hint: '',
+      fade: 1,
+      handoff2d: false,
+      talklineChapterId: null,
+      talklineSceneId: null,
+      meetingWalkUnlocked: false,
+      meetingChoice: null,
+      corpseApproachDone: false,
+      corpseTimerActive: false,
+      corpseInspected: false,
+      corpseSecondsLeft: 30,
+      stairDownHintDone: false,
+      corpseSequenceDone: false,
+    })
+    window.setTimeout(() => set({ fade: 0 }), 280)
+  },
+
+  unlockMeetingWalk: () => {
+    set({
+      meetingWalkUnlocked: true,
+      inputMode: '3d',
+      lookId: null,
+      hint: '',
+      exitOpen: { ...get().exitOpen, meetingRoom: true },
+    })
+  },
+
+  setMeetingChoice: (meetingChoice) => set({ meetingChoice }),
+
+  enterStairwellFromMeeting: () => {
+    document.exitPointerLock?.()
+    set({
+      chipWakeStep: 'stairwell',
+      currentRoom: 'stairwell',
+      inputMode: '3d',
+      lookId: null,
+      hint: '',
+      fade: 1,
+      corpseApproachDone: false,
+      corpseTimerActive: false,
+      corpseInspected: false,
+      corpseSecondsLeft: 30,
+      stairDownHintDone: false,
+      corpseSequenceDone: false,
+    })
+    window.setTimeout(() => set({ fade: 0 }), 280)
+  },
+
+  markStairDownHintDone: () => set({ stairDownHintDone: true }),
+
+  markCorpseApproachDone: () => set({ corpseApproachDone: true }),
+
+  startCorpseTimer: () => {
+    set({
+      corpseTimerActive: true,
+      corpseSecondsLeft: 30,
+      inputMode: '3d',
+      lookId: null,
+      hint: '',
+    })
+  },
+
+  tickCorpseTimer: () => {
+    const { corpseTimerActive, corpseSecondsLeft, corpseSequenceDone } = get()
+    if (!corpseTimerActive || corpseSequenceDone) return
+    if (corpseSecondsLeft <= 1) {
+      set({
+        corpseSecondsLeft: 0,
+        corpseTimerActive: false,
+      })
+      return
+    }
+    set({ corpseSecondsLeft: corpseSecondsLeft - 1 })
+  },
+
+  markCorpseInspected: () => set({ corpseInspected: true }),
+
+  finishCorpseSequence: () => {
+    set({
+      corpseSequenceDone: true,
+      corpseTimerActive: false,
+      corpseSecondsLeft: 0,
+      inputMode: 'vn',
+      lookId: null,
+      hint: '',
+    })
+    document.exitPointerLock?.()
+  },
+
   resetCoffeeGame: () => {
     set({
+      coffeeDeliveryFlags: {
+        minjunResponse: null,
+        groomyTrust: null,
+      },
+      isolPostCoffeeUnlocked: false,
+      isolPostCoffeeTalked: false,
       coffeeGame: {
-        orders: [
-          { name: '팀장님', shots: 2 },
-          { name: '대리님', shots: 1 },
-          { name: '그루미', shots: 5 },
-        ],
+        orders: createCoffeeOrders(),
         currentOrderIndex: 0,
         currentShots: 0,
         phase: 'idle',
+        coffeeGameDone: false,
       },
+      papers: GROOMY_FRAGMENTS,
+      paperPositions: {},
+      collectedFragments: [],
+      interactedFragmentIds: [],
+      fragmentsAllCollected: false,
+      fragmentsTimedOut: false,
+      fragmentHuntActive: false,
+      fragmentHuntComplete: false,
+      fragmentSecondsLeft: 10 * 60,
+      pendingFragmentCall: false,
     })
   },
 

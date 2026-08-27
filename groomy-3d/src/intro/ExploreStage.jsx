@@ -18,14 +18,9 @@ import {
   buildKangIsolBeats,
 } from '../runtime/productFlow.js'
 import VNOverlay from '../ui/VNOverlay.jsx'
+import InventoryBag, { ITEM_INFO } from '../ui/InventoryBag.jsx'
 import '../PlayRoot.css'
 import './OpeningVnOverlay.css'
-
-const ITEM_INFO = {
-  calendar: { name: '달력', info: '평범해 보이는 달력이다. 2127년 2월 7일에 체크표시가 되어있는 듯 하다.' },
-  wallet: { name: '지갑', info: '돈이 가득 들어있는 지갑이다. 누군가의 신분증이 들어있다.' },
-  nail: { name: '손톱', info: '매니큐어용 인조 손톱.' },
-}
 
 function CorridorWalk({ active, onDone }) {
   const { camera } = useThree()
@@ -69,7 +64,6 @@ export default function ExploreStage() {
   const [vnPhase, setVnPhase] = useState('idle')
   const [inspectId, setInspectId] = useState(null)
   const [bagOpen, setBagOpen] = useState(false)
-  const [bagItem, setBagItem] = useState(null)
   const startedRef = useRef(false)
   const audio = useMemo(() => createAudioService(), [])
   const inOffice = currentRoom === 'office'
@@ -219,8 +213,6 @@ export default function ExploreStage() {
     }
   }, [vnPhase, inspectId, officeInspected, markOfficeInspected, setHint, atePork, setPostInvestigationStage, beginOnboardingChannel])
 
-  const selected = bagItem ? ITEM_INFO[bagItem] : null
-
   return (
     <div className="opening-stage">
       <div className="opening-frame">
@@ -253,26 +245,12 @@ export default function ExploreStage() {
           </p>
         )}
         {vnPhase === 'free' && (
-          <button type="button" className="explore-bag-btn" onClick={() => setBagOpen((open) => !open)}>
-            가방
-          </button>
-        )}
-        {bagOpen && vnPhase === 'free' && (
-          <div className="explore-bag">
-            <p className="explore-bag-title">소지품</p>
-            {inventory.length === 0 && <p className="explore-bag-empty">비어 있다.</p>}
-            {inventory.map((id) => (
-              <button key={id} type="button" className="explore-bag-item" onClick={() => setBagItem(id)}>
-                {ITEM_INFO[id]?.name ?? id}
-              </button>
-            ))}
-            {selected && (
-              <p className="explore-bag-info">
-                <strong>{selected.name}</strong>
-                {selected.info}
-              </p>
-            )}
-          </div>
+          <InventoryBag
+            inventory={inventory}
+            itemInfo={ITEM_INFO}
+            open={bagOpen}
+            onToggle={setBagOpen}
+          />
         )}
       </div>
     </div>

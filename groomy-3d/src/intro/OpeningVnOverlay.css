@@ -174,9 +174,12 @@
   top: 18px;
   z-index: 12;
   padding: 8px 14px;
-  color: #f2eee6;
-  background: rgba(10, 12, 16, 0.82);
-  border: 1px solid rgba(232, 228, 214, 0.45);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-hairline);
   cursor: pointer;
 }
 
@@ -187,16 +190,19 @@
   z-index: 12;
   width: 240px;
   padding: 12px 14px;
-  color: #f4f0e8;
-  background: rgba(8, 9, 12, 0.88);
-  border: 1px solid rgba(232, 228, 214, 0.28);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-hairline);
 }
 
 .explore-bag-title {
   margin: 0 0 8px;
+  font-family: var(--font-mono);
   font-size: 13px;
   letter-spacing: 0.08em;
-  color: #d8c38a;
+  color: var(--text-system-mono, var(--text-primary));
+  opacity: 0.85;
 }
 
 .explore-bag-empty,
@@ -212,15 +218,17 @@
   margin-top: 6px;
   padding: 6px 8px;
   text-align: left;
-  color: #f2eee6;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(232, 228, 214, 0.28);
+  color: var(--text-primary);
+  font: inherit;
+  background: transparent;
+  border: 1px solid var(--border-hairline);
   cursor: pointer;
 }
 
 .explore-bag-info strong {
   display: block;
   margin-bottom: 4px;
-  color: #d8c38a;
+  font-family: var(--font-mono);
+  color: var(--text-system-mono, var(--text-primary));
 }
 

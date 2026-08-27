@@ -57,3 +57,70 @@
   margin: 0;
   letter-spacing: 0.12em;
 }
+
+.fragment-timer {
+  position: absolute;
+  left: 50%;
+  top: 18px;
+  z-index: 12;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+.fragment-timer-label {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  opacity: 0.72;
+}
+
+.fragment-timer-value {
+  font-size: 28px;
+  letter-spacing: 0.14em;
+}
+
+.fragment-timer.is-glitch .fragment-timer-value {
+  animation: fragmentTimerGlitch 0.55s steps(2, end);
+  color: #ff6b6b;
+}
+
+@keyframes fragmentTimerGlitch {
+  0%,
+  100% { opacity: 1; transform: translate(0, 0); }
+  25% { opacity: 0.35; transform: translate(2px, -1px); }
+  50% { opacity: 1; transform: translate(-2px, 1px); }
+  75% { opacity: 0.5; transform: translate(1px, 0); }
+}
+
+.fragment-puzzle {
+  z-index: 14;
+}
+
+.fragment-puzzle-confirm {
+  margin: 0 0 4px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.fragment-puzzle-yn {
+  display: flex;
+  gap: 10px;
+}
+
+.fragment-puzzle-yn button {
+  flex: 1;
+}
+
+.fragment-exit-hook {
+  position: absolute;
+  inset: 0;
+  z-index: 13;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.35);
+}

@@ -18,12 +18,12 @@ export function mixCupColor(shots, target) {
   return `#${CREAM.clone().lerp(BREW, t).getHexString()}`
 }
 
-export function coffeeRecipientForLook(lookId) {
-  if (lookId === 'staff-kim') return '팀장님'
-  if (lookId === 'staff-choi') return '대리님'
-  if (lookId === 'coffee-groomy') return '그루미'
-  return null
-}
+export {
+  activeCoffeeOrder,
+  coffeeRecipientForLook,
+  createCoffeeOrders,
+  isCoffeeGameDone,
+} from './CoffeeMinigame.jsx'
 
 export default function CoffeeStation({
   origin = [0, 0, 0],

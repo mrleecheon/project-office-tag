@@ -28,6 +28,18 @@ if (boot.has('groomy') || boot.has('afterinspect') || from === 'groomy' || from 
   useGameState.getState().beginKangIsolMorning()
 } else if (boot.has('coffee') || from === 'coffee') {
   useGameState.getState().startOfficeCoffeeBrewing()
+} else if (boot.has('fragments') || from === 'fragments') {
+  useGameState.getState().beginFragmentHunt()
+} else if (boot.get('fragcall') === 'timeout' || from === 'fragcall-timeout') {
+  useGameState.getState().beginFragmentReturnCall('timeout')
+} else if (boot.has('fragcall') || from === 'fragcall' || from === 'fragcall-all') {
+  useGameState.getState().beginFragmentReturnCall('all')
+} else if (boot.has('meeting') || from === 'meeting') {
+  useGameState.getState().enterMeetingAfterFragmentCall()
+} else if (boot.has('stair') || from === 'stair') {
+  useGameState.getState().enterMeetingAfterFragmentCall()
+  useGameState.getState().unlockMeetingWalk()
+  useGameState.getState().enterStairwellFromMeeting()
 }
 
 createRoot(document.getElementById('root')).render(
@@ -35,3 +47,7 @@ createRoot(document.getElementById('root')).render(
     <App />
   </StrictMode>,
 )
+
+if (import.meta.env.DEV) {
+  window.__GROOMY_STORE__ = useGameState
+}

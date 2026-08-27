@@ -183,6 +183,17 @@
   word-break: break-word;
 }
 
+.vn-overlay-text.is-runon {
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+
+.vn-overlay-text.is-whisper {
+  font-size: 14px;
+  opacity: 0.72;
+  letter-spacing: 0.04em;
+}
+
 .vn-overlay-text.is-shard {
   font-family: var(--font-mono);
   color: var(--text-glitch-warn);

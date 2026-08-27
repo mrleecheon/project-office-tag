@@ -39,3 +39,7 @@
     0 0 8px rgba(0, 0, 0, 0.6);
   white-space: nowrap;
 }
+
+.world-prompt:has(.world-prompt-label:only-child) {
+  min-width: 0;
+}

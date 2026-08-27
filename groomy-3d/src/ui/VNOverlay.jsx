@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import '../game/scenes/ShockScene.css'
 import './VNOverlay.css'
+
+const TYPING_MS = { default: 18, fast: 7 }
 
 function createCursor(beats) {
   const byId = Object.fromEntries(beats.map((beat) => [beat.id, beat]))
@@ -23,7 +25,13 @@ function createCursor(beats) {
   }
 }
 
-function useTypewriter(text, active) {
+function interpolateUser(text, userName) {
+  if (text == null) return text
+  const name = String(userName ?? '').trim() || '플레이어'
+  return String(text).split('{{user}}').join(name)
+}
+
+function useTypewriter(text, active, intervalMs = TYPING_MS.default) {
   const full = text ?? ''
   const [count, setCount] = useState(0)
   useEffect(() => {
@@ -37,9 +45,9 @@ function useTypewriter(text, active) {
         }
         return n + 1
       })
-    }, 18)
+    }, intervalMs)
     return () => window.clearInterval(id)
-  }, [active, full])
+  }, [active, full, intervalMs])
   return { shown: full.slice(0, count), done: !active || !full || count >= full.length }
 }
 
@@ -50,23 +58,28 @@ export default function VNOverlay({
   onChoice,
   actionComplete = false,
   autoAdvanceMs,
+  userName = '',
 }) {
   const cursorRef = useRef(null)
   if (!cursorRef.current) cursorRef.current = createCursor(beats)
   const [beat, setBeat] = useState(() => cursorRef.current.current)
   const [nameDraft, setNameDraft] = useState('')
   const [glitch, setGlitch] = useState(false)
+  const [blinkFx, setBlinkFx] = useState(false)
   const [afterInput, setAfterInput] = useState(false)
   const [waitingAction, setWaitingAction] = useState(false)
   const [skipType, setSkipType] = useState(false)
 
   const actionDoneRef = useRef(false)
 
-  const body = afterInput ? beat?.afterGlitchText : beat?.text
+  const rawBody = afterInput ? beat?.afterGlitchText : beat?.text
+  const body = useMemo(() => interpolateUser(rawBody, userName), [rawBody, userName])
   const isPopup = beat?.presentation === 'system-popup'
-  const typing = Boolean(body) && beat?.type !== 'choice' && !waitingAction && !isPopup
-  const { shown, done: typed } = useTypewriter(body, typing && !skipType)
-  const done = skipType || typed
+  const isEffect = beat?.type === 'effect'
+  const typingMs = beat?.typingSpeed === 'fast' ? TYPING_MS.fast : TYPING_MS.default
+  const typing = Boolean(body) && beat?.type !== 'choice' && !waitingAction && !isPopup && !isEffect
+  const { shown, done: typed } = useTypewriter(body, typing && !skipType, typingMs)
+  const done = isEffect || skipType || typed
   const shownText = skipType ? (body ?? '') : shown
 
   const goComplete = useCallback(() => {
@@ -81,6 +94,7 @@ export default function VNOverlay({
     setBeat(next)
     setAfterInput(false)
     setGlitch(false)
+    setBlinkFx(false)
     setNameDraft('')
     setSkipType(false)
     onBeatChange?.(next)
@@ -103,6 +117,24 @@ export default function VNOverlay({
       return undefined
     }
     setWaitingAction(false)
+    if (beat.type === 'effect' && beat.effect === 'screen-noise') {
+      // ShockScene .shock-flash / .shock-noise 재사용
+      setGlitch(true)
+      const id = window.setTimeout(() => {
+        setGlitch(false)
+        advance()
+      }, 900)
+      return () => window.clearTimeout(id)
+    }
+    if (beat.type === 'effect' && beat.effect === 'eye-blink') {
+      // 오프닝 blink-groomy-enter / .vn-overlay-blink 재사용
+      setBlinkFx(true)
+      const id = window.setTimeout(() => {
+        setBlinkFx(false)
+        advance()
+      }, 1100)
+      return () => window.clearTimeout(id)
+    }
     if (
       beat.presentation === 'footstep-black-fade'
       || beat.presentation === 'mount-white-room'
@@ -132,12 +164,14 @@ export default function VNOverlay({
   }, [beat, actionComplete, advance])
 
   useEffect(() => {
-    if (!done || waitingAction || !beat || beat.type === 'choice' || beat.input) return undefined
-    const useHold = beat.auto || autoAdvanceMs != null
+    if (!done || waitingAction || !beat || beat.type === 'choice' || beat.type === 'effect' || beat.input) return undefined
+    const useHold = beat.auto || beat.timing === 'fast' || autoAdvanceMs != null
     if (!useHold) return undefined
     const hold = autoAdvanceMs != null
       ? autoAdvanceMs
-      : Math.min(4200, Math.max(1100, 800 + String(body ?? '').length * 75))
+      : beat.timing === 'fast'
+        ? Math.min(900, Math.max(420, 280 + String(body ?? '').length * 28))
+        : Math.min(4200, Math.max(1100, 800 + String(body ?? '').length * 75))
     const id = window.setTimeout(() => advance(), hold)
     return () => window.clearTimeout(id)
   }, [beat, done, waitingAction, body, advance, autoAdvanceMs])
@@ -146,7 +180,7 @@ export default function VNOverlay({
     const onKey = (event) => {
       if (event.code !== 'Space' || event.repeat) return
       event.preventDefault()
-      if (!beat || waitingAction || beat.type === 'choice' || beat.input) return
+      if (!beat || waitingAction || beat.type === 'choice' || beat.type === 'effect' || beat.input) return
       if (!done) {
         setSkipType(true)
         return
@@ -167,7 +201,7 @@ export default function VNOverlay({
   }
 
   const clickPanel = () => {
-    if (!beat || waitingAction || beat.type === 'choice') return
+    if (!beat || waitingAction || beat.type === 'choice' || beat.type === 'effect') return
     if (beat.input && !afterInput) return
     if (!done) {
       setSkipType(true)
@@ -176,20 +210,25 @@ export default function VNOverlay({
     advance()
   }
 
-  const dimOff = waitingAction || beat?.type === 'action'
-  const showBar = beat && beat.type !== 'choice' && beat.presentation !== 'mount-white-room' && beat.presentation !== 'footstep-black-fade'
+  const dimOff = waitingAction || beat?.type === 'action' || isEffect
+  const showBar = beat
+    && beat.type !== 'choice'
+    && beat.type !== 'effect'
+    && beat.presentation !== 'mount-white-room'
+    && beat.presentation !== 'footstep-black-fade'
   const showText = !isPopup && Boolean(body)
+  const textStyleClass = beat?.style === 'runon' ? ' is-runon' : beat?.style === 'whisper' ? ' is-whisper' : ''
 
   if (!beat) return null
 
   return (
     <div
-      className={`vn-overlay${isPopup ? ' is-popup' : ''}${!waitingAction && beat.type !== 'choice' && beat.type !== 'action' ? ' is-advance' : ''}`}
+      className={`vn-overlay${isPopup ? ' is-popup' : ''}${!waitingAction && !isEffect && beat.type !== 'choice' && beat.type !== 'action' ? ' is-advance' : ''}`}
       onClick={clickPanel}
     >
       {!dimOff && <div className="vn-overlay-dim" />}
       {beat.presentation === 'black-caption' && <div className="vn-overlay-black" />}
-      {beat.presentation === 'blink-groomy-enter' && <div className="vn-overlay-blink" />}
+      {(beat.presentation === 'blink-groomy-enter' || blinkFx) && <div className="vn-overlay-blink" />}
       {isPopup && (
         <div
           className="vn-overlay-popup"
@@ -200,7 +239,7 @@ export default function VNOverlay({
           role="button"
           tabIndex={0}
         >
-          {beat.text}
+          {interpolateUser(beat.text, userName)}
         </div>
       )}
       {glitch && (
@@ -212,7 +251,7 @@ export default function VNOverlay({
 
       {beat.type === 'choice' && (
         <div className="vn-overlay-choices">
-          {beat.text && <p className="vn-overlay-choice-prompt">{beat.text}</p>}
+          {beat.text && <p className="vn-overlay-choice-prompt">{interpolateUser(beat.text, userName)}</p>}
           <div className="vn-overlay-choice-row">
             {beat.choices.map((choice) => (
               <button
@@ -223,7 +262,7 @@ export default function VNOverlay({
                   advance(choice.id)
                 }}
               >
-                {choice.text}
+                {interpolateUser(choice.text, userName)}
               </button>
             ))}
           </div>
@@ -242,7 +281,7 @@ export default function VNOverlay({
             <p
               className={`vn-overlay-text${
                 beat.speaker === '파편' || String(body ?? '').includes('[파편]') ? ' is-shard' : ''
-              }`}
+              }${textStyleClass}`}
               data-effect={waitingAction ? undefined : beat.effect || undefined}
             >
               {waitingAction ? (beat.text || '조사하세요. (E)') : (showText ? shownText : '\u00a0')}

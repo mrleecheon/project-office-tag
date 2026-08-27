@@ -25,9 +25,10 @@
   gap: 10px;
   min-width: 240px;
   padding: 16px 18px;
-  background: rgba(8, 16, 24, .92);
-  border: 1px solid rgba(180, 210, 230, .35);
-  color: #e8f2f8;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-hairline);
+  color: var(--text-primary);
+  font-family: var(--font-body);
 }
 
 .white-room-input label {
@@ -42,14 +43,14 @@
 }
 
 .white-room-input input {
-  background: #101820;
-  border: 1px solid #3a5568;
-  color: #f2f7fb;
+  background: transparent;
+  border: 1px solid var(--border-hairline);
+  color: var(--text-primary);
 }
 
 .white-room-input button {
-  background: #1c3344;
-  border: 1px solid #5a8aa8;
-  color: #d7eef8;
+  background: transparent;
+  border: 1px solid var(--border-hairline);
+  color: var(--text-primary);
   cursor: pointer;
 }

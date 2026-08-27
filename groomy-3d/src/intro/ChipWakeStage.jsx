@@ -3,6 +3,13 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { Matrix4, MathUtils, Quaternion, Vector3 } from 'three'
 import WhiteRoom from '../scenes/WhiteRoom.jsx'
 import Office from '../scenes/Office.jsx'
+import MeetingRoom, {
+  MEETING_CUT_CAMERA,
+  MEETING_CUT_FOV,
+  MEETING_CUT_LOOK,
+  MEETING_WALK_SPAWN,
+} from '../scenes/MeetingRoom.jsx'
+import Stairwell, { STAIR_BOUNDS, STAIR_SPAWN } from '../scenes/Stairwell.jsx'
 import CoffeeStation, {
   COFFEE_BREW_CAMERA,
   COFFEE_MACHINE_ORIGIN,
@@ -10,27 +17,53 @@ import CoffeeStation, {
   GROOMY_DELIVERY_POINT,
   GROOMY_ENTER_CAMERA,
   GROOMY_ENTER_LOOK,
-  coffeeRecipientForLook,
+  activeCoffeeOrder,
+  isCoffeeGameDone,
 } from '../scenes/CoffeeStation.jsx'
 import PlayerController from '../systems/PlayerController.jsx'
 import WorldCanvas from '../systems/WorldCanvas.jsx'
 import WorldErrorBoundary from '../runtime/WorldErrorBoundary.jsx'
 import WorldPrompt from '../systems/WorldPrompt.jsx'
 import VNOverlay from '../ui/VNOverlay.jsx'
+import IncomingCallScreen from '../ui/IncomingCallScreen.jsx'
+import FragmentTensionAudio from '../ui/FragmentTensionAudio.jsx'
 import { ROOM_GRAPH, useGameState } from '../state/gameStateStore.js'
 import {
   CHIP_WAKE_STEP,
   CHOI_STAFF_MONO_BEATS,
   CHOI_STAFF_VN_BEATS,
+  GROOMY_CALL_BEATS,
   GROOMY_CHIP_GUIDE_BEATS,
+  GROOMY_DELIVERY_BEATS,
   GROOMY_OFFICE_NUDGE_BEATS,
+  buildGroomyReturnCallBeats,
   ISOL_STAFF_BEATS,
   KANG_ISOL_COFFEE_BEATS_PART1,
   KANG_ISOL_COFFEE_BEATS_PART2,
   KANG_ISOL_COFFEE_NUDGE_BEATS,
+  KANG_ISOL_POST_COFFEE_BEATS,
+  MINJUN_DELIVERY_BEATS,
+  SUJIN_DELIVERY_BEATS,
   KIM_STAFF_BEATS,
   OFFICE_CHIP_MONOLOGUE_BEATS,
 } from '../runtime/productFlow.js'
+import {
+  BROKEN_ROPE_ITEM_ID,
+  FRAGMENT_ROPE_POPUP_BEATS,
+  FRAGMENT_VANISH_BEATS,
+  GROOMY_FRAGMENTS,
+  buildFragmentReadBeats,
+} from '../content/dialogue/groomyFragments.js'
+import {
+  CORPSE_AFTER_TIMER_BEATS,
+  CORPSE_DISCOVER_BEATS,
+  CORPSE_INSPECT_BEATS,
+  MEETING_DOOR_EXIT_CHOICE_BEATS,
+  MEETING_DOOR_THOUGHT_BEATS,
+  MEETING_SESSION_BEATS,
+  STAIR_DOWN_BLOCKED_BEATS,
+} from '../content/dialogue/meetingBeats.js'
+import InventoryBag from '../ui/InventoryBag.jsx'
 import '../PlayRoot.css'
 import './OpeningVnOverlay.css'
 import './WhiteRoomIntro.css'
@@ -224,9 +257,46 @@ export default function ChipWakeStage() {
   const markStaffTalked = useGameState((s) => s.markStaffTalked)
   const markGroomyOfficeNudgeDone = useGameState((s) => s.markGroomyOfficeNudgeDone)
   const coffeeGame = useGameState((s) => s.coffeeGame)
+  const playerNickname = useGameState((s) => s.playerNickname)
+  const isolPostCoffeeUnlocked = useGameState((s) => s.isolPostCoffeeUnlocked)
+  const isolPostCoffeeTalked = useGameState((s) => s.isolPostCoffeeTalked)
   const startCoffeeBrewing = useGameState((s) => s.startCoffeeBrewing)
   const pourCoffeeShot = useGameState((s) => s.pourCoffeeShot)
   const deliverCoffeeOrder = useGameState((s) => s.deliverCoffeeOrder)
+  const setCoffeeDeliveryFlag = useGameState((s) => s.setCoffeeDeliveryFlag)
+  const unlockIsolPostCoffee = useGameState((s) => s.unlockIsolPostCoffee)
+  const markIsolPostCoffeeTalked = useGameState((s) => s.markIsolPostCoffeeTalked)
+  const beginFragmentHunt = useGameState((s) => s.beginFragmentHunt)
+  const tickFragmentTimer = useGameState((s) => s.tickFragmentTimer)
+  const markFragmentInteracted = useGameState((s) => s.markFragmentInteracted)
+  const addInventoryItem = useGameState((s) => s.addInventoryItem)
+  const inventory = useGameState((s) => s.inventory)
+  const papers = useGameState((s) => s.papers)
+  const paperPositions = useGameState((s) => s.paperPositions)
+  const interactedFragmentIds = useGameState((s) => s.interactedFragmentIds)
+  const fragmentHuntActive = useGameState((s) => s.fragmentHuntActive)
+  const fragmentHuntComplete = useGameState((s) => s.fragmentHuntComplete)
+  const fragmentSecondsLeft = useGameState((s) => s.fragmentSecondsLeft)
+  const pendingFragmentCall = useGameState((s) => s.pendingFragmentCall)
+  const fragmentsTimedOut = useGameState((s) => s.fragmentsTimedOut)
+  const enterMeetingAfterFragmentCall = useGameState((s) => s.enterMeetingAfterFragmentCall)
+  const beginFragmentReturnCall = useGameState((s) => s.beginFragmentReturnCall)
+  const unlockMeetingWalk = useGameState((s) => s.unlockMeetingWalk)
+  const setMeetingChoice = useGameState((s) => s.setMeetingChoice)
+  const enterStairwellFromMeeting = useGameState((s) => s.enterStairwellFromMeeting)
+  const meetingWalkUnlocked = useGameState((s) => s.meetingWalkUnlocked)
+  const corpseApproachDone = useGameState((s) => s.corpseApproachDone)
+  const corpseTimerActive = useGameState((s) => s.corpseTimerActive)
+  const corpseSecondsLeft = useGameState((s) => s.corpseSecondsLeft)
+  const corpseInspected = useGameState((s) => s.corpseInspected)
+  const corpseSequenceDone = useGameState((s) => s.corpseSequenceDone)
+  const stairDownHintDone = useGameState((s) => s.stairDownHintDone)
+  const markStairDownHintDone = useGameState((s) => s.markStairDownHintDone)
+  const markCorpseApproachDone = useGameState((s) => s.markCorpseApproachDone)
+  const startCorpseTimer = useGameState((s) => s.startCorpseTimer)
+  const tickCorpseTimer = useGameState((s) => s.tickCorpseTimer)
+  const markCorpseInspected = useGameState((s) => s.markCorpseInspected)
+  const finishCorpseSequence = useGameState((s) => s.finishCorpseSequence)
   const beginChoiOfficeTalkline = useGameState((s) => s.beginChoiOfficeTalkline)
   const clearChipWakeResume = useGameState((s) => s.clearChipWakeResume)
 
@@ -238,21 +308,54 @@ export default function ChipWakeStage() {
   const [officeTalk, setOfficeTalk] = useState(!chipOfficeIntroDone)
   const [staffEvent, setStaffEvent] = useState(null)
   const [groomyEnter, setGroomyEnter] = useState(false)
+  const [fragmentEvent, setFragmentEvent] = useState(null)
+  const [activeFragmentId, setActiveFragmentId] = useState(null)
+  const [puzzleDraft, setPuzzleDraft] = useState('')
+  const [bagOpen, setBagOpen] = useState(false)
+  /** null | 'ring' | 'talk' — 파편 이후 복귀 전화 */
+  const [fragmentCallPhase, setFragmentCallPhase] = useState(null)
+  /** null | 'session' | 'door-thought' | 'door-choice' */
+  const [meetingEvent, setMeetingEvent] = useState(null)
+  /** null | 'stair-down' | 'corpse-discover' | 'corpse-inspect' | 'corpse-after' */
+  const [stairEvent, setStairEvent] = useState(null)
+  const [timerGlitch, setTimerGlitch] = useState(false)
+  const corpseTimerWasActive = useRef(false)
+  const qaVnOnly = new URLSearchParams(window.location.search).has('vnqa')
   const officeMeta = ROOM_GRAPH.office
+  const meetingMeta = ROOM_GRAPH.meetingRoom
   const choiBoot = new URLSearchParams(window.location.search).has('choi')
   const officeSpawn = choiBoot ? [2.55, 1.6, 1.85] : officeMeta.spawn
   const inOffice = chipWakeStep === CHIP_WAKE_STEP.OFFICE
   const inGuide = chipWakeStep === CHIP_WAKE_STEP.GUIDE_3D
+  const inFragment = chipWakeStep === CHIP_WAKE_STEP.FRAGMENT_ROOM
+  const inMeeting = chipWakeStep === CHIP_WAKE_STEP.MEETING
+  const inStair = chipWakeStep === CHIP_WAKE_STEP.STAIRWELL
   const coffeeCam = staffEvent === 'isol-coffee-cam'
   const showGroomy = officeAfterMorning && (groomyEnter || coffeeBriefingDone)
-  const coffeeOrder = coffeeGame.orders[coffeeGame.currentOrderIndex] ?? null
-  const walking = ((inGuide && !guideTalk) || (inOffice && !officeTalk && !phoneUp && !staffEvent))
+  const coffeeOrder = activeCoffeeOrder(coffeeGame)
+  const coffeeGameDone = isCoffeeGameDone(coffeeGame)
+  const fragmentBusy = Boolean(fragmentEvent)
+  const walking = (
+    (inGuide && !guideTalk)
+    || (inOffice && !officeTalk && !phoneUp && !staffEvent)
+    || (inFragment && fragmentHuntActive && !fragmentBusy && !fragmentHuntComplete && !pendingFragmentCall)
+    || (inMeeting && meetingWalkUnlocked && !meetingEvent)
+    || (inStair && !corpseSequenceDone && !stairEvent)
+  )
   const inputMode = walking ? '3d' : 'vn'
   const machineLook = [
     COFFEE_MACHINE_ORIGIN[0] + 0.35,
     1.12,
     COFFEE_MACHINE_ORIGIN[2],
   ]
+  const activeFragment = papers.find((p) => p.id === activeFragmentId) ?? GROOMY_FRAGMENTS.find((p) => p.id === activeFragmentId)
+  const fragmentReadBeats = activeFragment && !activeFragment.isInteractivePuzzle
+    ? buildFragmentReadBeats(activeFragment)
+    : null
+  const timerLabel = `${String(Math.floor(fragmentSecondsLeft / 60)).padStart(2, '0')}:${String(fragmentSecondsLeft % 60).padStart(2, '0')}`
+  const corpseTimerLabel = `${String(Math.floor(corpseSecondsLeft / 60)).padStart(2, '0')}:${String(corpseSecondsLeft % 60).padStart(2, '0')}`
+  const returnCallBeats = buildGroomyReturnCallBeats({ timedOut: fragmentsTimedOut })
+  const meetingCutLocked = inMeeting && !meetingWalkUnlocked
 
   const maybeGroomyNudge = useCallback(() => {
     const state = useGameState.getState()
@@ -260,6 +363,75 @@ export default function ChipWakeStage() {
     if (!state.isolTalked || !state.kimTalked || !state.choiTalked) return
     window.setTimeout(() => setStaffEvent('groomy'), 450)
   }, [])
+
+  useEffect(() => {
+    if (!import.meta.env.DEV) return undefined
+    window.__START_DELIVERY_VN__ = (kind) => setStaffEvent(kind)
+    window.__START_ISOL_POST_COFFEE__ = () => setStaffEvent('isol-post-coffee')
+    window.__START_FRAGMENT_HUNT__ = () => beginFragmentHunt()
+    window.__START_FRAGMENT_CALL__ = (reason = 'all') => {
+      beginFragmentReturnCall(reason === 'timeout' ? 'timeout' : 'all')
+      setFragmentCallPhase('ring')
+    }
+    return () => {
+      delete window.__START_DELIVERY_VN__
+      delete window.__START_ISOL_POST_COFFEE__
+      delete window.__START_FRAGMENT_HUNT__
+      delete window.__START_FRAGMENT_CALL__
+    }
+  }, [beginFragmentHunt, beginFragmentReturnCall])
+
+  useEffect(() => {
+    if (!pendingFragmentCall) return
+    if (fragmentCallPhase) return
+    setFragmentCallPhase('ring')
+  }, [pendingFragmentCall, fragmentCallPhase])
+
+  useEffect(() => {
+    if (!inMeeting || meetingWalkUnlocked || pendingFragmentCall) return
+    if (meetingEvent) return
+    setMeetingEvent('session')
+  }, [inMeeting, meetingWalkUnlocked, meetingEvent, pendingFragmentCall])
+
+  useEffect(() => {
+    if (!inStair || !walking) return
+    if (corpseApproachDone || stairEvent || corpseSequenceDone) return
+    if (lookId === 'stair-corpse') {
+      markCorpseApproachDone()
+      setStairEvent('corpse-discover')
+    }
+  }, [inStair, walking, lookId, corpseApproachDone, stairEvent, corpseSequenceDone, markCorpseApproachDone])
+
+  // 계단 하강 안내는 E로만 (스폰 직후 look 자동발화 방지)
+
+  useEffect(() => {
+    if (!corpseTimerActive) return undefined
+    const id = window.setInterval(() => tickCorpseTimer(), 1000)
+    return () => window.clearInterval(id)
+  }, [corpseTimerActive, tickCorpseTimer])
+
+  useEffect(() => {
+    if (corpseTimerWasActive.current && !corpseTimerActive && corpseSecondsLeft === 0 && !corpseSequenceDone && inStair) {
+      setTimerGlitch(true)
+      setStairEvent('corpse-after')
+      finishCorpseSequence()
+      window.setTimeout(() => setTimerGlitch(false), 700)
+    }
+    corpseTimerWasActive.current = corpseTimerActive
+  }, [corpseTimerActive, corpseSecondsLeft, corpseSequenceDone, inStair, finishCorpseSequence])
+
+  useEffect(() => {
+    if (!inFragment || !fragmentHuntActive || fragmentHuntComplete) return undefined
+    const id = window.setInterval(() => tickFragmentTimer(), 1000)
+    return () => window.clearInterval(id)
+  }, [inFragment, fragmentHuntActive, fragmentHuntComplete, tickFragmentTimer])
+
+  useEffect(() => {
+    if (!fragmentHuntComplete) return
+    setFragmentEvent(null)
+    setActiveFragmentId(null)
+    setBagOpen(false)
+  }, [fragmentHuntComplete])
 
   useEffect(() => {
     if (!coffeeCam) return undefined
@@ -313,19 +485,57 @@ export default function ChipWakeStage() {
     if (!walking) return undefined
     const onKey = (event) => {
       if (event.code !== 'KeyE') return
+      if (inFragment) {
+        if (!lookId || !String(lookId).startsWith('frag-')) return
+        if (interactedFragmentIds.includes(lookId)) return
+        const frag = papers.find((p) => p.id === lookId)
+        if (!frag) return
+        document.exitPointerLock?.()
+        setActiveFragmentId(lookId)
+        if (frag.isInteractivePuzzle) {
+          setPuzzleDraft('')
+          setFragmentEvent('puzzle')
+        } else {
+          setFragmentEvent('read')
+        }
+        return
+      }
       if (inGuide && lookId === 'groomy-guide' && !guideTalked) {
         setGuideTalk(true)
         return
       }
       if (inGuide && lookId === 'black-door' && guideTalked) enterChipOffice()
+      if (inMeeting && lookId === 'meeting-door') {
+        document.exitPointerLock?.()
+        setMeetingEvent('door-thought')
+        return
+      }
+      if (inStair && lookId === 'stair-down' && !stairDownHintDone) {
+        document.exitPointerLock?.()
+        setStairEvent('stair-down')
+        return
+      }
+      if (inStair && lookId === 'stair-corpse' && corpseTimerActive && !corpseInspected && !stairEvent) {
+        document.exitPointerLock?.()
+        markCorpseInspected()
+        setStairEvent('corpse-inspect')
+        return
+      }
       if (!inOffice) return
-      if (coffeeGame.phase === 'carrying') {
-        const recipient = coffeeRecipientForLook(lookId)
-        if (recipient) deliverCoffeeOrder(recipient)
+      if (coffeeGame.phase === 'carrying' && coffeeOrder) {
+        if (lookId === coffeeOrder.target) {
+          if (lookId === 'staff-choi') setStaffEvent('delivery-minjun')
+          else if (lookId === 'staff-kim') setStaffEvent('delivery-sujin')
+          else if (lookId === 'coffee-groomy') setStaffEvent('delivery-groomy')
+        }
         return
       }
       if (lookId === 'staff-isol') {
         if (officeAfterMorning) {
+          if (isolPostCoffeeUnlocked) {
+            if (!isolPostCoffeeTalked) setStaffEvent('isol-post-coffee')
+            return
+          }
           if (coffeeBriefingDone && !coffeeMachineVisited) {
             setStaffEvent('isol-coffee-nudge')
             return
@@ -347,8 +557,11 @@ export default function ChipWakeStage() {
         if (!choiTalked) setStaffEvent('choi')
         return
       }
+      if (lookId === 'coffee-groomy') {
+        return
+      }
       if (lookId === 'coffee-button' || lookId === 'coffee-deliver') {
-        if (!coffeeBriefingDone) return
+        if (!coffeeBriefingDone || coffeeGameDone) return
         if (coffeeGame.phase === 'idle') {
           startCoffeeBrewing()
           markCoffeeMachineVisited()
@@ -363,6 +576,7 @@ export default function ChipWakeStage() {
     walking,
     inGuide,
     inOffice,
+    inFragment,
     lookId,
     guideTalked,
     isolTalked,
@@ -372,15 +586,41 @@ export default function ChipWakeStage() {
     coffeeMachineVisited,
     officeAfterMorning,
     coffeeGame.phase,
+    coffeeOrder,
+    coffeeGameDone,
+    isolPostCoffeeUnlocked,
+    isolPostCoffeeTalked,
+    papers,
+    interactedFragmentIds,
+    inMeeting,
+    inStair,
+    stairDownHintDone,
+    corpseTimerActive,
+    corpseInspected,
+    stairEvent,
+    markCorpseInspected,
     enterChipOffice,
     beginKangIsolMorning,
     startCoffeeBrewing,
     pourCoffeeShot,
-    deliverCoffeeOrder,
     markCoffeeMachineVisited,
   ])
 
   useEffect(() => {
+    if (inFragment) {
+      setHint('')
+      return
+    }
+    if (inMeeting && meetingWalkUnlocked && !meetingEvent) {
+      setHint(lookId === 'meeting-door' ? 'E' : '')
+      return
+    }
+    if (inStair && !stairEvent && !corpseSequenceDone) {
+      if (lookId === 'stair-down' && !stairDownHintDone) setHint('E')
+      else if (lookId === 'stair-corpse' && corpseTimerActive && !corpseInspected) setHint('E')
+      else setHint('')
+      return
+    }
     if (inGuide && !guideTalk) {
       if (!guideTalked) {
         setHint(lookId === 'groomy-guide' ? 'E  말 걸기' : '그루미에게 가세요.')
@@ -391,13 +631,14 @@ export default function ChipWakeStage() {
     if (inOffice && !officeTalk && !staffEvent && !phoneUp) {
       if (officeAfterMorning) {
         if (lookId === 'staff-isol') {
-          if (!coffeeBriefingDone || !coffeeMachineVisited) setHint('E  말 걸기')
+          if (isolPostCoffeeUnlocked && !isolPostCoffeeTalked) setHint('E  말 걸기')
+          else if (!coffeeBriefingDone || !coffeeMachineVisited) setHint('E  말 걸기')
           else setHint('')
-        } else if (coffeeGame.phase === 'carrying' && coffeeRecipientForLook(lookId) === coffeeOrder?.name) {
+        } else if (coffeeGame.phase === 'carrying' && coffeeOrder && lookId === coffeeOrder.target) {
           setHint('E  커피 전달')
-        } else if (lookId === 'staff-kim' || lookId === 'staff-choi') {
+        } else if (coffeeGame.phase === 'carrying' && (lookId === 'staff-kim' || lookId === 'staff-choi' || lookId === 'coffee-groomy')) {
           setHint('...이 자리가 아닌 것 같다.')
-        } else if ((lookId === 'coffee-button' || lookId === 'coffee-deliver') && coffeeBriefingDone && (coffeeGame.phase === 'idle' || coffeeGame.phase === 'brewing')) {
+        } else if ((lookId === 'coffee-button' || lookId === 'coffee-deliver') && coffeeBriefingDone && !coffeeGameDone && (coffeeGame.phase === 'idle' || coffeeGame.phase === 'brewing')) {
           setHint('E  추출')
         } else setHint('')
       } else if (lookId === 'staff-isol') setHint(isolTalked ? '이미 대화함' : 'E  말 걸기')
@@ -407,6 +648,16 @@ export default function ChipWakeStage() {
       else setHint('책상과 의자로 가세요.')
     }
   }, [
+    inFragment,
+    inMeeting,
+    meetingWalkUnlocked,
+    meetingEvent,
+    inStair,
+    stairEvent,
+    corpseSequenceDone,
+    stairDownHintDone,
+    corpseTimerActive,
+    corpseInspected,
     inGuide,
     guideTalk,
     guideTalked,
@@ -423,6 +674,9 @@ export default function ChipWakeStage() {
     coffeeMachineVisited,
     coffeeGame.phase,
     coffeeOrder,
+    coffeeGameDone,
+    isolPostCoffeeUnlocked,
+    isolPostCoffeeTalked,
     setHint,
   ])
 
@@ -430,8 +684,9 @@ export default function ChipWakeStage() {
     <div className="opening-stage">
       <div className="opening-frame">
         <div className={`opening-canvas ${inputMode === 'vn' ? 'is-vn' : 'is-3d'}`}>
+          {!qaVnOnly && (
           <WorldErrorBoundary fallback={null}>
-          <WorldCanvas camera={{ fov: 70, position: inOffice ? officeSpawn : WHITE_SPAWN }}>
+          <WorldCanvas camera={{ fov: meetingCutLocked ? MEETING_CUT_FOV : 70, position: inOffice ? officeSpawn : inMeeting ? (meetingCutLocked ? MEETING_CUT_CAMERA : MEETING_WALK_SPAWN) : inStair ? STAIR_SPAWN : WHITE_SPAWN }}>
             <Suspense fallback={null}>
               {inOffice ? (
                 <>
@@ -475,9 +730,33 @@ export default function ChipWakeStage() {
                     />
                   )}
                 </>
+              ) : inMeeting ? (
+                <>
+                  <MeetingRoom />
+                  {meetingCutLocked && (
+                    <DirectedCam
+                      active
+                      aim={MEETING_CUT_CAMERA}
+                      look={MEETING_CUT_LOOK}
+                      damp={10}
+                      fov={MEETING_CUT_FOV}
+                    />
+                  )}
+                </>
+              ) : inStair ? (
+                <Stairwell />
               ) : (
                 <>
-                  <WhiteRoom />
+                  {inFragment ? (
+                    <WhiteRoom
+                      papers={papers}
+                      paperPositions={paperPositions}
+                      interactedIds={interactedFragmentIds}
+                      lookId={lookId}
+                    />
+                  ) : (
+                    <WhiteRoom />
+                  )}
                   {inGuide && (
                     <>
                       <GroomyBlob />
@@ -487,16 +766,24 @@ export default function ChipWakeStage() {
                 </>
               )}
             </Suspense>
-            <PlayerController
-              key={inOffice ? 'office' : 'white'}
-              bounds={inOffice ? officeMeta.bounds : WHITE_BOUNDS}
-              spawn={inOffice ? officeSpawn : WHITE_SPAWN}
-            />
+            {!meetingCutLocked && (
+              <PlayerController
+                key={inOffice ? 'office' : inMeeting ? 'meeting-walk' : inStair ? 'stair' : inFragment ? 'fragment' : 'white'}
+                bounds={inOffice ? officeMeta.bounds : inMeeting ? meetingMeta.bounds : inStair ? STAIR_BOUNDS : WHITE_BOUNDS}
+                spawn={inOffice ? officeSpawn : inMeeting ? MEETING_WALK_SPAWN : inStair ? STAIR_SPAWN : WHITE_SPAWN}
+              />
+            )}
             <LookAround active={looking} onDone={finishLook} />
-            {walking && hint && (
+            {walking && hint && !inFragment && (
               <WorldPrompt
                 position={
-                  lookId === 'groomy-guide' || (inGuide && !guideTalked)
+                  lookId === 'meeting-door'
+                    ? [0, 2.2, meetingMeta.bounds.minZ + 0.5]
+                    : lookId === 'stair-down'
+                      ? [0, 1.7, 2.5]
+                      : lookId === 'stair-corpse'
+                        ? [0.35, 1.6, -2.15]
+                    : lookId === 'groomy-guide' || (inGuide && !guideTalked)
                     ? [0, 1.95, -2.6]
                     : lookId === 'sit-desk'
                     ? [-3.1, 1.35, -0.55]
@@ -517,6 +804,7 @@ export default function ChipWakeStage() {
             )}
           </WorldCanvas>
           </WorldErrorBoundary>
+          )}
         </div>
         {blinkOn && chipWakeStep === CHIP_WAKE_STEP.BLINK && <div className="opening-blink" />}
         {phoneUp && (
@@ -625,7 +913,155 @@ export default function ChipWakeStage() {
             }}
           />
         )}
-        {inOffice && coffeeBriefingDone && coffeeOrder && (
+        {staffEvent === 'delivery-minjun' && (
+          <VNOverlay
+            key="delivery-minjun"
+            beats={MINJUN_DELIVERY_BEATS}
+            userName={playerNickname}
+            onChoice={(choiceId) => {
+              if (choiceId === 'corrected') setCoffeeDeliveryFlag('minjunResponse', 'corrected')
+              if (choiceId === 'accepted') setCoffeeDeliveryFlag('minjunResponse', 'accepted')
+            }}
+            onComplete={() => {
+              deliverCoffeeOrder('staff-choi')
+              setStaffEvent(null)
+            }}
+          />
+        )}
+        {staffEvent === 'delivery-sujin' && (
+          <VNOverlay
+            key="delivery-sujin"
+            beats={SUJIN_DELIVERY_BEATS}
+            userName={playerNickname}
+            onComplete={() => {
+              deliverCoffeeOrder('staff-kim')
+              setStaffEvent(null)
+            }}
+          />
+        )}
+        {staffEvent === 'delivery-groomy' && (
+          <VNOverlay
+            key="delivery-groomy"
+            beats={GROOMY_DELIVERY_BEATS}
+            userName={playerNickname}
+            onChoice={(choiceId) => {
+              if (choiceId === 'trust-y') setCoffeeDeliveryFlag('groomyTrust', true)
+              if (choiceId === 'trust-n') setCoffeeDeliveryFlag('groomyTrust', false)
+            }}
+            onComplete={() => {
+              deliverCoffeeOrder('coffee-groomy')
+              unlockIsolPostCoffee()
+              setStaffEvent(null)
+            }}
+          />
+        )}
+        {staffEvent === 'isol-post-coffee' && (
+          <VNOverlay
+            key="isol-post-coffee"
+            beats={KANG_ISOL_POST_COFFEE_BEATS}
+            userName={playerNickname}
+            onComplete={() => setStaffEvent('groomy-call-ring')}
+          />
+        )}
+        {(staffEvent === 'groomy-call-ring' || staffEvent === 'groomy-call-talk') && (
+          <IncomingCallScreen
+            caller="그루미"
+            phase={staffEvent === 'groomy-call-talk' ? 'active' : 'incoming'}
+            onAccept={() => setStaffEvent('groomy-call-talk')}
+          />
+        )}
+        {staffEvent === 'groomy-call-talk' && (
+          <VNOverlay
+            key="groomy-call-talk"
+            beats={GROOMY_CALL_BEATS}
+            userName={playerNickname}
+            onComplete={() => {
+              markIsolPostCoffeeTalked()
+              setStaffEvent(null)
+              beginFragmentHunt()
+            }}
+          />
+        )}
+        {inFragment && fragmentEvent === 'read' && fragmentReadBeats && (
+          <VNOverlay
+            key={`frag-read-${activeFragmentId}`}
+            beats={fragmentReadBeats}
+            onComplete={() => {
+              markFragmentInteracted(activeFragmentId, { collected: true })
+              setFragmentEvent(null)
+              setActiveFragmentId(null)
+            }}
+          />
+        )}
+        {inFragment && fragmentEvent === 'vanish' && (
+          <VNOverlay
+            key="frag-vanish"
+            beats={FRAGMENT_VANISH_BEATS}
+            onComplete={() => {
+              markFragmentInteracted(activeFragmentId, { collected: false })
+              setFragmentEvent(null)
+              setActiveFragmentId(null)
+            }}
+          />
+        )}
+        {inFragment && fragmentEvent === 'rope-popup' && (
+          <VNOverlay
+            key="frag-rope"
+            beats={FRAGMENT_ROPE_POPUP_BEATS}
+            onComplete={() => {
+              markFragmentInteracted(activeFragmentId, { collected: false })
+              setFragmentEvent(null)
+              setActiveFragmentId(null)
+            }}
+          />
+        )}
+        {inFragment && fragmentEvent === 'puzzle' && (
+          <div className="white-room-input fragment-puzzle">
+            <p className="fragment-puzzle-confirm">정말 숫자를 적을까?</p>
+            <label htmlFor="frag-lucky-number">좋아하는 숫자를 적어줘</label>
+            <input
+              id="frag-lucky-number"
+              inputMode="numeric"
+              value={puzzleDraft}
+              autoFocus
+              onChange={(event) => setPuzzleDraft(event.target.value)}
+            />
+            <div className="fragment-puzzle-yn">
+              <button
+                type="button"
+                onClick={() => {
+                  setPuzzleDraft('')
+                  setFragmentEvent('vanish')
+                }}
+              >
+                Y
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  addInventoryItem(BROKEN_ROPE_ITEM_ID)
+                  setPuzzleDraft('')
+                  setFragmentEvent('rope-popup')
+                }}
+              >
+                N
+              </button>
+            </div>
+          </div>
+        )}
+        {inFragment && fragmentHuntActive && !fragmentHuntComplete && (
+          <>
+            <FragmentTensionAudio active={inFragment} secondsLeft={fragmentSecondsLeft} />
+            <div className="fragment-timer" aria-live="polite">
+              <span className="fragment-timer-label">그루미가 돌아오기까지</span>
+              <span className="fragment-timer-value">{timerLabel}</span>
+            </div>
+          </>
+        )}
+        {inFragment && !fragmentBusy && !pendingFragmentCall && (
+          <InventoryBag inventory={inventory} open={bagOpen} onToggle={setBagOpen} />
+        )}
+        {inOffice && coffeeBriefingDone && coffeeOrder && !coffeeGameDone && (
           <div className="play-hud" style={{ zIndex: 9, pointerEvents: 'none' }}>
             <p>
               {coffeeGame.phase === 'idle' && `다음 주문  ${coffeeOrder.name} · ${coffeeOrder.shots}샷`}
@@ -634,9 +1070,101 @@ export default function ChipWakeStage() {
             </p>
           </div>
         )}
-        {inOffice && coffeeBriefingDone && !coffeeOrder && (
-          <div className="demo-end">
-            <p>시연은 커피 배달까지입니다</p>
+        {inOffice && coffeeBriefingDone && coffeeGameDone && !isolPostCoffeeTalked && isolPostCoffeeUnlocked && !staffEvent && (
+          <div className="play-hud" style={{ zIndex: 9, pointerEvents: 'none' }}>
+            <p>강이솔에게 가세요</p>
+          </div>
+        )}
+        {pendingFragmentCall && (fragmentCallPhase === 'ring' || fragmentCallPhase === 'talk') && (
+          <IncomingCallScreen
+            caller="그루미"
+            phase={fragmentCallPhase === 'talk' ? 'active' : 'incoming'}
+            onAccept={() => setFragmentCallPhase('talk')}
+          />
+        )}
+        {pendingFragmentCall && fragmentCallPhase === 'talk' && (
+          <VNOverlay
+            key={fragmentsTimedOut ? 'groomy-return-timeout' : 'groomy-return-collected'}
+            beats={returnCallBeats}
+            userName={playerNickname}
+            onComplete={() => {
+              setFragmentCallPhase(null)
+              enterMeetingAfterFragmentCall()
+            }}
+          />
+        )}
+        {meetingEvent === 'session' && (
+          <VNOverlay
+            key="meeting-session"
+            beats={MEETING_SESSION_BEATS}
+            userName={playerNickname}
+            onChoice={(choiceId) => setMeetingChoice(choiceId)}
+            onComplete={() => {
+              setMeetingEvent(null)
+              unlockMeetingWalk()
+            }}
+          />
+        )}
+        {meetingEvent === 'door-thought' && (
+          <VNOverlay
+            key="meeting-door-thought"
+            beats={MEETING_DOOR_THOUGHT_BEATS}
+            onComplete={() => setMeetingEvent('door-choice')}
+          />
+        )}
+        {meetingEvent === 'door-choice' && (
+          <VNOverlay
+            key="meeting-door-choice"
+            beats={MEETING_DOOR_EXIT_CHOICE_BEATS}
+            onChoice={(choiceId) => {
+              if (choiceId === 'y') {
+                setMeetingEvent(null)
+                enterStairwellFromMeeting()
+              }
+            }}
+            onComplete={() => setMeetingEvent(null)}
+          />
+        )}
+        {stairEvent === 'stair-down' && (
+          <VNOverlay
+            key="stair-down"
+            beats={STAIR_DOWN_BLOCKED_BEATS}
+            onComplete={() => {
+              markStairDownHintDone()
+              setStairEvent(null)
+            }}
+          />
+        )}
+        {stairEvent === 'corpse-discover' && (
+          <VNOverlay
+            key="corpse-discover"
+            beats={CORPSE_DISCOVER_BEATS}
+            userName={playerNickname}
+            onComplete={() => {
+              setStairEvent(null)
+              startCorpseTimer()
+            }}
+          />
+        )}
+        {stairEvent === 'corpse-inspect' && (
+          <VNOverlay
+            key="corpse-inspect"
+            beats={CORPSE_INSPECT_BEATS}
+            onComplete={() => setStairEvent(null)}
+          />
+        )}
+        {stairEvent === 'corpse-after' && (
+          <VNOverlay
+            key="corpse-after"
+            beats={CORPSE_AFTER_TIMER_BEATS}
+            userName={playerNickname}
+            onComplete={() => setStairEvent(null)}
+          />
+        )}
+        {(corpseTimerActive || timerGlitch) && inStair && (
+          <div className={`fragment-timer${timerGlitch ? ' is-glitch' : ''}`} aria-live="polite">
+            <span className="fragment-timer-label">조사</span>
+            <span className="fragment-timer-value">{timerGlitch ? '00:00' : corpseTimerLabel}</span>
           </div>
         )}
         <div className="play-fade" style={{ opacity: fade }} />

@@ -33,12 +33,12 @@ export function FogLayer() {
   return null
 }
 
-export function RoomLightRig({ ar = false }) {
+export function RoomLightRig({ ar = false, intensityScale = 1 }) {
   return (
     <directionalLight
       castShadow
       position={[2.4, 6.2, 3.1]}
-      intensity={ar ? 1.28 : 0.38}
+      intensity={(ar ? 1.28 : 0.38) * intensityScale}
       color={ar ? '#f3f1ea' : '#c8b492'}
       shadow-mapSize-width={1024}
       shadow-mapSize-height={1024}

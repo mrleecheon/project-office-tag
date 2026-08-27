@@ -1,0 +1,104 @@
+.incoming-call {
+  position: absolute;
+  inset: 0;
+  z-index: 14;
+  display: grid;
+  place-items: center;
+  background: rgba(5, 6, 8, 0.82);
+  pointer-events: auto;
+}
+
+.incoming-call.is-active {
+  z-index: 9;
+  background: rgba(5, 6, 8, 0.55);
+  pointer-events: none;
+}
+
+.incoming-call-panel {
+  width: min(360px, 86%);
+  padding: 28px 24px 24px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  text-align: center;
+  pointer-events: auto;
+}
+
+.incoming-call-label {
+  margin: 0 0 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-system-mono);
+}
+
+.incoming-call-caller {
+  margin: 0 0 22px;
+  font-family: var(--font-mono);
+  font-size: 28px;
+  letter-spacing: 0.06em;
+  color: var(--accent-groomy);
+}
+
+.incoming-call-actions {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+}
+
+.incoming-call-accept,
+.incoming-call-decline {
+  min-width: 108px;
+  padding: 10px 14px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.incoming-call-accept:hover,
+.incoming-call-accept:focus-visible {
+  border-color: var(--accent-groomy);
+  color: var(--accent-groomy);
+  outline: none;
+}
+
+.incoming-call-decline.is-disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.incoming-call-active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  color: var(--text-system-mono);
+}
+
+.incoming-call-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-groomy);
+  animation: incomingCallPulse 1.4s ease-in-out infinite;
+}
+
+.incoming-call-timer {
+  min-width: 3.2em;
+  text-align: left;
+}
+
+@keyframes incomingCallPulse {
+  0%,
+  100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}

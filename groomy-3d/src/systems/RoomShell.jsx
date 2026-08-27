@@ -16,6 +16,9 @@ export default function RoomShell({
   floorRoughness,
   floorEnvMapIntensity,
   modular = false,
+  ambientScale = 1,
+  hemiScale = 1,
+  directionalScale = 1,
   children,
   ...rest
 }) {
@@ -28,9 +31,9 @@ export default function RoomShell({
   return (
     <group userData={{ roomId }}>
       <FogLayer />
-      <hemisphereLight args={[skin.hemiTop, skin.hemiBot, ar ? 0.42 : 0.2]} />
-      <ambientLight intensity={ar ? 0.22 : 0.08} />
-      <RoomLightRig ar={ar} />
+      <hemisphereLight args={[skin.hemiTop, skin.hemiBot, (ar ? 0.42 : 0.2) * hemiScale]} />
+      <ambientLight intensity={(ar ? 0.22 : 0.08) * ambientScale} />
+      <RoomLightRig ar={ar} intensityScale={directionalScale} />
       <Suspense fallback={null}>
         <RoomEnvironment ar={ar} />
       </Suspense>

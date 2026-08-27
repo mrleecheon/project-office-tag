@@ -9,13 +9,30 @@ import { assetUrl } from '../../runtime/assetUrl.js'
 
 const SRC = assetUrl('/models/polyhaven/wall_clock/wall_clock_1k.gltf')
 
-export function WallClock(props) {
+/** frozen=true — 10:00에 멈춘 시계 (회의실 위화감) */
+export function WallClock({ frozen = false, ...props }) {
   const { nodes, materials } = useGLTF(SRC)
+  const hourRot = frozen ? -Math.PI / 3 : 0
+  const minuteRot = frozen ? 0 : 0
+  const secondRot = frozen ? 0 : 0
   return (
     <HeroProp contact={false} {...props}>
-      <mesh geometry={nodes.wall_clock_minute_hand.geometry} material={materials.wall_clock} />
-      <mesh geometry={nodes.wall_clock_second_hand.geometry} material={materials.wall_clock} />
-      <mesh geometry={nodes.wall_clock_hours_hand.geometry} material={materials.wall_clock} />
+      <mesh
+        geometry={nodes.wall_clock_minute_hand.geometry}
+        material={materials.wall_clock}
+        rotation={[0, 0, minuteRot]}
+      />
+      <mesh
+        geometry={nodes.wall_clock_second_hand.geometry}
+        material={materials.wall_clock}
+        rotation={[0, 0, secondRot]}
+        visible={!frozen}
+      />
+      <mesh
+        geometry={nodes.wall_clock_hours_hand.geometry}
+        material={materials.wall_clock}
+        rotation={[0, 0, hourRot]}
+      />
       <mesh geometry={nodes.frame001.geometry} material={materials.wall_clock} />
       <mesh geometry={nodes.frame001_1.geometry} material={materials.wall_clock_glass} />
     </HeroProp>

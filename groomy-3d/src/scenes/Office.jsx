@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { characters } from '@groomy/game/content/world/characters.js'
 import RoomShell from '../systems/RoomShell.jsx'
+import { OfficeHumAudio } from '../systems/SceneAmbientAudio.jsx'
 import { OfficeDesk, TaskChair } from '../assets/OfficeFurniture.jsx'
 import { ROOM_GRAPH, useGameState } from '../state/gameStateStore.js'
 
@@ -55,6 +56,7 @@ export default function Office() {
 
   return (
     <RoomShell size={meta.size} ar={ar} roomId="office" doorway="-z" doorPosition="-z">
+      <OfficeHumAudio />
       <OfficeDesk position={[-3.1, 0, -1.4]} ar={ar} />
       <TaskChair position={[-3.1, 0, -0.55]} rotation={[0, Math.PI, 0]} ar={ar} />
       <OfficeDesk position={[3.1, 0, -1.4]} ar={ar} />

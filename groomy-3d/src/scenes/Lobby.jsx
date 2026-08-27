@@ -1,6 +1,7 @@
 import { AdditiveBlending } from 'three'
 import { Sparkles } from '@react-three/drei'
 import RoomShell from '../systems/RoomShell.jsx'
+import { RuinOfficeCrossfadeAudio } from '../systems/SceneAmbientAudio.jsx'
 import LobbyDoor from '../systems/LobbyDoor.jsx'
 import MapEntryTrigger from '../systems/MapEntryTrigger.jsx'
 import WorldPrompt from '../systems/WorldPrompt.jsx'
@@ -84,6 +85,7 @@ export default function Lobby() {
       floorRoughness={ar ? 0.38 : 0.3}
       floorEnvMapIntensity={ar ? 1.05 : 0.92}
     >
+      <RuinOfficeCrossfadeAudio />
       <pointLight position={[-2.2, 0.8, -4.2]} intensity={hasKey ? 0 : 4} distance={5} color="#e6c25a" />
       <LobbyHeroLight />
 
